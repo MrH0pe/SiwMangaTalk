@@ -54,6 +54,7 @@ public class Autore {
 	public void setManga(Manga manga) {
 		this.manga = manga;
 	}
+	//Definisco hashCode e equals per poter confrontare 2 oggetti della stessa classe!
 	@Override
 	public int hashCode() {
 		return Objects.hash(cognome, descrizione, manga, nome, pathImmagine);
