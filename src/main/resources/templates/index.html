@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>SIW Manga Talk</title>
+</head>
+
+<body>
+	<h1>
+        <!-- Corretto da /listaManga a /mangas -->
+		<a th:href="@{/mangas}"> Lista Manga</a>
+	</h1>
+
+	<h1>
+		<a th:href="@{/artists}"> Lista Artisti </a>
+	</h1>
+
+	<h1>
+		<a th:href="@{/mangas/new}">Candida nuovi manga</a>
+	</h1>
+
+	<h1>
+		<a th:href="@{/commenti}">I miei Commenti</a>
+	</h1>
+
+	<h1>
+		<a th:href="@{/login}">Accedi</a>
+	</h1>
+	<h1>
+		<a th:href="@{/logout}">Logout</a>
+	</h1>
+</body>
+
+</html>

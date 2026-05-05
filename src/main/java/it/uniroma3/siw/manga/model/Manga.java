@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,22 +13,22 @@ import jakarta.persistence.OneToOne;
 @Entity
 public class Manga {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)	
+	@GeneratedValue(strategy = GenerationType.IDENTITY)	
 	private Long id;
 	
 	private String nome;
 	private String descrizione;
 	private String pathImmagine;
 	
-	@OneToOne (mappedBy = "manga" , fetch = FetchType.EAGER)
+	@OneToOne 
 	private Autore autore;
 	
-	@OneToMany (mappedBy = "manga" , fetch = FetchType.EAGER)
+	@OneToMany (mappedBy = "manga")
 	private List<Votazione> votazioneList;
-	
-	@OneToMany (mappedBy = "manga" , fetch = FetchType.EAGER)
-	private List<Thread> threadList;
 
+	@OneToMany (mappedBy = "manga")
+	private List<Commento> commentoList;
+	
 	public Long getId() {
 		return id;
 	}
@@ -78,17 +77,10 @@ public class Manga {
 		this.votazioneList = votazioneList;
 	}
 
-	public List<Thread> getThreadList() {
-		return threadList;
-	}
-
-	public void setThreadList(List<Thread> threadList) {
-		this.threadList = threadList;
-	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(autore, descrizione, id, nome, pathImmagine, threadList, votazioneList);
+		return Objects.hash(autore, descrizione, id, nome, pathImmagine, votazioneList);
 	}
 
 	@Override
@@ -102,7 +94,7 @@ public class Manga {
 		Manga other = (Manga) obj;
 		return Objects.equals(autore, other.autore) && Objects.equals(descrizione, other.descrizione)
 				&& Objects.equals(id, other.id) && Objects.equals(nome, other.nome)
-				&& Objects.equals(pathImmagine, other.pathImmagine) && Objects.equals(threadList, other.threadList)
+				&& Objects.equals(pathImmagine, other.pathImmagine)
 				&& Objects.equals(votazioneList, other.votazioneList);
 	}
 	

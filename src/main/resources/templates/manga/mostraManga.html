@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Manga</title>
+
+</head>
+
+<body>
+	<h1 th:text="${mangas.nome}"> Nome Manga </h1>
+	<div>
+		Descrizione: <span th:text="${mangas.descrizione}">Questo è un bel manga!</span>
+	</div>
+	
+	<div>
+			Autore: 
+			
+			<!-- Se l'autore' esiste, creiamo un link (tag <a>) -->
+			<a th:if="${mangas.autore != null}" 
+			   th:href="@{/autori/{id}(id=${mangas.autore.id})}" 
+			   th:text="${mangas.autore.nome}">Luca Bianchi
+			</a>
+			
+			<!-- Se il regista NON esiste, lasciamo il testo non cliccabile (tag <span>) -->
+			<span th:if="${mangas.autore == null}">Nessun autore assegnato</span>
+		</div>
+</body>
+
+</html>

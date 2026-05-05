@@ -16,16 +16,16 @@ public class Commento {
 	@GeneratedValue(strategy = GenerationType.AUTO)	
 	private Long id;
 	
-	private Boolean like;
-	private Boolean dislike;
+	private Boolean miPiace;
+	private Boolean nonMiPiace;
 	private String testo;
 	private Date tempoPubblicazione;
 	
 	@ManyToOne (fetch = FetchType.EAGER)
 	private Utente utente;
-	
+
 	@ManyToOne (fetch = FetchType.EAGER)
-	private Thread thread;
+	private Manga manga;
 
 	public Long getId() {
 		return id;
@@ -35,20 +35,20 @@ public class Commento {
 		this.id = id;
 	}
 
-	public Boolean getLike() {
-		return like;
+	public Boolean getMiPiace() {
+		return miPiace;
 	}
 
-	public void setLike(Boolean like) {
-		this.like = like;
+	public void setMiPiace(Boolean miPiace) {
+		this.miPiace = miPiace;
 	}
 
-	public Boolean getDislike() {
-		return dislike;
+	public Boolean getNonMiPiace() {
+		return nonMiPiace;
 	}
 
-	public void setDislike(Boolean dislike) {
-		this.dislike = dislike;
+	public void setNonMiPiace(Boolean nonMiPiace) {
+		this.nonMiPiace = nonMiPiace;
 	}
 
 	public String getTesto() {
@@ -75,17 +75,17 @@ public class Commento {
 		this.utente = utente;
 	}
 
-	public Thread getThread() {
-		return thread;
+	public Manga getManga() {
+		return manga;
 	}
 
-	public void setThread(Thread thread) {
-		this.thread = thread;
+	public void setManga(Manga manga) {
+		this.manga = manga;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(dislike, id, like, tempoPubblicazione, testo, thread, utente);
+		return Objects.hash(id, manga, miPiace, nonMiPiace, tempoPubblicazione, testo, utente);
 	}
 
 	@Override
@@ -97,11 +97,15 @@ public class Commento {
 		if (getClass() != obj.getClass())
 			return false;
 		Commento other = (Commento) obj;
-		return Objects.equals(dislike, other.dislike) && Objects.equals(id, other.id)
-				&& Objects.equals(like, other.like) && Objects.equals(tempoPubblicazione, other.tempoPubblicazione)
-				&& Objects.equals(testo, other.testo) && Objects.equals(thread, other.thread)
+		return Objects.equals(id, other.id) && Objects.equals(manga, other.manga)
+				&& Objects.equals(miPiace, other.miPiace) && Objects.equals(nonMiPiace, other.nonMiPiace)
+				&& Objects.equals(tempoPubblicazione, other.tempoPubblicazione) && Objects.equals(testo, other.testo)
 				&& Objects.equals(utente, other.utente);
 	}
+
+
+	
+
 	
 	
 }
