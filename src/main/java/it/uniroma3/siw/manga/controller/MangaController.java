@@ -12,21 +12,29 @@ import it.uniroma3.siw.manga.service.MangaService;
 
 @Controller
 public class MangaController {
+	
 	private MangaService mangaService;
-
+	
+	// COSTRUTTORE
 	public MangaController(MangaService mangaService) {
 		this.mangaService = mangaService;
 	}
 	
-	
-	@GetMapping("/mangas/{id}") 
-	public String mostraManga(@PathVariable("id") Long id, Model model) { 
+	// MANGA SINGOLO
+	@GetMapping("/mangas/{id}")
+	public String mostraManga(@PathVariable("id") Long id, Model model) {
 		Manga manga = this.mangaService.findById(id);
-		model.addAttribute("mangas", manga);
+		
+		// SALVAGENTE: Se l'ID non esiste, rimanda l'utente alla lista dei manga
+		if (manga == null) {
+			return "redirect:/mangas";
+		}
+		
+		model.addAttribute("manga", manga);
 		return "manga/mostraManga";
 	}
 	
-	//TUTTI I MANGA
+	// TUTTI I MANGA
 	@GetMapping("/mangas")
 	public String listaManga(Model model) {
 		List<Manga> mangaList = this.mangaService.findAll();
@@ -34,5 +42,4 @@ public class MangaController {
 		
 		return "manga/listaManga";
 	}
-	
 }

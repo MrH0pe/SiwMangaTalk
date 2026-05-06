@@ -1,29 +1,34 @@
 <!DOCTYPE html>
-<html>
-
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-	<title>Manga</title>
-
+	<title>Dettaglio Manga</title>
 </head>
-
 <body>
-	<h1 th:text="${mangas.nome}"> Nome Manga </h1>
-	<div>
-		Descrizione: <span th:text="${mangas.descrizione}">Questo è un bel manga!</span>
+	<h1 th:text="${manga.nome}"> Nome Manga </h1>
+	
+	<div style="margin-top: 20px;">
+	    <img th:src="${manga.pathImmagine}" 
+	         th:alt="${manga.nome}" 
+	         referrerpolicy="no-referrer"  style="max-width: 300px; height: auto; border: 1px solid #ccc;" />
 	</div>
 	
-	<div>
-			Autore: 
-			
-			<!-- Se l'autore' esiste, creiamo un link (tag <a>) -->
-			<a th:if="${mangas.autore != null}" 
-			   th:href="@{/autori/{id}(id=${mangas.autore.id})}" 
-			   th:text="${mangas.autore.nome}">Luca Bianchi
-			</a>
-			
-			<!-- Se il regista NON esiste, lasciamo il testo non cliccabile (tag <span>) -->
-			<span th:if="${mangas.autore == null}">Nessun autore assegnato</span>
-		</div>
-</body>
+	<div style="margin-top: 15px;">
+		<strong>Descrizione:</strong> 
+        <span th:text="${manga.descrizione}">Questo è un bel manga!</span>
+	</div>
+	
+	<div style="margin-top: 15px;">
+        <strong>Autore:</strong> 
+        
+        <a th:if="${manga.autore != null}" 
+           th:href="@{'/autori/' + ${manga.autore.id}}"
+           th:text="${manga.autore.nome} + ' ' + ${manga.autore.cognome}">Nome Autore
+        </a>
+        
+        <span th:if="${manga.autore == null}">Nessun autore assegnato</span>
+    </div>
 
+    <p style="margin-top: 30px;"><a th:href="@{/mangas}">Torna alla lista dei Manga</a></p>
+	<p><a th:href="@{/}">Torna alla home</a></p>
+</body>
 </html>

@@ -6,29 +6,38 @@
 </head>
 
 <body>
+
+	<!--- TITOLO -->
 	<h1>
-        <!-- Corretto da /listaManga a /mangas -->
+		SIW MANGA TALK
+	</h1>
+
+	<h2>
+		<!-- Corretto da /listaManga a /mangas -->
 		<a th:href="@{/mangas}"> Lista Manga</a>
-	</h1>
+	</h2>
 
-	<h1>
-		<a th:href="@{/artists}"> Lista Artisti </a>
-	</h1>
+	<h2>
+		<a th:href="@{/autori}"> Lista Mangaka </a>
+	</h2>
 
-	<h1>
-		<a th:href="@{/mangas/new}">Candida nuovi manga</a>
-	</h1>
-
-	<h1>
+	<h2>
 		<a th:href="@{/commenti}">I miei Commenti</a>
-	</h1>
-
-	<h1>
+	</h2>
+	
+	<h2>
+		<a th:href="@{/mangas/new}">Candida nuovi manga</a>
+	</h2>
+	<h2>
 		<a th:href="@{/login}">Accedi</a>
-	</h1>
-	<h1>
+	</h2>
+	<h2>
 		<a th:href="@{/logout}">Logout</a>
-	</h1>
+	</h2>
+
+	<footer>
+		<p>&copy; 2026 SiwMangaTalk</p>
+	</footer>
 </body>
 
 </html>

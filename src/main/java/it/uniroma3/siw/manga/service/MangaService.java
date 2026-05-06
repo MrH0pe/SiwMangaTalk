@@ -22,7 +22,8 @@ public class MangaService {
 		return (List<Manga>) this.mangaRepository.findAll();
 
 	}
-
+	
+	//Restiisce un solo manga
 	public Manga findById(Long id) {
 		return this.mangaRepository.findById(id).orElse(null);
 	}

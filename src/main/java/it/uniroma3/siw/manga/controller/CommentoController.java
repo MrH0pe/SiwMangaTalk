@@ -17,7 +17,8 @@ public class CommentoController {
 		this.commentoService = commentoService;
 	}
 	
-	 @GetMapping("/commenti/{id}")
+	//
+	 @GetMapping("/commenti")
 	 public String mostra(@PathVariable("id") Long id, Model model) {
 
 			Commento commento = this.commentoService.findById(id);

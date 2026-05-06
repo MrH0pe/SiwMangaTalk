@@ -3,7 +3,6 @@ package it.uniroma3.siw.manga.model;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,7 +20,7 @@ public class Autore {
 	private String descrizione;
 	
 	
-	@OneToOne (mappedBy = "autore" , fetch = FetchType.EAGER)
+	@OneToOne
 	private Manga manga;
 
 

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dettaglio Autore</title>
+</head>
+<body>
+    <h1 th:text="${autore.nome} + ' ' + ${autore.cognome}"> Luca Bianchi </h1>
+    
+    <div>
+        <strong>Descrizione:</strong> 
+        <span th:text="${autore.descrizione}">Descrizione non disponibile</span>
+    </div>
+    
+	<div style="margin-top: 20px;">
+	    <img th:src="${autore.pathImmagine}" 
+	         th:alt="${autore.nome}" 
+	         referrerpolicy="no-referrer"  style="max-width: 300px; height: auto; border: 1px solid #ccc;" />
+	</div>
+
+    <p style="margin-top: 20px;"><a th:href="@{/autori}">Torna alla lista autori</a></p>
+	<p><a th:href="@{/}">Torna alla home</a></p>
+</body>
+</html>

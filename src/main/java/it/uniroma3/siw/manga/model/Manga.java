@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,13 +21,13 @@ public class Manga {
 	private String descrizione;
 	private String pathImmagine;
 	
-	@OneToOne 
+	@OneToOne (mappedBy = "manga" , fetch = FetchType.EAGER)
 	private Autore autore;
 	
-	@OneToMany (mappedBy = "manga")
+	@OneToMany (mappedBy = "manga", fetch = FetchType.LAZY)
 	private List<Votazione> votazioneList;
 
-	@OneToMany (mappedBy = "manga")
+	@OneToMany (mappedBy = "manga", fetch = FetchType.LAZY)
 	private List<Commento> commentoList;
 	
 	public Long getId() {
