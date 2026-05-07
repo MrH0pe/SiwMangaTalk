@@ -1,25 +1,34 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<title>Manga</title>
-
+	<title>Manga - SiwMangaTalk</title>
+	
+	<link rel="stylesheet" th:href="@{/css/disposizioneManga.css}">
 </head>
 
 <body>
-	<h1> Lista manga </h1>
-	<div>
-		<ul>
-			<li th:each="manga : ${mangas}"> 
-				<a th:href="@{'/mangas/' + ${manga.id}}" th:text="${manga.nome}">titolo manga</a>
-			</li>
-		</ul>
+    <header class="top-nav">
+        <a th:href="@{/}">
+            <img th:src="@{/images/logo_siwmangatalk.png}" alt="SiwMangaTalk Logo" class="site-logo">
+        </a>
+    </header>
+
+	<div class="manga-grid">
+	    
+	    <a th:href="@{'/mangas/' + ${manga.id}}" class="manga-card" th:each="manga : ${mangas}">
+	        
+	        <div class="manga-image-container">
+	            <img th:src="@{${manga.pathImmagine}}" th:alt="${manga.nome}">
+	        </div>
+	        
+	        <div class="manga-title">
+	            <span th:text="${manga.nome}">Nome Manga</span>
+	        </div>
+	        
+	    </a>
 	</div>
 	
-	
-	
-	
-	<p><a th:href="@{/}">Torna alla home</a></p>
 </body>
 
 </html>

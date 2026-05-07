@@ -1,34 +1,64 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-	<title>Dettaglio Manga</title>
+	<title th:text="${manga.nome} + ' - SiwMangaTalk'">Dettaglio Manga</title>
+    <link rel="stylesheet" th:href="@{/css/dettaglioManga.css}">
 </head>
 <body>
-	<h1 th:text="${manga.nome}"> Nome Manga </h1>
-	
-	<div style="margin-top: 20px;">
-	    <img th:src="${manga.pathImmagine}" 
-	         th:alt="${manga.nome}" 
-	         referrerpolicy="no-referrer"  style="max-width: 300px; height: auto; border: 1px solid #ccc;" />
-	</div>
-	
-	<div style="margin-top: 15px;">
-		<strong>Descrizione:</strong> 
-        <span th:text="${manga.descrizione}">Questo è un bel manga!</span>
-	</div>
-	
-	<div style="margin-top: 15px;">
-        <strong>Autore:</strong> 
-        
-        <a th:if="${manga.autore != null}" 
-           th:href="@{'/autori/' + ${manga.autore.id}}"
-           th:text="${manga.autore.nome} + ' ' + ${manga.autore.cognome}">Nome Autore
+
+    <div class="top-nav-absolute">
+        <a th:href="@{/}">
+            <img th:src="@{/images/logo_siwmangatalk.png}" alt="SiwMangaTalk Logo" class="site-logo">
         </a>
-        
-        <span th:if="${manga.autore == null}">Nessun autore assegnato</span>
     </div>
 
-    <p style="margin-top: 30px;"><a th:href="@{/mangas}">Torna alla lista dei Manga</a></p>
-	<p><a th:href="@{/}">Torna alla home</a></p>
+    <header class="hero-section" th:style="'background-image: url(' + @{${manga.pathSfondo}} + ')'">
+        <div class="hero-overlay"></div>
+        
+        <div class="hero-content">
+            <img class="manga-cover" th:src="@{${manga.pathImmagine}}" th:alt="${manga.nome}" referrerpolicy="no-referrer" />
+            <h1 class="manga-title" th:text="${manga.nome}">Nome Manga</h1>
+        </div>
+    </header>
+
+    <main class="main-content">
+        
+        <section class="info-card">
+            <h2>Trama</h2>
+            <p class="descrizione" th:text="${manga.descrizione}">Questo è un bel manga!</p>
+            
+            <div class="autore-box">
+                <strong>Autore:</strong> 
+                <a th:if="${manga.autore != null}" 
+                   th:href="@{'/autori/' + ${manga.autore.id}}"
+                   th:text="${manga.autore.nome} + ' ' + ${manga.autore.cognome}">Nome Autore
+                </a>
+                <span th:if="${manga.autore == null}">Nessun autore assegnato</span>
+            </div>
+        </section>
+
+        <section class="comments-section">
+            <h2>Commenti della Community</h2>
+            
+            <div class="add-comment-box">
+                <textarea placeholder="Scrivi un commento su questo manga..."></textarea>
+                <button class="btn-invia">Invia Commento</button>
+            </div>
+
+            <div class="comment-list">
+                <div class="comment-item">
+                    <strong>Utente_Guest:</strong>
+                    <p>Manga stupendo, i disegni sono pazzeschi. Assolutamente consigliato!</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="navigation-links">
+            <a class="btn-nav" th:href="@{/mangas}">Torna alla lista</a>
+            <a class="btn-nav" th:href="@{/}">Torna alla home</a>
+        </div>
+
+    </main>
+
 </body>
 </html>

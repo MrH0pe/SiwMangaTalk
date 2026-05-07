@@ -1,23 +1,43 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Dettaglio Autore</title>
+    <title th:text="${autore.nome} + ' ' + ${autore.cognome} + ' - SiwMangaTalk'">Dettaglio Autore</title>
+    <link rel="stylesheet" th:href="@{/css/dettaglioAutore.css}">
 </head>
 <body>
-    <h1 th:text="${autore.nome} + ' ' + ${autore.cognome}"> Luca Bianchi </h1>
-    
-    <div>
-        <strong>Descrizione:</strong> 
-        <span th:text="${autore.descrizione}">Descrizione non disponibile</span>
-    </div>
-    
-	<div style="margin-top: 20px;">
-	    <img th:src="${autore.pathImmagine}" 
-	         th:alt="${autore.nome}" 
-	         referrerpolicy="no-referrer"  style="max-width: 300px; height: auto; border: 1px solid #ccc;" />
-	</div>
 
-    <p style="margin-top: 20px;"><a th:href="@{/autori}">Torna alla lista autori</a></p>
-	<p><a th:href="@{/}">Torna alla home</a></p>
+    <div class="top-nav-absolute">
+        <a th:href="@{/}">
+            <img th:src="@{/images/logo_siwmangatalk.png}" alt="SiwMangaTalk Logo" class="site-logo">
+        </a>
+    </div>
+
+    <main class="main-content">
+        
+        <div class="author-header">
+            <h1 th:text="${autore.nome} + ' ' + ${autore.cognome}">Nome Cognome Autore</h1>
+        </div>
+        
+        <section class="info-card">
+            <h2>Biografia e Dettagli</h2>
+            
+            <div class="descrizione-box">
+                <strong>Descrizione:</strong> 
+                <p class="descrizione" th:text="${autore.descrizione}">Descrizione non disponibile</p>
+            </div>
+
+            <div class="manga-collegato-box" th:if="${autore.manga != null}">
+                <strong>Opera principale:</strong> 
+                <a th:href="@{'/mangas/' + ${autore.manga.id}}" th:text="${autore.manga.nome}">Nome Manga</a>
+            </div>
+        </section>
+
+        <div class="navigation-links">
+            <a class="btn-nav" th:href="@{/autori}">Torna alla lista autori</a>
+            <a class="btn-nav" th:href="@{/}">Torna alla home</a>
+        </div>
+
+    </main>
+
 </body>
 </html>

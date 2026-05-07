@@ -1,0 +1,103 @@
+/* --- IMPOSTAZIONI GENERALI DELLA PAGINA --- */
+body {
+    background-color: #0b0f19; /* Ecco il nuovo sfondo blu notte! */
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- BARRA DI NAVIGAZIONE E LOGO --- */
+.top-nav {
+    padding: 20px 40px; /* Spazio dal bordo superiore e laterale */
+    display: flex;
+    justify-content: flex-start; /* Assicura che il logo stia a sinistra */
+}
+
+.site-logo {
+    max-width: 250px; /* Puoi aumentare o diminuire questo valore per cambiare la grandezza del logo */
+    height: auto;
+    transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
+}
+
+/* Effetto quando passi il mouse sul logo */
+.site-logo:hover {
+    transform: scale(1.05); /* Ingrandisce leggermente */
+    filter: drop-shadow(0px 0px 8px rgba(255, 255, 255, 0.3)); /* Aggiunge un lieve alone luminoso */
+}
+
+/* --- GRIGLIA PRINCIPALE --- */
+.manga-grid {
+    display: grid;
+    /* Crea esattamente 5 colonne della stessa larghezza */
+    grid-template-columns: repeat(5, 1fr); 
+    gap: 20px; /* Spazio tra le card */
+    padding: 20px;
+    max-width: 1200px; /* Limita la larghezza massima per non farle sproporzionate sui grandi schermi */
+    margin: 0 auto; /* Centra la griglia nella pagina */
+}
+
+/* --- SINGOLA CARD MANGA --- */
+.manga-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none; /* Rimuove la sottolineatura tipica dei link */
+    color: white;
+    background-color: #333333; /* Grigio scuro per la fascia del titolo, come in foto */
+    border-radius: 4px; /* Bordi leggermente smussati */
+    overflow: hidden; /* Evita che l'immagine esca dai bordi smussati */
+    
+    /* Prepara l'animazione per l'hover */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, filter 0.2s ease-in-out;
+}
+
+/* --- EFFETTO ILLUMINAZIONE (HOVER) --- */
+.manga-card:hover {
+    transform: scale(1.02); /* Ingrandisce impercettibilmente la card */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4); /* Crea un'ombra sotto, dando l'effetto "sollevato" */
+    filter: brightness(1.15); /* "Illumina" la card aumentando la luminosità del 15% */
+}
+
+/* --- GESTIONE IMMAGINI --- */
+.manga-image-container {
+    width: 100%;
+    /* Imposta una proporzione fissa. 
+       2/3 è l'ideale per i manga (più alti che larghi). 
+       Se usi frame di anime, usa 16/9. */
+    aspect-ratio: 2 / 3; 
+    background-color: #111; /* Sfondo nero se l'immagine carica lentamente */
+}
+
+.manga-image-container img {
+    width: 100%;
+    height: 100%;
+    /* object-fit: cover garantisce che l'immagine riempia tutto lo spazio
+       senza schiacciarsi o deformarsi, tagliando l'eccesso se necessario */
+    object-fit: cover; 
+    display: block;
+}
+
+/* --- TITOLO --- */
+.manga-title {
+    padding: 12px 10px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 15px;
+    /* Se il titolo è troppo lungo, lo taglia con i puntini di sospensione (...) */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- RESPONSIVITA' (Opzionale ma consigliato per i telefoni) --- */
+@media (max-width: 900px) {
+    .manga-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 colonne sui tablet */
+    }
+}
+@media (max-width: 600px) {
+    .manga-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 colonne sui telefoni */
+    }
+}

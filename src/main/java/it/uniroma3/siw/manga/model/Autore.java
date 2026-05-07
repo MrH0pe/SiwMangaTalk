@@ -13,13 +13,12 @@ public class Autore {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)	
 	private Long id;
-	
+
 	private String nome;
 	private String cognome;
-	private String pathImmagine;
 	private String descrizione;
-	
-	
+
+
 	@OneToOne
 	private Manga manga;
 
@@ -53,17 +52,6 @@ public class Autore {
 		this.cognome = cognome;
 	}
 
-
-	public String getPathImmagine() {
-		return pathImmagine;
-	}
-
-
-	public void setPathImmagine(String pathImmagine) {
-		this.pathImmagine = pathImmagine;
-	}
-
-
 	public String getDescrizione() {
 		return descrizione;
 	}
@@ -86,7 +74,7 @@ public class Autore {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(cognome, descrizione, id, manga, nome, pathImmagine);
+		return Objects.hash(cognome, descrizione, id, manga, nome);
 	}
 
 
@@ -101,10 +89,10 @@ public class Autore {
 		Autore other = (Autore) obj;
 		return Objects.equals(cognome, other.cognome) && Objects.equals(descrizione, other.descrizione)
 				&& Objects.equals(id, other.id) && Objects.equals(manga, other.manga)
-				&& Objects.equals(nome, other.nome) && Objects.equals(pathImmagine, other.pathImmagine);
+				&& Objects.equals(nome, other.nome);
 	}
-	
 
-	
-	
+
+
+
 }

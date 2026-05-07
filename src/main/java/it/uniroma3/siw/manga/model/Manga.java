@@ -20,6 +20,7 @@ public class Manga {
 	private String nome;
 	private String descrizione;
 	private String pathImmagine;
+	private String pathSfondo;
 	
 	@OneToOne (mappedBy = "manga" , fetch = FetchType.EAGER)
 	private Autore autore;
@@ -29,7 +30,7 @@ public class Manga {
 
 	@OneToMany (mappedBy = "manga", fetch = FetchType.LAZY)
 	private List<Commento> commentoList;
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -62,6 +63,14 @@ public class Manga {
 		this.pathImmagine = pathImmagine;
 	}
 
+	public String getPathSfondo() {
+		return pathSfondo;
+	}
+
+	public void setPathSfondo(String pathSfondo) {
+		this.pathSfondo = pathSfondo;
+	}
+
 	public Autore getAutore() {
 		return autore;
 	}
@@ -78,10 +87,17 @@ public class Manga {
 		this.votazioneList = votazioneList;
 	}
 
+	public List<Commento> getCommentoList() {
+		return commentoList;
+	}
+
+	public void setCommentoList(List<Commento> commentoList) {
+		this.commentoList = commentoList;
+	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(autore, descrizione, id, nome, pathImmagine, votazioneList);
+		return Objects.hash(autore, commentoList, descrizione, id, nome, pathImmagine, pathSfondo, votazioneList);
 	}
 
 	@Override
@@ -93,11 +109,14 @@ public class Manga {
 		if (getClass() != obj.getClass())
 			return false;
 		Manga other = (Manga) obj;
-		return Objects.equals(autore, other.autore) && Objects.equals(descrizione, other.descrizione)
-				&& Objects.equals(id, other.id) && Objects.equals(nome, other.nome)
-				&& Objects.equals(pathImmagine, other.pathImmagine)
-				&& Objects.equals(votazioneList, other.votazioneList);
+		return Objects.equals(autore, other.autore) && Objects.equals(commentoList, other.commentoList)
+				&& Objects.equals(descrizione, other.descrizione) && Objects.equals(id, other.id)
+				&& Objects.equals(nome, other.nome) && Objects.equals(pathImmagine, other.pathImmagine)
+				&& Objects.equals(pathSfondo, other.pathSfondo) && Objects.equals(votazioneList, other.votazioneList);
 	}
+	
+	
+
 	
 	
 }

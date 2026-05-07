@@ -1,24 +1,32 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Lista Autori</title>
+    <title>Lista Autori - SiwMangaTalk</title>
+    <link rel="stylesheet" th:href="@{/css/listaAutori.css}">
 </head>
 <body>
-    <h1> Lista Autori </h1>
-    <div>
-        <ul>
-            <li th:each="autore : ${autori}"> 
-                <a th:href="@{'/autori/' + ${autore.id}}" 
-                   th:text="${autore.nome} + ' ' + ${autore.cognome}">Luca Bianchi</a>
-            </li>
-        </ul>
+
+    <div class="top-nav-absolute">
+        <a th:href="@{/}">
+            <img th:src="@{/images/logo_siwmangatalk.png}" alt="SiwMangaTalk Logo" class="site-logo">
+        </a>
     </div>
-	
-	
-	
-	<p><a th:href="@{/}">Torna alla home</a></p>
-	
-	
+
+    <main class="main-content">
+        
+        <h1 class="page-title">I Maestri del Manga</h1>
+        
+        <div class="authors-grid">
+            <a class="author-card" th:each="autore : ${autori}" th:href="@{'/autori/' + ${autore.id}}">
+                <span class="author-icon">✒️</span> <span class="author-name" th:text="${autore.nome} + ' ' + ${autore.cognome}">Nome Autore</span>
+            </a>
+        </div>
+
+        <div class="navigation-links">
+            <a class="btn-nav" th:href="@{/}">Torna alla home</a>
+        </div>
+
+    </main>
 	
 </body>
 </html>
