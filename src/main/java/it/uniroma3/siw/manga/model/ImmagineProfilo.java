@@ -20,7 +20,7 @@ public class ImmagineProfilo {
 	private String pathImmagine;
 	
 	@OneToMany (mappedBy = "immagineProfilo" , fetch = FetchType.LAZY)
-	private Set<Utente> utente;
+	private Set<User> utente;
 
 	public Long getId() {
 		return id;
@@ -46,11 +46,11 @@ public class ImmagineProfilo {
 		this.pathImmagine = pathImmagine;
 	}
 
-	public Set<Utente> getUtente() {
+	public Set<User> getUtente() {
 		return utente;
 	}
 
-	public void setUtente(Set<Utente> utente) {
+	public void setUtente(Set<User> utente) {
 		this.utente = utente;
 	}
 

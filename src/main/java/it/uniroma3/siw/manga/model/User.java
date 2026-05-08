@@ -3,6 +3,7 @@ package it.uniroma3.siw.manga.model;
 import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -10,17 +11,22 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
-public class Utente {
+@Table(name = "utente")
+public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)	
 	private Long id;
-	
-	private String username;
+	@NotBlank
+	@Column(nullable = false)
+	private String name;
+	@NotBlank
+	@Column(nullable = false, unique = true)
 	private String email;
-	private String password;
-	private Boolean admin;   //Da cambiare con l'autenticazione
+	
 	
 	@ManyToOne (fetch = FetchType.EAGER)
 	private ImmagineProfilo immagineProfilo;
@@ -40,11 +46,11 @@ public class Utente {
 	}
 
 	public String getUsername() {
-		return username;
+		return name;
 	}
 
 	public void setUsername(String username) {
-		this.username = username;
+		this.name = username;
 	}
 
 	public String getEmail() {
@@ -53,22 +59,6 @@ public class Utente {
 
 	public void setEmail(String email) {
 		this.email = email;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public Boolean getAdmin() {
-		return admin;
-	}
-
-	public void setAdmin(Boolean admin) {
-		this.admin = admin;
 	}
 
 	public ImmagineProfilo getImmagineProfilo() {
@@ -97,7 +87,7 @@ public class Utente {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(admin, commentoList, email, id, immagineProfilo, password, username, votazioneList);
+		return Objects.hash(commentoList, email, id, immagineProfilo, name, votazioneList);
 	}
 
 	@Override
@@ -108,12 +98,12 @@ public class Utente {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Utente other = (Utente) obj;
-		return Objects.equals(admin, other.admin) && Objects.equals(commentoList, other.commentoList)
-				&& Objects.equals(email, other.email) && Objects.equals(id, other.id)
-				&& Objects.equals(immagineProfilo, other.immagineProfilo) && Objects.equals(password, other.password)
-				&& Objects.equals(username, other.username) && Objects.equals(votazioneList, other.votazioneList);
+		User other = (User) obj;
+		return Objects.equals(commentoList, other.commentoList) && Objects.equals(email, other.email)
+				&& Objects.equals(id, other.id) && Objects.equals(immagineProfilo, other.immagineProfilo)
+				&& Objects.equals(name, other.name) && Objects.equals(votazioneList, other.votazioneList);
 	}
-	
+
+
 	
 }

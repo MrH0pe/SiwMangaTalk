@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>I Miei Commenti - SiwMangaTalk</title>
+    <!-- Assicurati di creare o adattare questo file CSS -->
+    <link rel="stylesheet" th:href="@{/css/mieiCommenti.css}">
+</head>
+<body>
+
+    <div class="top-nav-absolute">
+        <a th:href="@{/}">
+            <img th:src="@{/images/logo_siwmangatalk.png}" alt="SiwMangaTalk Logo" class="site-logo">
+        </a>
+    </div>
+
+    <main class="main-content">
+        <h1>I Miei Commenti</h1>
+
+        <!-- Messaggio mostrato solo se la lista è vuota -->
+        <div th:if="${#lists.isEmpty(listaMieiCommenti)}" class="no-comments-box">
+            <p>Non hai ancora pubblicato nessun commento.</p>
+            <a th:href="@{/mangas}" class="btn-nav">Esplora i manga</a>
+        </div>
+
+        <!-- Lista dei commenti mostrata solo se ci sono elementi -->
+        <div th:unless="${#lists.isEmpty(listaMieiCommenti)}" class="comments-list">
+            
+            <!-- Iterazione sulla lista: per ogni 'commento' creiamo una card -->
+            <div class="comment-card" th:each="commento : ${listaMieiCommenti}">
+                
+                <div class="comment-header">
+                    <!-- Navighiamo l'oggetto: commento -> manga -> nome -->
+                    <strong>Manga: </strong>
+                    <a th:href="@{'/manga/' + ${commento.manga.id}}" 
+                       th:text="${commento.manga.nome}">Nome del Manga</a>
+                    
+                    <!-- Formattazione della data -->
+                    <span class="comment-date" 
+                          th:text="${#dates.format(commento.tempoPubblicazione, 'dd/MM/yyyy')}">
+                    </span>
+                </div>
+
+                <div class="comment-body">
+                    <p th:text="${commento.testo}">Testo del commento...</p>
+                </div>
+                
+                <!-- Extra: Mostrare Mi Piace / Non Mi Piace se implementati -->
+                <div class="comment-footer">
+                    <span th:if="${commento.miPiace}">👍 Ti è piaciuto</span>
+                    <span th:if="${commento.nonMiPiace}">👎 Non ti è piaciuto</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="navigation-links">
+            <a class="btn-nav" th:href="@{/}">Torna alla home</a>
+        </div>
+
+    </main>
+
+</body>
+</html>

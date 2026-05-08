@@ -37,13 +37,29 @@
             </div>
         </section>
 
+		<!-- Form per Inserire commenti dentro un manga -->
         <section class="comments-section">
             <h2>Commenti della Community</h2>
             
-            <div class="add-comment-box">
-                <textarea placeholder="Scrivi un commento su questo manga..."></textarea>
-                <button class="btn-invia">Invia Commento</button>
-            </div>
+			<div class="add-comment-box">
+			    <!-- L'azione punta all'URL con l'ID del manga dinamico -->
+			    <form method="POST" th:action="@{'/manga/' + ${manga.id} + '/commenti'}" th:object="${commento}">
+			        
+			        <div th:if="${#fields.hasGlobalErrors()}">
+			            <p th:each="err : ${#fields.globalErrors()}" th:text="${err}" style="color: red;"></p>
+			        </div>
+
+			        <div>
+			            <!-- Meglio una textarea per i commenti rispetto a un input text -->
+			            <textarea th:field="*{testo}" rows="3" placeholder="Scrivi cosa ne pensi..." required></textarea>
+			            <span th:if="${#fields.hasErrors('testo')}" th:errors="*{testo}" style="color: red;"></span>
+			        </div>
+
+			        <div>
+			            <button type="submit" class="btn-nav">Pubblica Commento</button>
+			        </div>
+			    </form>
+			</div>
 
             <div class="comment-list">
                 <div class="comment-item">

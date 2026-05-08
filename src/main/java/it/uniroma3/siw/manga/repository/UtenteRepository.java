@@ -2,8 +2,8 @@ package it.uniroma3.siw.manga.repository;
 
 import org.springframework.data.repository.CrudRepository;
 
-import it.uniroma3.siw.manga.model.Utente;
+import it.uniroma3.siw.manga.model.User;
 
-public interface UtenteRepository extends CrudRepository<Utente, Long>{
+public interface UtenteRepository extends CrudRepository<User, Long>{
 
 }

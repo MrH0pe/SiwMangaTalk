@@ -6,35 +6,41 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.uniroma3.siw.manga.model.Commento;
+import it.uniroma3.siw.manga.model.User;
 import it.uniroma3.siw.manga.repository.CommentoRepository;
 
 @Service
 public class CommentoService {
-	//Il service gestisce il repository in automatico
-	private CommentoRepository commentoRepository;
+    
+    private final CommentoRepository commentoRepository;
 
-	//Costruttore
-	public CommentoService(CommentoRepository commentoRepository) {
-		this.commentoRepository = commentoRepository;
-	}	
+    public CommentoService(CommentoRepository commentoRepository) {
+        this.commentoRepository = commentoRepository;
+    }	
 
-	//Metodo per trovare un commento tramite l'ID
-	@Transactional (readOnly = true)
-	public Commento findById(Long id) {   //Metodi Transactional Read Only
-		Commento commento = this.commentoRepository.findById(id).get();
-		return commento;
-	}
+    @Transactional(readOnly = true)
+    public Commento findById(Long id) {   
+        return this.commentoRepository.findById(id).orElse(null); // Meglio usare orElse(null) invece di .get() per evitare eccezioni se non lo trova
+    }
 
-	//Metodo per avere tutti i commenti
-	@Transactional (readOnly = true)
-	public List<Commento> findAll(){
-		List<Commento> commentoList = (List<Commento>) this.commentoRepository.findAll();
-		return commentoList;
-	}
-
-	//Metodo per salvare nuovi commenti dentro al DB
-	public void save(Commento commento) {
-		this.commentoRepository.save(commento);
-	}
-
+    // Rinominato in getCommenti per chiarezza e cambiato il tipo di ritorno
+    @Transactional(readOnly = true)
+    public List<Commento> getCommenti(User utente) {
+        return this.commentoRepository.findByUtente(utente);
+    }
+	
+    @Transactional(readOnly = true)
+    public List<Commento> findAll(){
+        return (List<Commento>) this.commentoRepository.findAll();
+    }
+	
+    @Transactional(readOnly = true)
+    public List<Commento> findByUtenteId(Long id){
+        return this.commentoRepository.findByUtenteId(id);
+    }
+	
+    @Transactional
+    public void save(Commento commento) {
+        this.commentoRepository.save(commento);
+    }
 }

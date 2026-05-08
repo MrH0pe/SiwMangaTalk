@@ -22,7 +22,7 @@ public class Commento {
 	private Date tempoPubblicazione;
 	
 	@ManyToOne (fetch = FetchType.EAGER)
-	private Utente utente;
+	private User utente;
 
 	@ManyToOne (fetch = FetchType.EAGER)
 	private Manga manga;
@@ -67,11 +67,11 @@ public class Commento {
 		this.tempoPubblicazione = tempoPubblicazione;
 	}
 
-	public Utente getUtente() {
+	public User getUtente() {
 		return utente;
 	}
 
-	public void setUtente(Utente utente) {
+	public void setUtente(User utente) {
 		this.utente = utente;
 	}
 

@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import it.uniroma3.siw.manga.model.Commento;
 import it.uniroma3.siw.manga.model.Manga;
 import it.uniroma3.siw.manga.service.MangaService;
 
@@ -31,6 +32,7 @@ public class MangaController {
 		}
 		
 		model.addAttribute("manga", manga);
+		model.addAttribute("commento", new Commento());
 		return "manga/mostraManga";
 	}
 	
