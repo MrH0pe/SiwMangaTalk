@@ -1,6 +1,6 @@
 package it.uniroma3.siw.manga.controller;
 
-import org.springframework.security.core.userdetails.User;
+import it.uniroma3.siw.manga.model.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -45,7 +45,7 @@ public class AuthenticationController {
                  BindingResult credentialsBindingResult) {
 
         if(!userBindingResult.hasErrors() && !credentialsBindingResult.hasErrors()) {
-            credentials.setUser(user);
+            credentials.setUtente(user);
             credentialsService.saveCredentials(credentials);
             return "redirect:/";
         }

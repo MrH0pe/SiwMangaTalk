@@ -67,6 +67,6 @@ public class CommentoController {
         this.commentoService.save(commento);
         
         // Post-Redirect-Get: rimandiamo l'utente alla pagina del manga appena commentato
-        return "redirect:/manga/" + idManga;
+        return "redirect:/mangas/" + idManga;
     }
 }
