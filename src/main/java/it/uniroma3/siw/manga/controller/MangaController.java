@@ -9,30 +9,29 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import it.uniroma3.siw.manga.model.Commento;
 import it.uniroma3.siw.manga.model.Manga;
+import it.uniroma3.siw.manga.service.CommentoService;
 import it.uniroma3.siw.manga.service.MangaService;
 
 @Controller
 public class MangaController {
-	
-	private MangaService mangaService;
-	
-	// COSTRUTTORE
-	public MangaController(MangaService mangaService) {
+
+	private final MangaService mangaService;
+	private final CommentoService commentoService;
+
+	public MangaController(MangaService mangaService, CommentoService commentoService) {
 		this.mangaService = mangaService;
+		this.commentoService = commentoService;
 	}
-	
-	// MANGA SINGOLO
+
 	@GetMapping("/mangas/{id}")
 	public String mostraManga(@PathVariable("id") Long id, Model model) {
 		Manga manga = this.mangaService.findById(id);
-		
-		// SALVAGENTE: Se l'ID non esiste, rimanda l'utente alla lista dei manga
 		if (manga == null) {
 			return "redirect:/mangas";
 		}
-		
 		model.addAttribute("manga", manga);
 		model.addAttribute("commento", new Commento());
+		model.addAttribute("commenti", this.commentoService.findByMangaId(id));
 		return "manga/mostraManga";
 	}
 	

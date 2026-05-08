@@ -19,11 +19,10 @@ public class CommentoService {
     }	
 
     @Transactional(readOnly = true)
-    public Commento findById(Long id) {   
-        return this.commentoRepository.findById(id).orElse(null); // Meglio usare orElse(null) invece di .get() per evitare eccezioni se non lo trova
+    public Commento findById(Long id) {
+        return this.commentoRepository.findById(id).orElse(null);
     }
 
-    // Rinominato in getCommenti per chiarezza e cambiato il tipo di ritorno
     @Transactional(readOnly = true)
     public List<Commento> getCommenti(User utente) {
         return this.commentoRepository.findByUtente(utente);
@@ -39,6 +38,11 @@ public class CommentoService {
         return this.commentoRepository.findByUtenteId(id);
     }
 	
+    @Transactional(readOnly = true)
+    public List<Commento> findByMangaId(Long mangaId) {
+        return this.commentoRepository.findByMangaId(mangaId);
+    }
+
     @Transactional
     public void save(Commento commento) {
         this.commentoRepository.save(commento);

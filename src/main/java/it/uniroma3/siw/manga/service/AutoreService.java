@@ -10,8 +10,7 @@ import it.uniroma3.siw.manga.repository.AutoreRepository;
 
 @Service
 public class AutoreService {
-	private AutoreRepository autoreRepository;
-
+	private final AutoreRepository autoreRepository;
 
 	public AutoreService(AutoreRepository autoreRepository) {
 		this.autoreRepository = autoreRepository;
@@ -24,7 +23,7 @@ public class AutoreService {
 
 	}
 
-	//Restituisce un solo autore
+	@Transactional(readOnly = true)
 	public Autore findById(Long id) {
 		return this.autoreRepository.findById(id).orElse(null);
 	}

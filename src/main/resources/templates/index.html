@@ -2,39 +2,65 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<title>SIW Manga Talk</title>
+    <title>SIW Manga Talk</title>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
 </head>
 
 <body>
 
-	<!--- TITOLO -->
-	<h1>
-		SIW MANGA TALK
-	</h1>
+    <!-- NAVBAR -->
+    <nav class="top-nav">
+        <a th:href="@{/}">
+            <img th:src="@{/images/logo_siwmangatalk.png}" alt="SiwMangaTalk Logo" class="site-logo">
+        </a>
+        <span th:if="${userDetails}" class="user-greeting"
+              th:text="'Bentornato ' + ${userDetails.username} + '!'"></span>
+    </nav>
 
-	<h2>
-		<!-- Corretto da /listaManga a /mangas -->
-		<a th:href="@{/mangas}"> Lista Manga</a>
-	</h2>
+    <!-- HERO -->
+    <section class="hero">
 
-	<h2>
-		<a th:href="@{/autori}"> Lista Mangaka </a>
-	</h2>
+        <h1 class="hero-title">SIW Manga Talk</h1>
+        <p class="hero-subtitle">Il tuo spazio per scoprire e commentare i migliori manga</p>
 
-	<h2>
-		<a th:href="@{/mieiCommenti}">I miei Commenti</a>
-	</h2>
-	
-	<h2>
-		<a th:href="@{/login}">Accedi</a>
-	</h2>
-	<h2>
-		<a th:href="@{/logout}">Logout</a>
-	</h2>
+        <!-- CARD NAVIGAZIONE PRINCIPALI -->
+        <div class="nav-grid">
 
-	<footer>
-		<p>&copy; 2026 SiwMangaTalk</p>
-	</footer>
+            <a th:href="@{/mangas}" class="nav-card">
+                <span class="nav-card-icon">📚</span>
+                <span class="nav-card-label">Lista Manga</span>
+            </a>
+
+            <a th:href="@{/autori}" class="nav-card">
+                <span class="nav-card-icon">✒️</span>
+                <span class="nav-card-label">Lista Mangaka</span>
+            </a>
+
+            <a th:if="${userDetails}" th:href="@{/mieiCommenti}" class="nav-card">
+                <span class="nav-card-icon">💬</span>
+                <span class="nav-card-label">I miei Commenti</span>
+            </a>
+
+        </div>
+
+        <!-- SEZIONE LOGIN / LOGOUT -->
+        <div class="auth-section">
+
+            <a th:if="${userDetails == null}" th:href="@{/login}" class="btn-auth btn-login">Accedi</a>
+            <a th:if="${userDetails == null}" th:href="@{/register}" class="btn-auth btn-logout">Registrati</a>
+
+            <form th:if="${userDetails}" th:action="@{/logout}" method="post" style="margin:0;">
+                <button type="submit" class="btn-auth btn-logout">Logout</button>
+            </form>
+
+        </div>
+
+    </section>
+
+    <footer>
+        <p>&copy; 2026 SiwMangaTalk</p>
+    </footer>
+
 </body>
 
 </html>

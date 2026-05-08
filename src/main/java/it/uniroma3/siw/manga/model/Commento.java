@@ -1,6 +1,6 @@
 package it.uniroma3.siw.manga.model;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 public class Commento {
@@ -18,8 +19,9 @@ public class Commento {
 	
 	private Boolean miPiace;
 	private Boolean nonMiPiace;
+	@NotBlank
 	private String testo;
-	private Date tempoPubblicazione;
+	private LocalDateTime tempoPubblicazione;
 	
 	@ManyToOne (fetch = FetchType.EAGER)
 	private User utente;
@@ -59,11 +61,11 @@ public class Commento {
 		this.testo = testo;
 	}
 
-	public Date getTempoPubblicazione() {
+	public LocalDateTime getTempoPubblicazione() {
 		return tempoPubblicazione;
 	}
 
-	public void setTempoPubblicazione(Date tempoPubblicazione) {
+	public void setTempoPubblicazione(LocalDateTime tempoPubblicazione) {
 		this.tempoPubblicazione = tempoPubblicazione;
 	}
 

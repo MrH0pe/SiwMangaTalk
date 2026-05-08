@@ -10,6 +10,9 @@
         <a th:href="@{/}">
             <img th:src="@{/images/logo_siwmangatalk.png}" alt="SiwMangaTalk Logo" class="site-logo">
         </a>
+        <span th:if="${userDetails}"
+              style="position:fixed;top:18px;right:24px;color:#fff;font-weight:600;font-size:0.95rem;z-index:100;"
+              th:text="'Bentornato ' + ${userDetails.username} + '!'"></span>
     </div>
 
     <header class="hero-section" th:style="'background-image: url(' + @{${manga.pathSfondo}} + ')'">
@@ -62,9 +65,13 @@
 			</div>
 
             <div class="comment-list">
-                <div class="comment-item">
-                    <strong>Utente_Guest:</strong>
-                    <p>Manga stupendo, i disegni sono pazzeschi. Assolutamente consigliato!</p>
+                <div th:if="${#lists.isEmpty(commenti)}">
+                    <p>Nessun commento ancora. Sii il primo!</p>
+                </div>
+                <div class="comment-item" th:each="c : ${commenti}">
+                    <strong th:text="${c.utente != null ? c.utente.username : 'Anonimo'}"></strong>
+                    <p th:text="${c.testo}"></p>
+                    <small th:text="${#temporals.format(c.tempoPubblicazione, 'dd/MM/yyyy HH:mm')}"></small>
                 </div>
             </div>
         </section>

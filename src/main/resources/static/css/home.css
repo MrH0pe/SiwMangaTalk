@@ -1,0 +1,171 @@
+/* --- RESET BASE E SFONDO --- */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #0b0f19;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- BARRA DI NAVIGAZIONE --- */
+.top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+}
+
+.site-logo {
+    max-width: 220px;
+    height: auto;
+    transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
+}
+
+.site-logo:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0px 0px 8px rgba(255, 255, 255, 0.3));
+}
+
+.user-greeting {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* --- HERO SECTION --- */
+.hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 140px 20px 60px;
+    background: radial-gradient(ellipse at center top, #1a1f35 0%, #0b0f19 70%);
+}
+
+.hero-title {
+    font-size: 64px;
+    font-weight: 900;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    margin: 0 0 12px 0;
+    text-shadow: 0 0 40px rgba(255, 71, 87, 0.4);
+}
+
+.hero-subtitle {
+    font-size: 16px;
+    color: #888;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin: 0 0 60px 0;
+}
+
+/* --- GRIGLIA DI NAVIGAZIONE --- */
+.nav-grid {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+
+.nav-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 200px;
+    padding: 36px 20px;
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #ffffff;
+    border-bottom: 3px solid transparent;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s;
+}
+
+.nav-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    border-bottom: 3px solid #ff4757;
+}
+
+.nav-card-icon {
+    font-size: 36px;
+    line-height: 1;
+}
+
+.nav-card-label {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* --- SEPARATORE SEZIONE AUTH --- */
+.auth-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.btn-auth {
+    display: inline-block;
+    padding: 10px 28px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    text-decoration: none;
+}
+
+.btn-auth:active {
+    transform: scale(0.97);
+}
+
+.btn-login {
+    background-color: #ff4757;
+    color: #ffffff;
+    border: none;
+}
+
+.btn-login:hover {
+    background-color: #ff6b81;
+}
+
+.btn-logout {
+    background-color: transparent;
+    color: #aaa;
+    border: 1px solid #333;
+    font-family: inherit;
+}
+
+.btn-logout:hover {
+    background-color: #1e1e1e;
+    color: #fff;
+    border-color: #555;
+}
+
+/* --- FOOTER --- */
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #444;
+    font-size: 13px;
+    border-top: 1px solid #1a1a1a;
+}

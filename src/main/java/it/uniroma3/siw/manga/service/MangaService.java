@@ -23,7 +23,7 @@ public class MangaService {
 
 	}
 	
-	//Restiisce un solo manga
+	@Transactional(readOnly = true)
 	public Manga findById(Long id) {
 		return this.mangaRepository.findById(id).orElse(null);
 	}

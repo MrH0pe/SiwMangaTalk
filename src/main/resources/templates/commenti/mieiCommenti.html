@@ -11,6 +11,9 @@
         <a th:href="@{/}">
             <img th:src="@{/images/logo_siwmangatalk.png}" alt="SiwMangaTalk Logo" class="site-logo">
         </a>
+        <span th:if="${userDetails}"
+              style="position:fixed;top:18px;right:24px;color:#fff;font-weight:600;font-size:0.95rem;z-index:100;"
+              th:text="'Bentornato ' + ${userDetails.username} + '!'"></span>
     </div>
 
     <main class="main-content">
@@ -31,12 +34,12 @@
                 <div class="comment-header">
                     <!-- Navighiamo l'oggetto: commento -> manga -> nome -->
                     <strong>Manga: </strong>
-                    <a th:href="@{'/manga/' + ${commento.manga.id}}" 
+                    <a th:href="@{'/mangas/' + ${commento.manga.id}}"
                        th:text="${commento.manga.nome}">Nome del Manga</a>
                     
                     <!-- Formattazione della data -->
                     <span class="comment-date" 
-                          th:text="${#dates.format(commento.tempoPubblicazione, 'dd/MM/yyyy')}">
+                          th:text="${#temporals.format(commento.tempoPubblicazione, 'dd/MM/yyyy HH:mm')}">
                     </span>
                 </div>
 

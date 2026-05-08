@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Admin - SIW Manga Talk</title>
+</head>
+
+<body>
+
+    <h1>SIW MANGA TALK - Pannello Admin</h1>
+
+    <span th:if="${userDetails}"
+          style="position:fixed;top:18px;right:24px;color:#000;font-weight:600;font-size:0.95rem;"
+          th:text="'Bentornato ' + ${userDetails.username} + '!'"></span>
+
+    <h2>Benvenuto nel pannello di amministrazione</h2>
+
+    <ul>
+        <li><a th:href="@{/mangas}">Gestisci Manga</a></li>
+        <li><a th:href="@{/autori}">Gestisci Autori</a></li>
+    </ul>
+
+    <p><a th:href="@{/}">Torna alla home</a></p>
+
+</body>
+
+</html>

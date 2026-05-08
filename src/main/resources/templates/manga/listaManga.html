@@ -12,6 +12,9 @@
         <a th:href="@{/}">
             <img th:src="@{/images/logo_siwmangatalk.png}" alt="SiwMangaTalk Logo" class="site-logo">
         </a>
+        <span th:if="${userDetails}"
+              style="position:fixed;top:18px;right:24px;color:#fff;font-weight:600;font-size:0.95rem;z-index:100;"
+              th:text="'Bentornato ' + ${userDetails.username} + '!'"></span>
     </header>
 
 	<div class="manga-grid">
