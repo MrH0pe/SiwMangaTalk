@@ -9,12 +9,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
-
-import it.uniroma3.siw.manga.model.Credentials;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+
+import it.uniroma3.siw.manga.model.Credentials;
 
 @Configuration
 @EnableWebSecurity
@@ -26,6 +26,7 @@ public class SecurityConfiguration {
         this.dataSource = dataSource;
     }
 
+    //CONFIGURAZIONE DELLA GESTIONE DEGLI UTENTI
     @Bean
     public UserDetailsService userDetailsService() {
         JdbcUserDetailsManager manager = new JdbcUserDetailsManager(dataSource);
@@ -36,11 +37,13 @@ public class SecurityConfiguration {
         return manager;
     }
 
+    //Codice alfanumerico per Criptare la password
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    //CHI PUO' ACCEDERE A COSA
     @Bean
     protected SecurityFilterChain configure(final HttpSecurity httpSecurity) throws Exception {
 
@@ -53,12 +56,14 @@ public class SecurityConfiguration {
             authorize.anyRequest().authenticated();
         });
 
+        //CONFIGURAZIONE LOGIN
         httpSecurity.formLogin(form -> {
             form.loginPage("/login").permitAll();
             form.defaultSuccessUrl("/", true);
             form.failureUrl("/login?error=true");
         });
 
+        //CONFIGURAZIONE LOGOUT
         httpSecurity.logout(logout -> {
             logout.logoutUrl("/logout");
             logout.logoutSuccessUrl("/");

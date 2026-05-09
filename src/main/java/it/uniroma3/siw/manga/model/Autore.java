@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 
+//Classe che modella un AUTORE
 @Entity
 public class Autore {
 	@Id
@@ -18,7 +19,7 @@ public class Autore {
 	private String cognome;
 	private String descrizione;
 
-
+	//Associazione 1 a 1 tra Autore e Manga, un autore può scrivere un solo manga e un manga può essere scritto da un solo autore	
 	@OneToOne
 	private Manga manga;
 

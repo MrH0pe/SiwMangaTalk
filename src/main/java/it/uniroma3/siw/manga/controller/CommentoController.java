@@ -19,6 +19,7 @@ import it.uniroma3.siw.manga.service.CredentialsService;
 import it.uniroma3.siw.manga.service.MangaService;
 import jakarta.validation.Valid;
 
+// Controller per la gestione dei commenti sui manga
 @Controller
 public class CommentoController {
 
@@ -32,6 +33,7 @@ public class CommentoController {
         this.credentialsService = credentialsService;
     }
     
+    // Visualizza i commenti dell'utente loggato
     @GetMapping("/mieiCommenti")
     public String mostraMieiCommenti(Model model) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -41,6 +43,7 @@ public class CommentoController {
         return "commenti/mieiCommenti";
     }
     
+    // Salva un nuovo commento per un manga specifico
     @PostMapping("/manga/{idManga}/commenti")
     public String saveCommento(@PathVariable("idManga") Long idManga, 
                                @Valid @ModelAttribute("commento") Commento commento,

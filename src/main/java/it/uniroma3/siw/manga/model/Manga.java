@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 
+//Classe che modella un AUTORE
 @Entity
 public class Manga {
 	@Id
@@ -22,12 +23,15 @@ public class Manga {
 	private String pathImmagine;
 	private String pathSfondo;
 	
+	//Associazione 1 a 1 tra Autore e Manga, un autore può scrivere un solo manga e un manga può essere scritto da un solo autore
 	@OneToOne (mappedBy = "manga" , fetch = FetchType.EAGER)
 	private Autore autore;
 	
+	//Associazione uno a molti tra Manga e Votazione, un manga può avere più votazioni ma una votazione è associata ad un solo manga
 	@OneToMany (mappedBy = "manga", fetch = FetchType.LAZY)
 	private List<Votazione> votazioneList;
 
+	//Associazione uno a molti tra Manga e Commento, un manga può avere più commenti ma un commento è associato ad un solo manga
 	@OneToMany (mappedBy = "manga", fetch = FetchType.LAZY)
 	private List<Commento> commentoList;
 

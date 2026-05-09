@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
+//Classe che modella un VOTAZIONE
 @Entity
 public class Votazione {
 	@Id
@@ -18,9 +19,11 @@ public class Votazione {
 	private Integer numeroStelle;
 	/* private Immagine IconaManga;   invece delle stelline, per dragon ball ci saranno le sfere del drago come icona*/
 	
+	//Associazione molti a uno tra Votazione e Manga, una votazione è associata ad un solo manga ma un manga può avere più votazioni
 	@ManyToOne (fetch = FetchType.EAGER)
 	private Manga manga;
 	
+	//Associazione molti a uno tra Votazione e User, una votazione è scritta da un solo utente ma un utente può scrivere più votazioni
 	@ManyToOne (fetch = FetchType.EAGER)
 	private User utente;
 

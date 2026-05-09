@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotBlank;
 
+//Classe che modella un COMMENTO
 @Entity
 public class Commento {
 	@Id
@@ -23,9 +24,11 @@ public class Commento {
 	private String testo;
 	private LocalDateTime tempoPubblicazione;
 	
+	//Associazione molti a uno tra Commento e User, un commento è scritto da un solo utente ma un utente può scrivere più commenti
 	@ManyToOne (fetch = FetchType.EAGER)
 	private User utente;
 
+	//Associazione molti a uno tra Commento e Manga, un commento è scritto su un solo manga ma un manga può avere più commenti
 	@ManyToOne (fetch = FetchType.EAGER)
 	private Manga manga;
 

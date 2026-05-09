@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 
+//Classe che modella un CREDENTIALS
 @Entity
 public class Credentials {
 
@@ -25,6 +26,7 @@ public class Credentials {
     private String password;
 	private String role;
 
+	//Associazione 1 a 1 tra Credentials e User, un credentials è associato ad un solo utente e un utente ha un solo credentials
 	@OneToOne(cascade = CascadeType.ALL)
 	private User utente;
 

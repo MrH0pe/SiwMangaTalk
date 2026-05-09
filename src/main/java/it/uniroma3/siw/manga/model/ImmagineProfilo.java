@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
+//Classe che modella un IMMAGINE PROFILO
 @Entity
 public class ImmagineProfilo {
 	@Id
@@ -19,6 +20,7 @@ public class ImmagineProfilo {
 	private String nomeImmagine;
 	private String pathImmagine;
 	
+	//Associazione uno a molti tra ImmagineProfilo e User, un'immagine profilo può essere associata a più utenti ma un utente ha una sola immagine profilo
 	@OneToMany (mappedBy = "immagineProfilo" , fetch = FetchType.LAZY)
 	private Set<User> utente;
 
