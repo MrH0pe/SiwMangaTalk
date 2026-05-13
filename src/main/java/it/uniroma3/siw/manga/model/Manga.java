@@ -11,29 +11,35 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 
-//Classe che modella un AUTORE
+// Classe che modella un MANGA
 @Entity
 public class Manga {
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)	
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	private String nome;
 	private String descrizione;
 	private String pathImmagine;
 	private String pathSfondo;
-	
-	//Associazione 1 a 1 tra Autore e Manga, un autore può scrivere un solo manga e un manga può essere scritto da un solo autore
-	@OneToOne (mappedBy = "manga" , fetch = FetchType.EAGER)
+
+	// Associazione 1 a 1 tra Manga e Autore (lato inverso):
+	// un manga è scritto da un solo autore e un autore scrive un solo manga
+	@OneToOne(mappedBy = "manga", fetch = FetchType.EAGER)
 	private Autore autore;
-	
-	//Associazione uno a molti tra Manga e Votazione, un manga può avere più votazioni ma una votazione è associata ad un solo manga
-	@OneToMany (mappedBy = "manga", fetch = FetchType.LAZY)
+
+	// Associazione uno a molti tra Manga e Votazione:
+	// un manga può avere più votazioni, ma una votazione appartiene a un solo manga
+	@OneToMany(mappedBy = "manga", fetch = FetchType.LAZY)
 	private List<Votazione> votazioneList;
 
-	//Associazione uno a molti tra Manga e Commento, un manga può avere più commenti ma un commento è associato ad un solo manga
-	@OneToMany (mappedBy = "manga", fetch = FetchType.LAZY)
+	// Associazione uno a molti tra Manga e Commento:
+	// un manga può avere più commenti, ma un commento appartiene a un solo manga
+	@OneToMany(mappedBy = "manga", fetch = FetchType.LAZY)
 	private List<Commento> commentoList;
+
+	// --- Getters e Setters ---
 
 	public Long getId() {
 		return id;
@@ -99,9 +105,11 @@ public class Manga {
 		this.commentoList = commentoList;
 	}
 
+	// hashCode e equals basati solo sui campi non-lazy (id, nome, descrizione, path)
+	// per evitare LazyInitializationException quando le collezioni non sono caricate
 	@Override
 	public int hashCode() {
-		return Objects.hash(autore, commentoList, descrizione, id, nome, pathImmagine, pathSfondo, votazioneList);
+		return Objects.hash(id, nome, descrizione, pathImmagine, pathSfondo);
 	}
 
 	@Override
@@ -113,14 +121,10 @@ public class Manga {
 		if (getClass() != obj.getClass())
 			return false;
 		Manga other = (Manga) obj;
-		return Objects.equals(autore, other.autore) && Objects.equals(commentoList, other.commentoList)
-				&& Objects.equals(descrizione, other.descrizione) && Objects.equals(id, other.id)
-				&& Objects.equals(nome, other.nome) && Objects.equals(pathImmagine, other.pathImmagine)
-				&& Objects.equals(pathSfondo, other.pathSfondo) && Objects.equals(votazioneList, other.votazioneList);
+		return Objects.equals(id, other.id)
+				&& Objects.equals(nome, other.nome)
+				&& Objects.equals(descrizione, other.descrizione)
+				&& Objects.equals(pathImmagine, other.pathImmagine)
+				&& Objects.equals(pathSfondo, other.pathSfondo);
 	}
-	
-	
-
-	
-	
 }

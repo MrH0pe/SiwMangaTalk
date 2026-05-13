@@ -8,25 +8,22 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 
-// Classe globale valida per tutti i controller
+// ControllerAdvice applicato a tutti i controller: espone l'utente loggato come attributo di modello globale
 @ControllerAdvice
 public class GlobalController {
-    @ModelAttribute("userDetails")
 
+    // Aggiunge "userDetails" al model di ogni richiesta:
+    // contiene i dati dell'utente autenticato, oppure null se l'utente è anonimo
+    @ModelAttribute("userDetails")
     public UserDetails getUser() {
         UserDetails user = null;
 
-        // Recupera l'utente attualmente autenticato
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // Se l'utente non è anonimo, prende i suoi dettagli
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            user = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            user = (UserDetails) authentication.getPrincipal();
         }
 
-
-        // Restituisce l'utente loggato, oppure null
         return user;
-
     }
 }

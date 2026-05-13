@@ -22,41 +22,38 @@ public class AuthenticationController {
     }
 
 
-	//Service usato per gestire la logica relativa alle credenziali
-	@GetMapping(value = "/register") 
-	public String showRegisterForm (Model model) {
+	// Mostra il form di registrazione di un nuovo utente
+	@GetMapping("/register")
+	public String showRegisterForm(Model model) {
 		model.addAttribute("user", new User());
 		model.addAttribute("credentials", new Credentials());
 		return "authentication/registerUser";
 	}
 
-	//Restituisce il nome del template HTML
-	@GetMapping(value = "/login") 
-	public String showLoginForm (Model model) {
+	// Mostra il form di login; Spring Security gestisce l'autenticazione in automatico
+	@GetMapping("/login")
+	public String showLoginForm(Model model) {
 		return "authentication/login";
 	}
 
-
-	//L'accesso a questa pagina viene solitamente protetto tramite configurazione di Spring Security.
-	@GetMapping(value = "/admin/index")
+	// Mostra la pagina di amministrazione; l'accesso è protetto da Spring Security (solo ADMIN)
+	@GetMapping("/admin/index")
 	public String index() {
 		return "admin/index";
 	}
 
+	// Processa il form di registrazione: salva l'utente e le credenziali se non ci sono errori di validazione
+	@PostMapping("/register")
+	public String registerUser(@Valid @ModelAttribute("user") User user,
+			BindingResult userBindingResult, @Valid
+			@ModelAttribute("credentials") Credentials credentials,
+			BindingResult credentialsBindingResult) {
 
-
-	//Questo metodo viene chiamato quando l'utente invia il form di registrazione
-	@PostMapping(value = { "/register" })
-    public String registerUser(@Valid @ModelAttribute("user") User user,
-                 BindingResult userBindingResult, @Valid
-                 @ModelAttribute("credentials") Credentials credentials,
-                 BindingResult credentialsBindingResult) {
-
-        if(!userBindingResult.hasErrors() && !credentialsBindingResult.hasErrors()) {
-            credentials.setUtente(user);
-            credentialsService.saveCredentials(credentials);
-            return "redirect:/";
-        }
-        return "authentication/registerUser";
-    }
+		if (!userBindingResult.hasErrors() && !credentialsBindingResult.hasErrors()) {
+			credentials.setUtente(user);
+			credentialsService.saveCredentials(credentials);
+			return "redirect:/";
+		}
+		return "authentication/registerUser";
+	}
 }

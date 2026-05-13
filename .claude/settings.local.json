@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem -Recurse -Path \"c:\\\\Users\\\\Daniele\\\\Documents\\\\workspace-spring-tools-for-eclipse-5.1.1.RELEASE\\\\SiwMangaTalk\" -Filter \"*.java\")",
-      "Bash(Select-Object -First 5 FullName)"
+      "Bash(Select-Object -First 5 FullName)",
+      "Bash(python3:*)"
     ]
   }
 }

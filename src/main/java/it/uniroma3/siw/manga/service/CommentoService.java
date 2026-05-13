@@ -6,57 +6,88 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.uniroma3.siw.manga.model.Commento;
-import it.uniroma3.siw.manga.model.User;
 import it.uniroma3.siw.manga.repository.CommentoRepository;
 
+/**
+ * Service per la gestione dei commenti.
+ *
+ * Si occupa di recuperare, salvare ed eliminare i commenti.
+ * La logica di eliminazione (deleteIfOwner) gestisce sia commenti principali
+ * sia risposte, garantendo che solo il proprietario possa eliminare i propri contenuti.
+ */
 @Service
 public class CommentoService {
-    
+
     private final CommentoRepository commentoRepository;
 
+    /** Costruttore con iniezione del repository tramite Spring. */
     public CommentoService(CommentoRepository commentoRepository) {
         this.commentoRepository = commentoRepository;
-    }	
+    }
 
-
-    //Restituisce un commento dal id
+    /**
+     * Restituisce un commento dato il suo id, oppure null se non esiste.
+     */
     @Transactional(readOnly = true)
     public Commento findById(Long id) {
         return this.commentoRepository.findById(id).orElse(null);
     }
 
-
-    //Restituisce i commenti di un utente
+    /**
+     * Restituisce tutti i commenti scritti da un utente, identificato dal suo id.
+     * Usato nella pagina "I miei commenti".
+     */
     @Transactional(readOnly = true)
-    public List<Commento> getCommenti(User utente) {
-        return this.commentoRepository.findByUtente(utente);
-    }
-
-
-    //Restituisce l'elenco dei commenti
-    @Transactional(readOnly = true)
-    public List<Commento> findAll(){
-        return (List<Commento>) this.commentoRepository.findAll();
-    }
-
-
-    //Restituisce l'elenco dei commenti di un utente attraverso il suo id
-    @Transactional(readOnly = true)
-    public List<Commento> findByUtenteId(Long id){
+    public List<Commento> findByUtenteId(Long id) {
         return this.commentoRepository.findByUtenteId(id);
     }
 
-
-    //Restituisce tutti i commenti di un manga attraverso l'id del manga stesso
+    /**
+     * Restituisce solo i commenti principali (senza padre) di un manga,
+     * cioè esclude le risposte. Usato per popolare la sezione commenti
+     * nella pagina di dettaglio del manga.
+     */
     @Transactional(readOnly = true)
-    public List<Commento> findByMangaId(Long mangaId) {
-        return this.commentoRepository.findByMangaId(mangaId);
+    public List<Commento> findTopLevelByMangaId(Long mangaId) {
+        return this.commentoRepository.findByMangaIdAndCommentoPadreIsNull(mangaId);
     }
 
-
-    //salva il commento
+    /**
+     * Salva un commento (nuovo o aggiornato) nel database.
+     */
     @Transactional
     public void save(Commento commento) {
         this.commentoRepository.save(commento);
+    }
+
+    /**
+     * Elimina un commento solo se l'utente corrente ne è il proprietario.
+     * Se il commento non esiste o appartiene a un altro utente, non viene fatto nulla.
+     *
+     * - Se è una risposta: viene rimossa dalla collection del padre; Hibernate
+     *   la cancella automaticamente grazie a orphanRemoval=true.
+     * - Se è un commento principale: viene cancellato direttamente; le risposte
+     *   e le reazioni vengono eliminate per effetto di CascadeType.ALL.
+     */
+    @Transactional
+    public void deleteIfOwner(Long commentoId, Long currentUserId) {
+        Commento commento = this.commentoRepository.findById(commentoId).orElse(null);
+        if (commento == null || commento.getUtente() == null
+                || !commento.getUtente().getId().equals(currentUserId)) {
+            return;
+        }
+
+        Commento padre = commento.getCommentoPadre();
+        if (padre != null) {
+            // È una risposta: la rimuoviamo dalla collection del padre.
+            // Con orphanRemoval=true, Hibernate cancella automaticamente
+            // l'entità rimossa dalla collection al flush della transazione.
+            padre.getRisposte().removeIf(r -> r.getId().equals(commentoId));
+            this.commentoRepository.save(padre);
+        } else {
+            // È un commento principale: delete diretto.
+            // CascadeType.ALL propaga la cancellazione alle risposte e alle reazioni.
+            this.commentoRepository.delete(commento);
+        }
     }
 }

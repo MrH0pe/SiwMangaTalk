@@ -5,13 +5,21 @@ import java.util.List;
 import org.springframework.data.repository.CrudRepository;
 
 import it.uniroma3.siw.manga.model.Commento;
-import it.uniroma3.siw.manga.model.User;
 
-public interface CommentoRepository extends CrudRepository<Commento, Long>{
-	
-	List<Commento> findByUtente(User utente);
+/**
+ * Repository JPA per l'entità Commento.
+ * Spring Data genera automaticamente le implementazioni dei metodi
+ * sulla base dei nomi dichiarati nell'interfaccia.
+ */
+public interface CommentoRepository extends CrudRepository<Commento, Long> {
 
+	/** Restituisce tutti i commenti scritti dall'utente con l'id specificato. */
 	List<Commento> findByUtenteId(Long utenteId);
 
-	List<Commento> findByMangaId(Long mangaId);
+	/**
+	 * Restituisce solo i commenti principali (commentoPadre = null) di un manga.
+	 * Usato per mostrare la lista di commenti nella pagina del manga,
+	 * escludendo le risposte (che sono figlie di altri commenti).
+	 */
+	List<Commento> findByMangaIdAndCommentoPadreIsNull(Long mangaId);
 }

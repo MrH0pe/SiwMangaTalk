@@ -15,16 +15,15 @@ public class AutoreController {
 	public AutoreController(AutoreService autoreService) {
 		this.autoreService = autoreService;
 	}
- // 
 
-	//Serve per mostrare l'autore di un manga
+	// Mostra il dettaglio di un autore dato il suo id
 	@GetMapping("/autori/{id}")
 	public String mostraAutore(@PathVariable Long id, Model model) {
 		model.addAttribute("autore", this.autoreService.findById(id));
 		return "autori/mostraAutore";
 	}
 
-	//Serve per mostrare una lista di autori
+	// Mostra la lista di tutti gli autori presenti nel sistema
 	@GetMapping("/autori")
 	public String listaAutori(Model model) {
 		model.addAttribute("autori", this.autoreService.findAll());

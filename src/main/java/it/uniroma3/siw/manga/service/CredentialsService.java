@@ -24,22 +24,21 @@ public class CredentialsService {
         this.credentialsRepository = credentialsRepository;
     }
 
-    //Serve per cercare le credenziali tramite id
-    @Transactional
+    // Restituisce le credenziali associate all'id specificato, null se non trovate
+    @Transactional(readOnly = true)
     public Credentials getCredentials(Long id) {
         Optional<Credentials> result = this.credentialsRepository.findById(id);
         return result.orElse(null);
     }
 
-    //Serve per cercare le credenziali tramite l'username
-    @Transactional
+    // Restituisce le credenziali associate all'username specificato, null se non trovate
+    @Transactional(readOnly = true)
     public Credentials getCredentials(String username) {
         Optional<Credentials> result = Optional.ofNullable(this.credentialsRepository.findByUsername(username));
         return result.orElse(null);
     }
 
-
-    //Serve per salvare le credenziali
+    // Salva le credenziali del nuovo utente: assegna il ruolo DEFAULT e cifra la password con BCrypt
     @Transactional
     public Credentials saveCredentials(Credentials credentials) {
         credentials.setRole(Credentials.DEFAULT_ROLE);

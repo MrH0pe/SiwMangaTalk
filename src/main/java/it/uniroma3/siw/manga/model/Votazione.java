@@ -8,24 +8,47 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
-//Classe che modella un VOTAZIONE
+/**
+ * Classe che modella una VOTAZIONE (voto con stelle) di un utente su un manga.
+ *
+ * Il vincolo di unicità su (utente_id, manga_id) garantisce che ogni utente
+ * possa esprimere al massimo un voto per manga. Se l'utente vota di nuovo,
+ * il record esistente viene aggiornato (upsert gestito da VotazioneService).
+ *
+ * Il valore è un Double da 0.5 a 5.0 con incrementi di 0.5 (mezze stelle).
+ */
 @Entity
+@Table(uniqueConstraints = {
+	@UniqueConstraint(columnNames = {"utente_id", "manga_id"})
+})
 public class Votazione {
+
+	/** Chiave primaria generata automaticamente dal DB. */
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)	
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
-	private Integer numeroStelle;
-	/* private Immagine IconaManga;   invece delle stelline, per dragon ball ci saranno le sfere del drago come icona*/
-	
-	//Associazione molti a uno tra Votazione e Manga, una votazione è associata ad un solo manga ma un manga può avere più votazioni
-	@ManyToOne (fetch = FetchType.EAGER)
+
+	/** Valore del voto: da 0.5 (minimo) a 5.0 (massimo), a mezzi punti. */
+	private Double valoreStelline;
+
+	/**
+	 * Manga votato (lato proprietario della FK manga_id).
+	 * EAGER: il manga viene sempre caricato insieme alla votazione.
+	 */
+	@ManyToOne(fetch = FetchType.EAGER)
 	private Manga manga;
-	
-	//Associazione molti a uno tra Votazione e User, una votazione è scritta da un solo utente ma un utente può scrivere più votazioni
-	@ManyToOne (fetch = FetchType.EAGER)
+
+	/**
+	 * Utente che ha espresso il voto (lato proprietario della FK utente_id).
+	 * EAGER: l'utente viene sempre caricato insieme alla votazione.
+	 */
+	@ManyToOne(fetch = FetchType.EAGER)
 	private User utente;
+
+	// --- Getters e Setters ---
 
 	public Long getId() {
 		return id;
@@ -35,12 +58,12 @@ public class Votazione {
 		this.id = id;
 	}
 
-	public Integer getNumeroStelle() {
-		return numeroStelle;
+	public Double getValoreStelline() {
+		return valoreStelline;
 	}
 
-	public void setNumeroStelle(Integer numeroStelle) {
-		this.numeroStelle = numeroStelle;
+	public void setValoreStelline(Double valoreStelline) {
+		this.valoreStelline = valoreStelline;
 	}
 
 	public Manga getManga() {
@@ -59,23 +82,21 @@ public class Votazione {
 		this.utente = utente;
 	}
 
+	// Tutti i campi sono EAGER o scalari: nessun rischio di LazyInitializationException
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, manga, numeroStelle, utente);
+		return Objects.hash(id, manga, valoreStelline, utente);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
 		Votazione other = (Votazione) obj;
-		return Objects.equals(id, other.id) && Objects.equals(manga, other.manga)
-				&& Objects.equals(numeroStelle, other.numeroStelle) && Objects.equals(utente, other.utente);
+		return Objects.equals(id, other.id)
+				&& Objects.equals(manga, other.manga)
+				&& Objects.equals(valoreStelline, other.valoreStelline)
+				&& Objects.equals(utente, other.utente);
 	}
-	
-	
 }

@@ -10,14 +10,12 @@
         <a th:href="@{/}">
             <img th:src="@{/images/logo_siwmangatalk.png}" alt="SiwMangaTalk Logo" class="site-logo">
         </a>
-        <span th:if="${userDetails}"
-              style="position:fixed;top:18px;right:24px;color:#fff;font-weight:600;font-size:0.95rem;z-index:100;"
+        <span th:if="${userDetails}" class="user-greeting"
               th:text="'Bentornato ' + ${userDetails.username} + '!'"></span>
     </div>
 
     <header class="hero-section" th:style="'background-image: url(' + @{${manga.pathSfondo}} + ')'">
         <div class="hero-overlay"></div>
-        
         <div class="hero-content">
             <img class="manga-cover" th:src="@{${manga.pathImmagine}}" th:alt="${manga.nome}" referrerpolicy="no-referrer" />
             <h1 class="manga-title" th:text="${manga.nome}">Nome Manga</h1>
@@ -25,54 +23,219 @@
     </header>
 
     <main class="main-content">
-        
+
+        <!-- Trama e autore -->
         <section class="info-card">
             <h2>Trama</h2>
             <p class="descrizione" th:text="${manga.descrizione}">Questo è un bel manga!</p>
-            
             <div class="autore-box">
-                <strong>Autore:</strong> 
-                <a th:if="${manga.autore != null}" 
+                <strong>Autore:</strong>
+                <a th:if="${manga.autore != null}"
                    th:href="@{'/autori/' + ${manga.autore.id}}"
-                   th:text="${manga.autore.nome} + ' ' + ${manga.autore.cognome}">Nome Autore
-                </a>
+                   th:text="${manga.autore.nome} + ' ' + ${manga.autore.cognome}">Nome Autore</a>
                 <span th:if="${manga.autore == null}">Nessun autore assegnato</span>
             </div>
         </section>
 
-		<!-- Form per Inserire commenti dentro un manga -->
+        <!-- ===================================================== -->
+        <!--  SEZIONE VOTAZIONE                                     -->
+        <!-- ===================================================== -->
+        <section class="rating-section">
+
+            <!-- Media voti (visibile a tutti) -->
+            <div class="rating-average">
+                <div th:if="${mediaVoti != null}">
+                    <div class="stars-static">
+                        <span class="stars-bg">★★★★★</span>
+                        <span class="stars-fg"
+                              th:style="'width: ' + ${mediaVoti * 20} + '%'">★★★★★</span>
+                    </div>
+                    <span class="rating-value"
+                          th:text="${#numbers.formatDecimal(mediaVoti, 1, 'POINT', 1, 'POINT')}"></span>
+                    <span class="rating-count"
+                          th:text="'(' + ${countVoti} + (${countVoti} == 1 ? ' voto' : ' voti') + ')'"></span>
+                </div>
+                <div th:if="${mediaVoti == null}" class="rating-no-votes">
+                    <span class="stars-bg">★★★★★</span>
+                    <span class="rating-count">Nessun voto ancora</span>
+                </div>
+            </div>
+
+            <!-- Vota (solo se loggato) -->
+            <div th:if="${userDetails != null}" class="rating-user">
+                <p class="rating-user-label"
+                   th:text="${votoUtente != null} ? 'Il tuo voto:' : 'Dai il tuo voto:'"></p>
+                <form method="POST" th:action="@{'/mangas/' + ${manga.id} + '/voto'}"
+                      id="votoForm">
+                    <div class="star-picker"
+                         id="starPicker"
+                         th:attr="data-current=${votoUtente != null ? votoUtente : 0}">
+                        <span class="star-icon" data-value="1">★</span>
+                        <span class="star-icon" data-value="2">★</span>
+                        <span class="star-icon" data-value="3">★</span>
+                        <span class="star-icon" data-value="4">★</span>
+                        <span class="star-icon" data-value="5">★</span>
+                    </div>
+                    <input type="hidden" name="valoreStelline" id="ratingInput" value="0">
+                    <button type="submit" class="btn-submit-vote" id="votoBtn" disabled>Vota</button>
+                </form>
+            </div>
+
+        </section>
+
+        <!-- ===================================================== -->
+        <!--  SEZIONE COMMENTI  –  stile YouTube                   -->
+        <!-- ===================================================== -->
         <section class="comments-section">
             <h2>Commenti della Community</h2>
-            
-			<div class="add-comment-box">
-			    <!-- L'azione punta all'URL con l'ID del manga dinamico -->
-			    <form method="POST" th:action="@{'/manga/' + ${manga.id} + '/commenti'}" th:object="${commento}">
-			        
-			        <div th:if="${#fields.hasGlobalErrors()}">
-			            <p th:each="err : ${#fields.globalErrors()}" th:text="${err}" style="color: red;"></p>
-			        </div>
 
-			        <div>
-			            <!-- Meglio una textarea per i commenti rispetto a un input text -->
-			            <textarea th:field="*{testo}" rows="3" placeholder="Scrivi cosa ne pensi..." required></textarea>
-			            <span th:if="${#fields.hasErrors('testo')}" th:errors="*{testo}" style="color: red;"></span>
-			        </div>
+            <!-- Form nuovo commento principale (solo se loggato) -->
+            <div class="add-comment-box" th:if="${userDetails != null}">
+                <form method="POST"
+                      th:action="@{'/manga/' + ${manga.id} + '/commenti'}"
+                      th:object="${commento}">
+                    <textarea th:field="*{testo}" rows="1"
+                              placeholder="Aggiungi un commento..."
+                              class="comment-textarea"
+                              onfocus="expandTextarea(this)" required></textarea>
+                    <div class="comment-form-actions" style="display:none">
+                        <button type="button" class="btn-cancel-comment"
+                                onclick="collapseTextarea(this)">Annulla</button>
+                        <button type="submit" class="btn-submit-comment">Commenta</button>
+                    </div>
+                </form>
+            </div>
 
-			        <div>
-			            <button type="submit" class="btn-nav">Pubblica Commento</button>
-			        </div>
-			    </form>
-			</div>
+            <!-- Lista commenti principali -->
+            <div class="comments-list">
 
-            <div class="comment-list">
-                <div th:if="${#lists.isEmpty(commenti)}">
+                <div th:if="${#lists.isEmpty(commenti)}" class="no-comments-msg">
                     <p>Nessun commento ancora. Sii il primo!</p>
                 </div>
+
+                <!-- Iterazione commenti principali -->
                 <div class="comment-item" th:each="c : ${commenti}">
-                    <strong th:text="${c.utente != null ? c.utente.username : 'Anonimo'}"></strong>
-                    <p th:text="${c.testo}"></p>
-                    <small th:text="${#temporals.format(c.tempoPubblicazione, 'dd/MM/yyyy HH:mm')}"></small>
+
+                    <div class="comment-meta">
+                        <span class="comment-author"
+                              th:text="${c.utente != null ? c.utente.username : 'Anonimo'}"></span>
+                        <span class="comment-date"
+                              th:text="${#temporals.format(c.tempoPubblicazione, 'dd/MM/yyyy HH:mm')}"></span>
+                        <!-- Bidone elimina: visibile solo al proprietario -->
+                        <form method="POST"
+                              th:if="${currentUserId != null and c.utente != null and c.utente.id == currentUserId}"
+                              th:action="@{'/commenti/' + ${c.id} + '/elimina'}"
+                              style="margin-left:auto; display:flex; align-items:center">
+                            <button type="submit" class="btn-delete-comment" title="Elimina commento">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                                    <path d="M10 11v6"></path>
+                                    <path d="M14 11v6"></path>
+                                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+
+                    <p class="comment-text" th:text="${c.testo}"></p>
+
+                    <!-- Azioni: like, dislike (visibili a tutti), rispondi (solo se loggato) -->
+                    <div class="comment-actions">
+
+                        <!-- LIKE -->
+                        <form th:if="${userDetails != null}" method="POST"
+                              th:action="@{'/commenti/' + ${c.id} + '/reazione'}" class="reaction-form">
+                            <input type="hidden" name="tipo" value="LIKE">
+                            <button type="submit" class="btn-reaction"
+                                    th:classappend="${reazioniUtente != null and reazioniUtente[c.id] == 'LIKE'} ? ' active-like'">
+                                &#128077; <span th:text="${likeMap[c.id] ?: 0}">0</span>
+                            </button>
+                        </form>
+                        <span th:unless="${userDetails != null}" class="reaction-readonly">
+                            &#128077; <span th:text="${likeMap[c.id] ?: 0}">0</span>
+                        </span>
+
+                        <!-- DISLIKE -->
+                        <form th:if="${userDetails != null}" method="POST"
+                              th:action="@{'/commenti/' + ${c.id} + '/reazione'}" class="reaction-form">
+                            <input type="hidden" name="tipo" value="DISLIKE">
+                            <button type="submit" class="btn-reaction"
+                                    th:classappend="${reazioniUtente != null and reazioniUtente[c.id] == 'DISLIKE'} ? ' active-dislike'">
+                                &#128078; <span th:text="${dislikeMap[c.id] ?: 0}">0</span>
+                            </button>
+                        </form>
+                        <span th:unless="${userDetails != null}" class="reaction-readonly">
+                            &#128078; <span th:text="${dislikeMap[c.id] ?: 0}">0</span>
+                        </span>
+
+                        <!-- Pulsante Rispondi -->
+                        <button th:if="${userDetails != null}" type="button" class="btn-reply-toggle"
+                                onclick="toggleReplyForm(this)">Rispondi</button>
+
+                    </div>
+
+                    <!-- Form risposta inline (nascosto di default) -->
+                    <div class="reply-form-wrapper" style="display:none"
+                         th:if="${userDetails != null}">
+                        <form method="POST"
+                              th:action="@{'/manga/' + ${manga.id} + '/commenti/' + ${c.id} + '/risposte'}">
+                            <textarea name="testo" rows="2"
+                                      placeholder="Aggiungi una risposta..."
+                                      class="comment-textarea reply-textarea" required></textarea>
+                            <div class="comment-form-actions">
+                                <button type="button" class="btn-cancel-comment"
+                                        onclick="cancelReply(this)">Annulla</button>
+                                <button type="submit" class="btn-submit-reply">Rispondi</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Toggle + lista risposte (solo se esistono) -->
+                    <div class="replies-section"
+                         th:if="${c.risposte != null and !#lists.isEmpty(c.risposte)}">
+
+                        <button type="button" class="btn-toggle-replies"
+                                onclick="toggleReplies(this)">
+                            <span class="toggle-arrow">▼</span>
+                            <span th:text="${#lists.size(c.risposte)} + (${#lists.size(c.risposte)} == 1 ? ' risposta' : ' risposte')"></span>
+                        </button>
+
+                        <div class="replies-list" style="display:none">
+                            <div class="reply-item" th:each="r : ${c.risposte}">
+                                <div class="comment-meta">
+                                    <span class="comment-author"
+                                          th:text="${r.utente != null ? r.utente.username : 'Anonimo'}"></span>
+                                    <span class="comment-date"
+                                          th:text="${#temporals.format(r.tempoPubblicazione, 'dd/MM/yyyy HH:mm')}"></span>
+                                    <!-- Bidone elimina risposta: visibile solo al proprietario -->
+                                    <form method="POST"
+                                          th:if="${currentUserId != null and r.utente != null and r.utente.id == currentUserId}"
+                                          th:action="@{'/commenti/' + ${r.id} + '/elimina'}"
+                                          style="margin-left:auto; display:flex; align-items:center">
+                                        <button type="submit" class="btn-delete-comment" title="Elimina risposta">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                 stroke="currentColor" stroke-width="2"
+                                                 stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="3 6 5 6 21 6"></polyline>
+                                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                                                <path d="M10 11v6"></path>
+                                                <path d="M14 11v6"></path>
+                                                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                                <p class="comment-text" th:text="${r.testo}"></p>
+                            </div>
+                        </div>
+
+                    </div>
+
                 </div>
+
             </div>
         </section>
 
@@ -82,6 +245,116 @@
         </div>
 
     </main>
+
+<script>
+    // Espande la textarea e mostra i pulsanti quando viene messa a fuoco
+    function expandTextarea(textarea) {
+        textarea.rows = 2;
+        const actions = textarea.nextElementSibling;
+        if (actions && actions.classList.contains('comment-form-actions')) {
+            actions.style.display = 'flex';
+        }
+    }
+
+    // Annulla e collassa il form del commento principale
+    function collapseTextarea(btn) {
+        const actions = btn.closest('.comment-form-actions');
+        const textarea = actions.previousElementSibling;
+        textarea.value = '';
+        textarea.rows = 1;
+        actions.style.display = 'none';
+    }
+
+    // Mostra/nasconde il form di risposta sotto un commento
+    function toggleReplyForm(btn) {
+        const commentItem = btn.closest('.comment-item');
+        const replyForm = commentItem.querySelector('.reply-form-wrapper');
+        if (!replyForm) return;
+        const isVisible = replyForm.style.display !== 'none';
+        replyForm.style.display = isVisible ? 'none' : 'block';
+        if (!isVisible) replyForm.querySelector('textarea').focus();
+    }
+
+    // Annulla e chiude il form risposta
+    function cancelReply(btn) {
+        const replyForm = btn.closest('.reply-form-wrapper');
+        replyForm.style.display = 'none';
+        replyForm.querySelector('textarea').value = '';
+    }
+
+    // Apre/chiude la lista delle risposte e ruota la freccia
+    function toggleReplies(btn) {
+        const arrow = btn.querySelector('.toggle-arrow');
+        const repliesList = btn.nextElementSibling;
+        const isVisible = repliesList.style.display !== 'none';
+        repliesList.style.display = isVisible ? 'none' : 'block';
+        arrow.style.transform = isVisible ? '' : 'rotate(180deg)';
+    }
+
+    // ---- STAR PICKER ----
+    (function () {
+        const picker = document.getElementById('starPicker');
+        if (!picker) return;
+
+        const stars = picker.querySelectorAll('.star-icon');
+        const input = document.getElementById('ratingInput');
+        const votoBtn = document.getElementById('votoBtn');
+        let currentRating = parseFloat(picker.dataset.current) || 0;
+
+        // Applica gli stili di riempimento direttamente sull'elemento
+        function paintStars(value) {
+            stars.forEach(function (star) {
+                const v = parseFloat(star.dataset.value);
+                star.style.background = 'none';
+                star.style.webkitBackgroundClip = '';
+                star.style.backgroundClip = '';
+                if (value >= v) {
+                    star.style.color = '#ffd700';
+                    star.style.webkitTextFillColor = '#ffd700';
+                } else if (value >= v - 0.5) {
+                    star.style.background = 'linear-gradient(to right, #ffd700 50%, #555 50%)';
+                    star.style.webkitBackgroundClip = 'text';
+                    star.style.backgroundClip = 'text';
+                    star.style.webkitTextFillColor = 'transparent';
+                    star.style.color = 'transparent';
+                } else {
+                    star.style.color = '#555';
+                    star.style.webkitTextFillColor = '#555';
+                }
+            });
+        }
+
+        // Calcola il valore in base alla posizione del mouse sulla stella
+        function valueFromEvent(star, e) {
+            const rect = star.getBoundingClientRect();
+            const isLeft = (e.clientX - rect.left) < rect.width / 2;
+            return isLeft ? parseFloat(star.dataset.value) - 0.5 : parseFloat(star.dataset.value);
+        }
+
+        stars.forEach(function (star) {
+            star.addEventListener('mousemove', function (e) {
+                paintStars(valueFromEvent(this, e));
+            });
+            star.addEventListener('click', function (e) {
+                currentRating = valueFromEvent(this, e);
+                input.value = currentRating;
+                paintStars(currentRating);
+                votoBtn.disabled = false;
+            });
+        });
+
+        picker.addEventListener('mouseleave', function () {
+            paintStars(currentRating);
+        });
+
+        // Stato iniziale (voto già espresso o 0)
+        paintStars(currentRating);
+        if (currentRating > 0) {
+            input.value = currentRating;
+            votoBtn.disabled = false;
+        }
+    })();
+</script>
 
 </body>
 </html>

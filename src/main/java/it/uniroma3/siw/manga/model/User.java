@@ -14,31 +14,39 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 
-//Classe che modella un USER
+// Classe che modella un UTENTE (profilo applicativo)
 @Entity
 @Table(name = "utente")
 public class User {
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)	
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+
 	@NotBlank
 	@Column(nullable = false)
 	private String name;
+
 	@NotBlank
 	@Column(nullable = false, unique = true)
 	private String email;
-	
-	//Associazione molti a uno tra User e ImmagineProfilo, un utente ha una sola immagine profilo ma un'immagine profilo può essere associata a più utenti
-	@ManyToOne (fetch = FetchType.EAGER)
+
+	// Associazione molti a uno tra User e ImmagineProfilo:
+	// un utente ha una sola immagine profilo, ma la stessa immagine può essere condivisa da più utenti
+	@ManyToOne(fetch = FetchType.EAGER)
 	private ImmagineProfilo immagineProfilo;
-	
-	//Associazione uno a molti tra User e Commento, un utente può scrivere più commenti ma un commento è scritto da un solo utente
-	@OneToMany (mappedBy = "utente" , fetch = FetchType.LAZY)
+
+	// Associazione uno a molti tra User e Commento:
+	// un utente può scrivere più commenti, ma ogni commento appartiene a un solo utente
+	@OneToMany(mappedBy = "utente", fetch = FetchType.LAZY)
 	private List<Commento> commentoList;
-	
-	//Associazione uno a molti tra User e Votazione, un utente può scrivere più votazioni ma una votazione è scritta da un solo utente
-	@OneToMany (mappedBy = "utente" , fetch = FetchType.LAZY)
+
+	// Associazione uno a molti tra User e Votazione:
+	// un utente può esprimere più voti, ma ogni voto appartiene a un solo utente
+	@OneToMany(mappedBy = "utente", fetch = FetchType.LAZY)
 	private List<Votazione> votazioneList;
+
+	// --- Getters e Setters ---
 
 	public Long getId() {
 		return id;
@@ -56,10 +64,12 @@ public class User {
 		this.name = name;
 	}
 
+	// Alias di getName() per compatibilità con i template Thymeleaf (${utente.username})
 	public String getUsername() {
 		return name;
 	}
 
+	// Alias di setName() per compatibilità con i form di registrazione
 	public void setUsername(String username) {
 		this.name = username;
 	}
@@ -96,9 +106,11 @@ public class User {
 		this.votazioneList = votazioneList;
 	}
 
+	// hashCode e equals basati su id ed email (campi univoci e non lazy)
+	// per evitare LazyInitializationException sulle collezioni LAZY
 	@Override
 	public int hashCode() {
-		return Objects.hash(commentoList, email, id, immagineProfilo, name, votazioneList);
+		return Objects.hash(id, email);
 	}
 
 	@Override
@@ -110,11 +122,7 @@ public class User {
 		if (getClass() != obj.getClass())
 			return false;
 		User other = (User) obj;
-		return Objects.equals(commentoList, other.commentoList) && Objects.equals(email, other.email)
-				&& Objects.equals(id, other.id) && Objects.equals(immagineProfilo, other.immagineProfilo)
-				&& Objects.equals(name, other.name) && Objects.equals(votazioneList, other.votazioneList);
+		return Objects.equals(id, other.id)
+				&& Objects.equals(email, other.email);
 	}
-
-
-	
 }
