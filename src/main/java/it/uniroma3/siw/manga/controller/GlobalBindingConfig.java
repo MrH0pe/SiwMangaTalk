@@ -8,8 +8,12 @@ import org.springframework.web.bind.annotation.InitBinder;
 @ControllerAdvice
 public class GlobalBindingConfig {
 
-   @InitBinder
-   public void initBinder(WebDataBinder binder) {
+
+    //Personalizza il modo in cui Spring legge i dati dai form
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
         binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
-   }
+    }
+
+
 }

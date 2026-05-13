@@ -11,6 +11,8 @@
 
     <h2>Accedi</h2>
 
+
+    <!-- Form per effettuare il login -->
     <form th:action="@{/login}" method="post">
 
         <div>
@@ -23,6 +25,7 @@
             <input type="password" id="password" name="password" required />
         </div>
 
+        <!-- Messaggio mostrato se il login fallisce -->
         <div th:if="${param.error}">
             <p>Username o password errati.</p>
         </div>

@@ -23,6 +23,8 @@ public class MangaController {
 		this.commentoService = commentoService;
 	}
 
+
+	//Serve per mostrare il singolo manga
 	@GetMapping("/mangas/{id}")
 	public String mostraManga(@PathVariable("id") Long id, Model model) {
 		Manga manga = this.mangaService.findById(id);

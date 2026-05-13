@@ -23,6 +23,7 @@ public class AutoreService {
 
 	}
 
+	//Restituisce un autore dal id
 	@Transactional(readOnly = true)
 	public Autore findById(Long id) {
 		return this.autoreRepository.findById(id).orElse(null);

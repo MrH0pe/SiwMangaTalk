@@ -21,23 +21,31 @@ public class AuthenticationController {
         this.credentialsService = credentialsService;
     }
 
+
+	//Service usato per gestire la logica relativa alle credenziali
 	@GetMapping(value = "/register") 
 	public String showRegisterForm (Model model) {
 		model.addAttribute("user", new User());
 		model.addAttribute("credentials", new Credentials());
 		return "authentication/registerUser";
 	}
-	
+
+	//Restituisce il nome del template HTML
 	@GetMapping(value = "/login") 
 	public String showLoginForm (Model model) {
 		return "authentication/login";
 	}
 
+
+	//L'accesso a questa pagina viene solitamente protetto tramite configurazione di Spring Security.
 	@GetMapping(value = "/admin/index")
 	public String index() {
 		return "admin/index";
 	}
-		
+
+
+
+	//Questo metodo viene chiamato quando l'utente invia il form di registrazione
 	@PostMapping(value = { "/register" })
     public String registerUser(@Valid @ModelAttribute("user") User user,
                  BindingResult userBindingResult, @Valid

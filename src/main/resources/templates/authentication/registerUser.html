@@ -11,6 +11,7 @@
 
     <h2>Crea un account</h2>
 
+    <!-- Form per effettuare la registrazione -->
     <form th:action="@{/register}" method="post">
 
         <h3>Dati personali</h3>
@@ -37,6 +38,8 @@
             <input type="password" id="password" name="password" required />
         </div>
 
+
+        <!-- Mostra un errore se presente -->
         <div th:if="${userError}">
             <p th:text="${userError}" style="color:red;"></p>
         </div>

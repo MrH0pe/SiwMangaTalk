@@ -22,7 +22,8 @@ public class MangaService {
 		return (List<Manga>) this.mangaRepository.findAll();
 
 	}
-	
+
+	//Restituisce un manga dal suo id
 	@Transactional(readOnly = true)
 	public Manga findById(Long id) {
 		return this.mangaRepository.findById(id).orElse(null);

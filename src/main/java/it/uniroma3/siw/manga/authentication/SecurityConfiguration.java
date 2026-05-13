@@ -20,6 +20,7 @@ import it.uniroma3.siw.manga.model.Credentials;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
+    //Questo attributo e' un componente di Spring che modella un punto di accesso al DB
     private final DataSource dataSource;
 
     public SecurityConfiguration(DataSource dataSource) {

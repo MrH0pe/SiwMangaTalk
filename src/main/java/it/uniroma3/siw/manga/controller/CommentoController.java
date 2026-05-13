@@ -32,7 +32,7 @@ public class CommentoController {
         this.mangaService = mangaService;
         this.credentialsService = credentialsService;
     }
-    // 
+    
     // Visualizza i commenti dell'utente loggato
     @GetMapping("/mieiCommenti")
     public String mostraMieiCommenti(Model model) {
