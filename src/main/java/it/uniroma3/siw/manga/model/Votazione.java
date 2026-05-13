@@ -8,16 +8,21 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
-//Classe che modella un VOTAZIONE
+//Classe che modella una VOTAZIONE
 @Entity
+@Table(uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"utente_id", "manga_id"})
+})
 public class Votazione {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)	
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
-	private Integer numeroStelle;
-	/* private Immagine IconaManga;   invece delle stelline, per dragon ball ci saranno le sfere del drago come icona*/
+
+	// Valore da 0.5 a 5.0 con mezzi punti
+	private Double valoreStelline;
 	
 	//Associazione molti a uno tra Votazione e Manga, una votazione è associata ad un solo manga ma un manga può avere più votazioni
 	@ManyToOne (fetch = FetchType.EAGER)
@@ -35,12 +40,12 @@ public class Votazione {
 		this.id = id;
 	}
 
-	public Integer getNumeroStelle() {
-		return numeroStelle;
+	public Double getValoreStelline() {
+		return valoreStelline;
 	}
 
-	public void setNumeroStelle(Integer numeroStelle) {
-		this.numeroStelle = numeroStelle;
+	public void setValoreStelline(Double valoreStelline) {
+		this.valoreStelline = valoreStelline;
 	}
 
 	public Manga getManga() {
@@ -61,7 +66,7 @@ public class Votazione {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, manga, numeroStelle, utente);
+		return Objects.hash(id, manga, valoreStelline, utente);
 	}
 
 	@Override
@@ -74,7 +79,7 @@ public class Votazione {
 			return false;
 		Votazione other = (Votazione) obj;
 		return Objects.equals(id, other.id) && Objects.equals(manga, other.manga)
-				&& Objects.equals(numeroStelle, other.numeroStelle) && Objects.equals(utente, other.utente);
+				&& Objects.equals(valoreStelline, other.valoreStelline) && Objects.equals(utente, other.utente);
 	}
 	
 	

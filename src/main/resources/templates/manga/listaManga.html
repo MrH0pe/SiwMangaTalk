@@ -17,18 +17,40 @@
               th:text="'Bentornato ' + ${userDetails.username} + '!'"></span>
     </header>
 
+    <!-- BARRA ORDINAMENTO -->
+    <div class="sort-bar">
+        <form method="GET" th:action="@{/mangas}" id="sortForm">
+            <label for="sortSelect">Ordina per:</label>
+            <select id="sortSelect" name="sort"
+                    onchange="document.getElementById('sortForm').submit()">
+                <option value="alpha-asc"   th:selected="${sort == 'alpha-asc'}">A → Z</option>
+                <option value="alpha-desc"  th:selected="${sort == 'alpha-desc'}">Z → A</option>
+                <option value="rating-desc" th:selected="${sort == 'rating-desc'}">Voto ↓ (migliori prima)</option>
+                <option value="rating-asc"  th:selected="${sort == 'rating-asc'}">Voto ↑ (peggiori prima)</option>
+            </select>
+        </form>
+    </div>
+
 	<div class="manga-grid">
-	    
+
 	    <a th:href="@{'/mangas/' + ${manga.id}}" class="manga-card" th:each="manga : ${mangas}">
-	        
+
 	        <div class="manga-image-container">
 	            <img th:src="@{${manga.pathImmagine}}" th:alt="${manga.nome}">
 	        </div>
-	        
+
 	        <div class="manga-title">
 	            <span th:text="${manga.nome}">Nome Manga</span>
+	            <!-- Stelle medie (solo se il manga ha almeno un voto) -->
+	            <div class="card-rating" th:if="${mediaMap[manga.id] != null and mediaMap[manga.id] > 0}">
+	                <span th:each="i : ${#numbers.sequence(1, 5)}"
+	                      class="star-sm"
+	                      th:classappend="${mediaMap[manga.id] >= i} ? ' star-full' : (${mediaMap[manga.id] >= i - 0.5} ? ' star-half' : ' star-empty')">★</span>
+	                <span class="rating-val-sm"
+	                      th:text="${#numbers.formatDecimal(mediaMap[manga.id], 1, 'POINT', 1, 'POINT')}"></span>
+	            </div>
 	        </div>
-	        
+
 	    </a>
 	</div>
 	

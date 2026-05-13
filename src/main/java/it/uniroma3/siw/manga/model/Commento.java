@@ -1,14 +1,19 @@
 package it.uniroma3.siw.manga.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.validation.constraints.NotBlank;
 
 //Classe che modella un COMMENTO
@@ -31,6 +36,15 @@ public class Commento {
 	//Associazione molti a uno tra Commento e Manga, un commento è scritto su un solo manga ma un manga può avere più commenti
 	@ManyToOne (fetch = FetchType.EAGER)
 	private Manga manga;
+
+	//Riferimento al commento padre: null per commenti principali, valorizzato per le risposte
+	@ManyToOne(fetch = FetchType.EAGER)
+	private Commento commentoPadre;
+
+	//Lista delle risposte dirette a questo commento
+	@OneToMany(mappedBy = "commentoPadre", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OrderBy("tempoPubblicazione ASC")
+	private List<Commento> risposte = new ArrayList<>();
 
 	public Long getId() {
 		return id;
@@ -86,6 +100,22 @@ public class Commento {
 
 	public void setManga(Manga manga) {
 		this.manga = manga;
+	}
+
+	public Commento getCommentoPadre() {
+		return commentoPadre;
+	}
+
+	public void setCommentoPadre(Commento commentoPadre) {
+		this.commentoPadre = commentoPadre;
+	}
+
+	public List<Commento> getRisposte() {
+		return risposte;
+	}
+
+	public void setRisposte(List<Commento> risposte) {
+		this.risposte = risposte;
 	}
 
 	@Override

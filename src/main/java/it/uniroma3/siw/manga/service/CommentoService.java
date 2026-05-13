@@ -54,9 +54,39 @@ public class CommentoService {
     }
 
 
+    //Restituisce solo i commenti principali (senza padre) di un manga
+    @Transactional(readOnly = true)
+    public List<Commento> findTopLevelByMangaId(Long mangaId) {
+        return this.commentoRepository.findByMangaIdAndCommentoPadreIsNull(mangaId);
+    }
+
+
     //salva il commento
     @Transactional
     public void save(Commento commento) {
         this.commentoRepository.save(commento);
+    }
+
+    // Elimina un commento solo se l'utente corrente ne è il proprietario
+    @Transactional
+    public void deleteIfOwner(Long commentoId, Long currentUserId) {
+        Commento commento = this.commentoRepository.findById(commentoId).orElse(null);
+        if (commento == null || commento.getUtente() == null
+                || !commento.getUtente().getId().equals(currentUserId)) {
+            return;
+        }
+
+        Commento padre = commento.getCommentoPadre();
+        if (padre != null) {
+            // È una risposta: la rimuoviamo dalla collection del padre.
+            // Con orphanRemoval=true, Hibernate cancella automaticamente
+            // l'entità rimossa dalla collection al flush della transazione.
+            padre.getRisposte().removeIf(r -> r.getId().equals(commentoId));
+            this.commentoRepository.save(padre);
+        } else {
+            // È un commento primario: delete diretto.
+            // CascadeType.ALL propaga la cancellazione alle sue risposte.
+            this.commentoRepository.delete(commento);
+        }
     }
 }

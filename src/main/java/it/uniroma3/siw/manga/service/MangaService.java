@@ -28,4 +28,5 @@ public class MangaService {
 	public Manga findById(Long id) {
 		return this.mangaRepository.findById(id).orElse(null);
 	}
+
 }

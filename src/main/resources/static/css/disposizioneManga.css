@@ -79,15 +79,103 @@ body {
 
 /* --- TITOLO --- */
 .manga-title {
-    padding: 12px 10px;
+    padding: 12px 10px 8px;
     text-align: center;
     font-family: Arial, sans-serif;
     font-weight: bold;
     font-size: 15px;
-    /* Se il titolo è troppo lungo, lo taglia con i puntini di sospensione (...) */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    overflow: hidden;
+}
+
+/* Tronca il testo del nome con puntini se è troppo lungo */
+.manga-title > span:first-child {
+    width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* --- BARRA ORDINAMENTO --- */
+.sort-bar {
+    max-width: 1200px;
+    margin: 10px auto 0;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sort-bar label {
+    font-size: 14px;
+    color: #aaa;
+    white-space: nowrap;
+}
+
+.sort-bar select {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23aaa' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+    transition: border-color 0.2s;
+}
+
+.sort-bar select:hover {
+    border-color: #70a1ff;
+}
+
+.sort-bar select option {
+    background-color: #1e1e1e;
+}
+
+/* --- STELLE PICCOLE NELLE CARD --- */
+.card-rating {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+}
+
+.star-sm {
+    font-size: 13px;
+    line-height: 1;
+    user-select: none;
+}
+
+.star-sm.star-full {
+    color: #ffd700;
+}
+
+.star-sm.star-empty {
+    color: #555;
+}
+
+.star-sm.star-half {
+    background: linear-gradient(to right, #ffd700 50%, #555 50%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.rating-val-sm {
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffd700;
+    margin-left: 4px;
 }
 
 /* --- RESPONSIVITA' (Opzionale ma consigliato per i telefoni) --- */

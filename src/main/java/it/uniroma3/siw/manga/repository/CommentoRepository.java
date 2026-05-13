@@ -14,4 +14,7 @@ public interface CommentoRepository extends CrudRepository<Commento, Long>{
 	List<Commento> findByUtenteId(Long utenteId);
 
 	List<Commento> findByMangaId(Long mangaId);
+
+	//Restituisce solo i commenti principali (senza padre) di un manga
+	List<Commento> findByMangaIdAndCommentoPadreIsNull(Long mangaId);
 }
