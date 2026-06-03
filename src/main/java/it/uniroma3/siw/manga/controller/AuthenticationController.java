@@ -29,6 +29,7 @@ public class AuthenticationController {
 	
 	private final CredentialsService credentialsService;
 
+    /** Costruttore con iniezione del service tramite Spring. */
     public AuthenticationController(CredentialsService credentialsService) {
         this.credentialsService = credentialsService;
     }

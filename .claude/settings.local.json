@@ -3,7 +3,10 @@
     "allow": [
       "Bash(Get-ChildItem -Recurse -Path \"c:\\\\Users\\\\Daniele\\\\Documents\\\\workspace-spring-tools-for-eclipse-5.1.1.RELEASE\\\\SiwMangaTalk\" -Filter \"*.java\")",
       "Bash(Select-Object -First 5 FullName)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(# Get the actual HTML content of the manga page as logged-in user and check for React mounts curl -sLb /tmp/cookies3.txt http://localhost:8080/mangas/91101)",
+      "Bash(# Check the esc function in the rendered HTML curl -sLb /tmp/cookies3.txt http://localhost:8080/mangas/91101)",
+      "Bash(# Get the actual esc function from rendered HTML curl -sLb /tmp/cookies3.txt http://localhost:8080/mangas/91101)"
     ]
   }
 }

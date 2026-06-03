@@ -22,6 +22,7 @@ public class AutoreController {
 	
 	private final AutoreService autoreService;
 
+	/** Costruttore con iniezione del service tramite Spring. */
 	public AutoreController(AutoreService autoreService) {
 		this.autoreService = autoreService;
 	}

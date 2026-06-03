@@ -718,8 +718,8 @@
                 // Escape HTML per prevenire XSS nell'inserimento dinamico
                 var esc = function(s) {
                     return String(s || '')
-                        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                        .replace(/&/g, '&amp;').replace(/\x3C/g, '&lt;')
+                        .replace(/\x3E/g, '&gt;').replace(/"/g, '&quot;');
                 };
 
                 var repliesSection = commentItem.querySelector('.replies-section');

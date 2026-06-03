@@ -9,12 +9,23 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 
-// Classe che modella un UTENTE (profilo applicativo)
+/**
+ * Classe che modella il profilo applicativo di un UTENTE.
+ *
+ * Contiene le informazioni di profilo (nome, email) distinte
+ * dalle credenziali di accesso, che sono gestite dalla classe Credentials.
+ *
+ * Relazioni:
+ * - 1:N con Commento (un utente può scrivere più commenti)
+ * - 1:N con Votazione (un utente può esprimere più voti)
+ *
+ * hashCode e equals sono basati solo su id ed email (campi scalari EAGER)
+ * per evitare LazyInitializationException sulle collezioni LAZY.
+ */
 @Entity
 @Table(name = "utente")
 public class User {
@@ -30,11 +41,6 @@ public class User {
 	@NotBlank
 	@Column(nullable = false, unique = true)
 	private String email;
-
-	// Associazione molti a uno tra User e ImmagineProfilo:
-	// un utente ha una sola immagine profilo, ma la stessa immagine può essere condivisa da più utenti
-	@ManyToOne(fetch = FetchType.EAGER)
-	private ImmagineProfilo immagineProfilo;
 
 	// Associazione uno a molti tra User e Commento:
 	// un utente può scrivere più commenti, ma ogni commento appartiene a un solo utente
@@ -80,14 +86,6 @@ public class User {
 
 	public void setEmail(String email) {
 		this.email = email;
-	}
-
-	public ImmagineProfilo getImmagineProfilo() {
-		return immagineProfilo;
-	}
-
-	public void setImmagineProfilo(ImmagineProfilo immagineProfilo) {
-		this.immagineProfilo = immagineProfilo;
 	}
 
 	public List<Commento> getCommentoList() {

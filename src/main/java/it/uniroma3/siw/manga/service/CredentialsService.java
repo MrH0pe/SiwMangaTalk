@@ -23,11 +23,12 @@ import it.uniroma3.siw.manga.repository.CredentialsRepository;
 public class CredentialsService {
 
     // Encoder BCrypt iniettato da SecurityConfiguration: cifra la password prima di salvarla
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     // Repository per l'accesso alla tabella "credentials" nel database
-    private CredentialsRepository credentialsRepository;    
+    private final CredentialsRepository credentialsRepository;
 
+    /** Costruttore con iniezione delle dipendenze tramite Spring. */
     public CredentialsService(PasswordEncoder passwordEncoder, CredentialsRepository credentialsRepository) {
         this.passwordEncoder = passwordEncoder;
         this.credentialsRepository = credentialsRepository;

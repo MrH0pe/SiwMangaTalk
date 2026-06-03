@@ -8,12 +8,19 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 
-// ControllerAdvice applicato a tutti i controller: espone l'utente loggato come attributo di modello globale
+/**
+ * ControllerAdvice applicato a tutti i controller.
+ * Espone l'utente correntemente autenticato come attributo di modello globale
+ * accessibile in tutti i template Thymeleaf tramite ${userDetails}.
+ */
 @ControllerAdvice
 public class GlobalController {
 
-    // Aggiunge "userDetails" al model di ogni richiesta:
-    // contiene i dati dell'utente autenticato, oppure null se l'utente è anonimo
+    /**
+     * Aggiunge "userDetails" al model di ogni richiesta.
+     * Restituisce il principal dell'utente autenticato (UserDetails),
+     * oppure null se la richiesta è anonima.
+     */
     @ModelAttribute("userDetails")
     public UserDetails getUser() {
         UserDetails user = null;
