@@ -39,16 +39,25 @@ public class Commento {
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Manga manga;
 
+<<<<<<< HEAD
 	// Riferimento al commento padre: null per i commenti principali, valorizzato per le risposte
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Commento commentoPadre;
 
 	// Lista delle risposte dirette a questo commento;
 	// CascadeType.ALL + orphanRemoval propagano creazione e cancellazione alle risposte
+=======
+	//Riferimento al commento padre: null per commenti principali, valorizzato per le risposte
+	@ManyToOne(fetch = FetchType.EAGER)
+	private Commento commentoPadre;
+
+	//Lista delle risposte dirette a questo commento
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 	@OneToMany(mappedBy = "commentoPadre", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("tempoPubblicazione ASC")
 	private List<Commento> risposte = new ArrayList<>();
 
+<<<<<<< HEAD
 	// Lista delle reazioni (like/dislike) a questo commento;
 	// CascadeType.ALL garantisce la cancellazione automatica delle reazioni quando il commento viene eliminato
 	@OneToMany(mappedBy = "commento", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -56,6 +65,8 @@ public class Commento {
 
 	// --- Getters e Setters ---
 
+=======
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 	public Long getId() {
 		return id;
 	}
@@ -112,6 +123,7 @@ public class Commento {
 		this.risposte = risposte;
 	}
 
+<<<<<<< HEAD
 	public List<ReazioneCommento> getReazioni() {
 		return reazioni;
 	}
@@ -120,6 +132,8 @@ public class Commento {
 		this.reazioni = reazioni;
 	}
 
+=======
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, manga, tempoPubblicazione, testo, utente);

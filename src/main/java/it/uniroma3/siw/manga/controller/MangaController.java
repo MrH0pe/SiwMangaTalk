@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+<<<<<<< HEAD
+=======
+import it.uniroma3.siw.manga.model.Commento;
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 import it.uniroma3.siw.manga.model.Credentials;
 import it.uniroma3.siw.manga.model.Manga;
 import it.uniroma3.siw.manga.model.User;
@@ -42,7 +46,10 @@ public class MangaController {
 	private final VotazioneService votazioneService;
 	private final ReazioneCommentoService reazioneService;
 
+<<<<<<< HEAD
 	/** Costruttore con iniezione di tutti i service tramite Spring. */
+=======
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 	public MangaController(MangaService mangaService, CommentoService commentoService,
 			CredentialsService credentialsService, VotazioneService votazioneService,
 			ReazioneCommentoService reazioneService) {
@@ -70,6 +77,7 @@ public class MangaController {
 			return "redirect:/mangas";
 		}
 		model.addAttribute("manga", manga);
+<<<<<<< HEAD
 		model.addAttribute("commenti", this.commentoService.findTopLevelByMangaId(id));
 
 		// Se l'utente è autenticato, recupera i suoi dati personali (voto e reazioni).
@@ -94,16 +102,40 @@ public class MangaController {
 		model.addAttribute("mediaVoti", votazioneService.getMediaVoti(id));
 		model.addAttribute("countVoti", votazioneService.countVoti(id));
 		// likeMap / dislikeMap: mappe {commentoId → conteggio} per tutti i commenti del manga
+=======
+		model.addAttribute("commento", new Commento());
+		model.addAttribute("commenti", this.commentoService.findTopLevelByMangaId(id));
+
+		// Aggiunge l'id dell'utente corrente per il controllo di proprietà dei commenti,
+		// i dati della votazione e le reazioni ai commenti
+		Long currentUserId = null;
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null && !(auth instanceof AnonymousAuthenticationToken)) {
+			Credentials creds = credentialsService.getCredentials(auth.getName());
+			if (creds != null && creds.getUtente() != null) {
+				currentUserId = creds.getUtente().getId();
+				model.addAttribute("currentUserId", currentUserId);
+				model.addAttribute("votoUtente", votazioneService.getVotoUtente(currentUserId, id));
+				model.addAttribute("reazioniUtente", reazioneService.getReazioniUtente(currentUserId, id));
+			}
+		}
+		model.addAttribute("mediaVoti", votazioneService.getMediaVoti(id));
+		model.addAttribute("countVoti", votazioneService.countVoti(id));
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 		model.addAttribute("likeMap", reazioneService.getLikeCountByManga(id));
 		model.addAttribute("dislikeMap", reazioneService.getDislikeCountByManga(id));
 		return "manga/mostraManga";
 	}
 
+<<<<<<< HEAD
 	/**
 	 * Registra o aggiorna il voto dell'utente autenticato per un manga.
 	 * Accetta valori da 0.5 a 5.0 (mezze stelle); valori fuori range vengono ignorati.
 	 * Dopo il salvataggio reindirizza alla pagina di dettaglio del manga.
 	 */
+=======
+	// Salva o aggiorna il voto dell'utente per un manga
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 	@PostMapping("/mangas/{id}/voto")
 	public String votaManga(@PathVariable Long id, @RequestParam double valoreStelline) {
 		Manga manga = this.mangaService.findById(id);
@@ -116,6 +148,7 @@ public class MangaController {
 		return "redirect:/mangas/" + id;
 	}
 
+<<<<<<< HEAD
 	/**
 	 * Mostra la lista di tutti i manga con ordinamento opzionale.
 	 *
@@ -125,20 +158,31 @@ public class MangaController {
 	 * - "rating-desc" → media voti dal più alto al più basso
 	 * - "rating-asc"  → media voti dal più basso al più alto
 	 */
+=======
+	// TUTTI I MANGA con ordinamento opzionale
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 	@GetMapping("/mangas")
 	public String listaManga(Model model,
 			@RequestParam(required = false, defaultValue = "alpha-asc") String sort) {
 
 		List<Manga> mangaList = new ArrayList<>(this.mangaService.findAll());
 
+<<<<<<< HEAD
 		// Precalcola la media voti per ogni manga per usarla nel comparatore e nella view
+=======
+		// Calcola la media voti per ogni manga
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 		Map<Long, Double> mediaMap = new HashMap<>();
 		for (Manga manga : mangaList) {
 			Double media = votazioneService.getMediaVoti(manga.getId());
 			mediaMap.put(manga.getId(), media != null ? media : 0.0);
 		}
 
+<<<<<<< HEAD
 		// Seleziona il comparatore in base al parametro di ordinamento
+=======
+		// Ordina la lista in base al parametro ricevuto
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 		Comparator<Manga> comparator;
 		switch (sort) {
 			case "alpha-desc":
