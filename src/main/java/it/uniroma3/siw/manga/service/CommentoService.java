@@ -52,14 +52,27 @@ public class CommentoService {
         return this.commentoRepository.findByMangaIdAndCommentoPadreIsNull(mangaId);
     }
 
+<<<<<<< HEAD
     /**
      * Salva un commento (nuovo o aggiornato) nel database.
      */
+=======
+
+    //Restituisce solo i commenti principali (senza padre) di un manga
+    @Transactional(readOnly = true)
+    public List<Commento> findTopLevelByMangaId(Long mangaId) {
+        return this.commentoRepository.findByMangaIdAndCommentoPadreIsNull(mangaId);
+    }
+
+
+    //salva il commento
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
     @Transactional
     public void save(Commento commento) {
         this.commentoRepository.save(commento);
     }
 
+<<<<<<< HEAD
     /**
      * Elimina un commento senza verificare la proprietà (riservato all'admin).
      * Usa la stessa logica di orphanRemoval di deleteIfOwner per garantire
@@ -87,6 +100,9 @@ public class CommentoService {
      * - Se è un commento principale: viene cancellato direttamente; le risposte
      *   e le reazioni vengono eliminate per effetto di CascadeType.ALL.
      */
+=======
+    // Elimina un commento solo se l'utente corrente ne è il proprietario
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
     @Transactional
     public void deleteIfOwner(Long commentoId, Long currentUserId) {
         Commento commento = this.commentoRepository.findById(commentoId).orElse(null);
@@ -103,6 +119,7 @@ public class CommentoService {
             padre.getRisposte().removeIf(r -> r.getId().equals(commentoId));
             this.commentoRepository.save(padre);
         } else {
+<<<<<<< HEAD
             // È un commento principale: delete diretto.
             // CascadeType.ALL propaga la cancellazione alle risposte e alle reazioni.
             this.commentoRepository.delete(commento);
@@ -126,4 +143,11 @@ public class CommentoService {
         this.commentoRepository.save(commento);
         return true;
     }
+=======
+            // È un commento primario: delete diretto.
+            // CascadeType.ALL propaga la cancellazione alle sue risposte.
+            this.commentoRepository.delete(commento);
+        }
+    }
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 }

@@ -106,9 +106,28 @@
         <section class="comments-section">
             <h2>Commenti della Community</h2>
 
+<<<<<<< HEAD
             <!-- Form nuovo commento principale (React) – solo se loggato.
                  Il componente React viene montato su questo div al caricamento della pagina. -->
             <div id="react-add-comment" th:if="${userDetails != null}"></div>
+=======
+            <!-- Form nuovo commento principale (solo se loggato) -->
+            <div class="add-comment-box" th:if="${userDetails != null}">
+                <form method="POST"
+                      th:action="@{'/manga/' + ${manga.id} + '/commenti'}"
+                      th:object="${commento}">
+                    <textarea th:field="*{testo}" rows="1"
+                              placeholder="Aggiungi un commento..."
+                              class="comment-textarea"
+                              onfocus="expandTextarea(this)" required></textarea>
+                    <div class="comment-form-actions" style="display:none">
+                        <button type="button" class="btn-cancel-comment"
+                                onclick="collapseTextarea(this)">Annulla</button>
+                        <button type="submit" class="btn-submit-comment">Commenta</button>
+                    </div>
+                </form>
+            </div>
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 
             <!-- Lista commenti principali -->
             <div class="comments-list">
@@ -125,7 +144,11 @@
                               th:text="${c.utente != null ? c.utente.username : 'Anonimo'}"></span>
                         <span class="comment-date"
                               th:text="${#temporals.format(c.tempoPubblicazione, 'dd/MM/yyyy HH:mm')}"></span>
+<<<<<<< HEAD
                         <!-- Bidone elimina: visibile solo al proprietario del commento -->
+=======
+                        <!-- Bidone elimina: visibile solo al proprietario -->
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
                         <form method="POST"
                               th:if="${currentUserId != null and c.utente != null and c.utente.id == currentUserId}"
                               th:action="@{'/commenti/' + ${c.id} + '/elimina'}"
@@ -144,6 +167,7 @@
                         </form>
                     </div>
 
+<<<<<<< HEAD
                     <p class="comment-text" th:text="${c.testo}"
                        th:attr="data-comment-text-for=${c.id}"></p>
 
@@ -181,6 +205,30 @@
                              th:attr="data-commento-id=${c.id}, data-testo=${c.testo}">
                         </div>
 
+=======
+                    <p class="comment-text" th:text="${c.testo}"></p>
+
+                    <!-- Pulsante Rispondi (solo se loggato) -->
+                    <div class="comment-actions" th:if="${userDetails != null}">
+                        <button type="button" class="btn-reply-toggle"
+                                onclick="toggleReplyForm(this)">Rispondi</button>
+                    </div>
+
+                    <!-- Form risposta inline (nascosto di default) -->
+                    <div class="reply-form-wrapper" style="display:none"
+                         th:if="${userDetails != null}">
+                        <form method="POST"
+                              th:action="@{'/manga/' + ${manga.id} + '/commenti/' + ${c.id} + '/risposte'}">
+                            <textarea name="testo" rows="2"
+                                      placeholder="Aggiungi una risposta..."
+                                      class="comment-textarea reply-textarea" required></textarea>
+                            <div class="comment-form-actions">
+                                <button type="button" class="btn-cancel-comment"
+                                        onclick="cancelReply(this)">Annulla</button>
+                                <button type="submit" class="btn-submit-reply">Rispondi</button>
+                            </div>
+                        </form>
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
                     </div>
 
                     <!-- Toggle + lista risposte (solo se esistono) -->
@@ -218,6 +266,7 @@
                                         </button>
                                     </form>
                                 </div>
+<<<<<<< HEAD
                                 <p class="comment-text" th:text="${r.testo}"
                                    th:attr="data-comment-text-for=${r.id}"></p>
 
@@ -242,6 +291,9 @@
                                          th:attr="data-commento-id=${r.id}, data-testo=${r.testo}">
                                     </div>
                                 </div>
+=======
+                                <p class="comment-text" th:text="${r.testo}"></p>
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
                             </div>
                         </div>
 
@@ -278,6 +330,26 @@
         actions.style.display = 'none';
     }
 
+<<<<<<< HEAD
+=======
+    // Mostra/nasconde il form di risposta sotto un commento
+    function toggleReplyForm(btn) {
+        const commentItem = btn.closest('.comment-item');
+        const replyForm = commentItem.querySelector('.reply-form-wrapper');
+        if (!replyForm) return;
+        const isVisible = replyForm.style.display !== 'none';
+        replyForm.style.display = isVisible ? 'none' : 'block';
+        if (!isVisible) replyForm.querySelector('textarea').focus();
+    }
+
+    // Annulla e chiude il form risposta
+    function cancelReply(btn) {
+        const replyForm = btn.closest('.reply-form-wrapper');
+        replyForm.style.display = 'none';
+        replyForm.querySelector('textarea').value = '';
+    }
+
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
     // Apre/chiude la lista delle risposte e ruota la freccia
     function toggleReplies(btn) {
         const arrow = btn.querySelector('.toggle-arrow');
@@ -352,6 +424,7 @@
     })();
 </script>
 
+<<<<<<< HEAD
     <!-- ============================================================ -->
     <!--  REACT – Componente per aggiungere commenti senza reload    -->
     <!-- ============================================================ -->
@@ -924,5 +997,7 @@
         });
     </script>
 
+=======
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 </body>
 </html>

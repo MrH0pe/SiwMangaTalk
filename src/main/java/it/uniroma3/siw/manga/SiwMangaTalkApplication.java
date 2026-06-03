@@ -14,11 +14,19 @@ public class SiwMangaTalkApplication {
 	/*
 	 * Casi d’uso: Abbiamo implementato almeno 6 casi d’uso, come richiesto negli obbiettivi del progetto assegnato.
 1)	(DONE) Operazione di inserimento dati di una entità: L’utente registrato può scrivere zero o molti commenti .
+<<<<<<< HEAD
 2)	(DONE) Operazione di aggiornamento dati di una entità: Aggiornamento di uno o molti commenti, scritti dagli utenti. (l'utente può modificare i propri commenti)
 3)	(DONE) Operazione di cancellazione di una entità: L’utente può cancellare soltanto i propri commenti scritti nei vari Manga. Mentre l’admin può cancellare qualsiasi commento di qualsiasi utente.
 4)	(DONE) Operazione di lettura dati di una entità o più entità:  Una pagina web che contiene tutti i commenti scritti da un singolo utente in molti Manga.
 5)	(DONE) Operazione di lettura dati di una entità o più entità: Nella pagina iniziale (/index) l’utente può visualizzare OrderBy voto dato dall’utente ai vari manga. Così facendo la pagina ordina graficamente tutti i manga in ordine ascendente di voto.
 6)	(DONE) Operazione di lettura dati di una entità o più entità: Solo l’admin può vedere per un manga quali utenti hanno commentato, mostrandone gli username e il numero di commenti effettuati.
+=======
+2)	(DONE) Operazione di aggiornamento dati di una entità: Aggiornamento di uno o molti commenti, scritti dagli utenti.
+3)	(HALF DONE)Operazione di cancellazione di una entità: L’utente può cancellare soltanto i propri commenti scritti nei vari Thread. Mentre l’admin può cancellare qualsiasi commento di qualsiasi utente.
+4)	(DONE) Operazione di lettura dati di una entità o più entità:  Una pagina web che contiene tutti i commenti scritti da un singolo utente in molti Thread.
+5)	Operazione di lettura dati di una entità o più entità: Nella pagina iniziale (/index) l’utente può visualizzare OrderBy voto dato dall’utente ai vari manga. Così facendo la pagina ordina graficamente tutti i manga in ordine ascendente di voto.
+6)	Operazione di lettura dati di una entità o più entità: Solo l’admin può vedere per un manga quali utenti hanno commentato, mostrandone gli username e il numero di commenti effettuati.
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 
 
 	 */

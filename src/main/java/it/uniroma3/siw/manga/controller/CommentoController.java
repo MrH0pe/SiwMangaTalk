@@ -118,6 +118,7 @@ public class CommentoController {
         return "redirect:/mangas/" + commento.getManga().getId();
     }
 
+<<<<<<< HEAD
     /**
      * Elimina un commento.
      * - Se l'utente ha ruolo ADMIN: può eliminare qualsiasi commento (deleteAsAdmin).
@@ -140,10 +141,16 @@ public class CommentoController {
     public String eliminaCommento(@PathVariable Long idCommento,
                                   @RequestParam(required = false, defaultValue = "false") boolean fromAdmin,
                                   @RequestParam(required = false, defaultValue = "false") boolean fromAdminHome) {
+=======
+    // Elimina un commento (solo il proprietario può farlo)
+    @PostMapping("/commenti/{idCommento}/elimina")
+    public String eliminaCommento(@PathVariable Long idCommento) {
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
         Commento commento = commentoService.findById(idCommento);
         if (commento == null) return "redirect:/mangas";
         Long mangaId = commento.getManga().getId();
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
+<<<<<<< HEAD
         Credentials creds = credentialsService.getCredentials(username);
         if (Credentials.ADMIN_ROLE.equals(creds.getRole())) {
             commentoService.deleteAsAdmin(idCommento);
@@ -156,6 +163,10 @@ public class CommentoController {
         if (fromAdmin) {
             return "redirect:/mangas/admin/" + mangaId;
         }
+=======
+        User currentUser = credentialsService.getCredentials(username).getUtente();
+        commentoService.deleteIfOwner(idCommento, currentUser.getId());
+>>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
         return "redirect:/mangas/" + mangaId;
     }
 }
