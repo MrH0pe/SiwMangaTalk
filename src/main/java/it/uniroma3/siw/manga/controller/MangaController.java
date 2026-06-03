@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import it.uniroma3.siw.manga.model.Commento;
 import it.uniroma3.siw.manga.model.Credentials;
 import it.uniroma3.siw.manga.model.Manga;
 import it.uniroma3.siw.manga.model.User;
@@ -71,16 +70,18 @@ public class MangaController {
 			return "redirect:/mangas";
 		}
 		model.addAttribute("manga", manga);
-		model.addAttribute("commento", new Commento());
 		model.addAttribute("commenti", this.commentoService.findTopLevelByMangaId(id));
 
-		// Se l'utente è autenticato, recupera i suoi dati personali (voto e reazioni)
-		Long currentUserId = null;
+		// Se l'utente è autenticato, recupera i suoi dati personali (voto e reazioni).
+		// L'admin viene reindirizzato subito al pannello di amministrazione.
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth != null && !(auth instanceof AnonymousAuthenticationToken)) {
 			Credentials creds = credentialsService.getCredentials(auth.getName());
+			if (creds != null && Credentials.ADMIN_ROLE.equals(creds.getRole())) {
+				return "redirect:/mangas/admin/" + id;
+			}
 			if (creds != null && creds.getUtente() != null) {
-				currentUserId = creds.getUtente().getId();
+				Long currentUserId = creds.getUtente().getId();
 				// currentUserId: usato nella view per mostrare il pulsante "elimina" solo al proprietario
 				model.addAttribute("currentUserId", currentUserId);
 				// votoUtente: il voto (0.5–5.0) già espresso dall'utente, null se non ha votato

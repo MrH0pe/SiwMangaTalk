@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="'Admin – ' + ${manga.nome} + ' - SiwMangaTalk'">Admin Manga</title>
+    <link rel="stylesheet" th:href="@{/css/dettaglioManga.css}">
+    <style>
+        /* Stili specifici per il pannello admin */
+        .admin-banner {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-left: 4px solid #e94560;
+            color: #e94560;
+            padding: 0.75rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            letter-spacing: 0.05em;
+        }
+        .admin-section-title {
+            color: #e94560;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e94560;
+        }
+        .admin-comment-count {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 1rem;
+        }
+        /* Il pulsante delete è sempre visibile nell'admin panel */
+        .btn-delete-comment {
+            display: flex !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-nav-absolute">
+        <a th:href="@{/}">
+            <img th:src="@{/images/logo_siwmangatalk.png}" alt="SiwMangaTalk Logo" class="site-logo">
+        </a>
+        <span th:if="${userDetails}" class="user-greeting"
+              th:text="'Admin: ' + ${userDetails.username}"></span>
+    </div>
+
+    <header class="hero-section" th:style="'background-image: url(' + @{${manga.pathSfondo}} + ')'">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <img class="manga-cover" th:src="@{${manga.pathImmagine}}" th:alt="${manga.nome}" referrerpolicy="no-referrer" />
+            <h1 class="manga-title" th:text="${manga.nome}">Nome Manga</h1>
+        </div>
+    </header>
+
+    <main class="main-content">
+
+        <!-- Banner pannello admin -->
+        <div class="admin-banner">
+            &#9881; PANNELLO DI AMMINISTRAZIONE – puoi eliminare qualsiasi commento
+        </div>
+
+        <!-- Info manga -->
+        <section class="info-card">
+            <h2>Trama</h2>
+            <p class="descrizione" th:text="${manga.descrizione}">Descrizione manga.</p>
+            <div class="autore-box">
+                <strong>Autore:</strong>
+                <a th:if="${manga.autore != null}"
+                   th:href="@{'/autori/' + ${manga.autore.id}}"
+                   th:text="${manga.autore.nome} + ' ' + ${manga.autore.cognome}">Nome Autore</a>
+                <span th:if="${manga.autore == null}">Nessun autore assegnato</span>
+            </div>
+            <!-- Media voti -->
+            <div th:if="${mediaVoti != null}" style="margin-top:0.75rem;">
+                <strong>Media voti:</strong>
+                <span th:text="${#numbers.formatDecimal(mediaVoti, 1, 1)} + ' / 5'">4.0 / 5</span>
+                <span th:text="'(' + ${countVoti} + ' voti)'"></span>
+            </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- GESTIONE COMMENTI                                       -->
+        <!-- ===================================================== -->
+        <section class="comments-section">
+
+            <h2 class="admin-section-title">&#128274; Gestione Commenti</h2>
+
+            <p class="admin-comment-count"
+               th:text="${#lists.size(commenti)} + ' commenti principali'"></p>
+
+            <div th:if="${#lists.isEmpty(commenti)}" class="no-comments-msg">
+                <p>Nessun commento per questo manga.</p>
+            </div>
+
+            <div class="comments-list">
+
+                <!-- Iterazione commenti principali -->
+                <div class="comment-item" th:each="c : ${commenti}">
+
+                    <div class="comment-meta">
+                        <span class="comment-author"
+                              th:text="${c.utente != null ? c.utente.username : 'Anonimo'}"></span>
+                        <span class="comment-date"
+                              th:text="${#temporals.format(c.tempoPubblicazione, 'dd/MM/yyyy HH:mm')}"></span>
+                        <!-- Pulsante elimina: sempre visibile per l'admin -->
+                        <form method="POST"
+                              th:action="@{'/commenti/' + ${c.id} + '/elimina'}"
+                              style="margin-left:auto; display:flex; align-items:center">
+                            <input type="hidden" name="fromAdmin" value="true">
+                            <button type="submit" class="btn-delete-comment" title="Elimina commento">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                                    <path d="M10 11v6"></path>
+                                    <path d="M14 11v6"></path>
+                                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+
+                    <p class="comment-text" th:text="${c.testo}"></p>
+
+                    <!-- Contatori like/dislike (sola lettura nell'admin panel) -->
+                    <div class="comment-actions">
+                        <span class="reaction-readonly">
+                            &#128077; <span th:text="${likeMap[c.id] ?: 0}">0</span>
+                        </span>
+                        <span class="reaction-readonly">
+                            &#128078; <span th:text="${dislikeMap[c.id] ?: 0}">0</span>
+                        </span>
+                    </div>
+
+                    <!-- Risposte al commento -->
+                    <div class="replies-section"
+                         th:if="${c.risposte != null and !#lists.isEmpty(c.risposte)}">
+
+                        <button type="button" class="btn-toggle-replies"
+                                onclick="toggleReplies(this)">
+                            <span class="toggle-arrow">▼</span>
+                            <span th:text="${#lists.size(c.risposte)} + (${#lists.size(c.risposte)} == 1 ? ' risposta' : ' risposte')"></span>
+                        </button>
+
+                        <div class="replies-list" style="display:none">
+                            <div class="reply-item" th:each="r : ${c.risposte}">
+                                <div class="comment-meta">
+                                    <span class="comment-author"
+                                          th:text="${r.utente != null ? r.utente.username : 'Anonimo'}"></span>
+                                    <span class="comment-date"
+                                          th:text="${#temporals.format(r.tempoPubblicazione, 'dd/MM/yyyy HH:mm')}"></span>
+                                    <!-- Pulsante elimina risposta: sempre visibile per l'admin -->
+                                    <form method="POST"
+                                          th:action="@{'/commenti/' + ${r.id} + '/elimina'}"
+                                          style="margin-left:auto; display:flex; align-items:center">
+                                        <input type="hidden" name="fromAdmin" value="true">
+                                        <button type="submit" class="btn-delete-comment" title="Elimina risposta">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                 stroke="currentColor" stroke-width="2"
+                                                 stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="3 6 5 6 21 6"></polyline>
+                                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                                                <path d="M10 11v6"></path>
+                                                <path d="M14 11v6"></path>
+                                                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                                <p class="comment-text" th:text="${r.testo}"></p>
+                                <!-- Contatori like/dislike risposta (sola lettura) -->
+                                <div class="comment-actions">
+                                    <span class="reaction-readonly">
+                                        &#128077; <span th:text="${likeMap[r.id] ?: 0}">0</span>
+                                    </span>
+                                    <span class="reaction-readonly">
+                                        &#128078; <span th:text="${dislikeMap[r.id] ?: 0}">0</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <div class="navigation-links">
+            <a class="btn-nav" th:href="@{/mangas/{id}(id=${manga.id})}">Torna alla pagina manga</a>
+            <a class="btn-nav" th:href="@{/mangas}">Torna alla lista</a>
+            <a class="btn-nav" th:href="@{/}">Home</a>
+        </div>
+
+    </main>
+
+<script>
+    // Apre/chiude la lista delle risposte e ruota la freccia
+    function toggleReplies(btn) {
+        const arrow = btn.querySelector('.toggle-arrow');
+        const repliesList = btn.nextElementSibling;
+        const isVisible = repliesList.style.display !== 'none';
+        repliesList.style.display = isVisible ? 'none' : 'block';
+        arrow.style.transform = isVisible ? '' : 'rotate(180deg)';
+    }
+</script>
+
+</body>
+</html>

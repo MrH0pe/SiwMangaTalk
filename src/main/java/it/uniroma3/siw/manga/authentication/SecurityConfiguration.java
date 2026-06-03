@@ -82,6 +82,9 @@ public class SecurityConfiguration {
     protected SecurityFilterChain configure(final HttpSecurity httpSecurity) throws Exception {
 
         httpSecurity.authorizeHttpRequests(authorize -> {
+            // Pannello admin manga: DEVE precedere la regola permAll per /mangas/**
+            // altrimenti /mangas/admin/** sarebbe accessibile a tutti.
+            authorize.requestMatchers("/mangas/admin/**").hasAnyAuthority(Credentials.ADMIN_ROLE);
             // Pagine e risorse accessibili a tutti (anche non loggati)
             authorize.requestMatchers(HttpMethod.GET, "/", "/index", "/register", "/mangas", "/mangas/**", "/autori", "/autori/**", "/css/**", "/images/**", "/CopertinaManga/**", "/sfondoManga/**", "/favicon.ico").permitAll();
             // Registrazione e login accessibili a tutti
@@ -95,10 +98,15 @@ public class SecurityConfiguration {
             authorize.anyRequest().authenticated();
         });
 
-        // Pagina di login personalizzata; Spring Security gestisce l'autenticazione in automatico
+        // Pagina di login personalizzata; Spring Security gestisce l'autenticazione in automatico.
+        // Il successHandler personalizzato reindirizza l'admin a /admin e gli utenti normali a /.
         httpSecurity.formLogin(form -> {
             form.loginPage("/login").permitAll();
-            form.defaultSuccessUrl("/", true);       // dopo il login va alla home
+            form.successHandler((request, response, authentication) -> {
+                boolean isAdmin = authentication.getAuthorities().stream()
+                        .anyMatch(a -> Credentials.ADMIN_ROLE.equals(a.getAuthority()));
+                response.sendRedirect(isAdmin ? "/admin" : "/");
+            });
             form.failureUrl("/login?error=true");    // in caso di credenziali errate
         });
 

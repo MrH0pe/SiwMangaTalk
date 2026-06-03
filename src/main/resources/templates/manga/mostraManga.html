@@ -3,6 +3,23 @@
 <head>
 	<title th:text="${manga.nome} + ' - SiwMangaTalk'">Dettaglio Manga</title>
     <link rel="stylesheet" th:href="@{/css/dettaglioManga.css}">
+    <style>
+        .btn-edit-toggle {
+            background: transparent;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 0.82rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            transition: color 0.15s;
+        }
+        .btn-edit-toggle:hover { color: #fff; }
+        .edit-form-wrapper { margin-top: 0.5rem; width: 100%; }
+    </style>
+    <!-- Token CSRF: letto dal componente React per includerlo come header nelle richieste AJAX -->
+    <meta name="_csrf"        th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
 </head>
 <body>
 
@@ -89,22 +106,9 @@
         <section class="comments-section">
             <h2>Commenti della Community</h2>
 
-            <!-- Form nuovo commento principale (solo se loggato) -->
-            <div class="add-comment-box" th:if="${userDetails != null}">
-                <form method="POST"
-                      th:action="@{'/manga/' + ${manga.id} + '/commenti'}"
-                      th:object="${commento}">
-                    <textarea th:field="*{testo}" rows="1"
-                              placeholder="Aggiungi un commento..."
-                              class="comment-textarea"
-                              onfocus="expandTextarea(this)" required></textarea>
-                    <div class="comment-form-actions" style="display:none">
-                        <button type="button" class="btn-cancel-comment"
-                                onclick="collapseTextarea(this)">Annulla</button>
-                        <button type="submit" class="btn-submit-comment">Commenta</button>
-                    </div>
-                </form>
-            </div>
+            <!-- Form nuovo commento principale (React) – solo se loggato.
+                 Il componente React viene montato su questo div al caricamento della pagina. -->
+            <div id="react-add-comment" th:if="${userDetails != null}"></div>
 
             <!-- Lista commenti principali -->
             <div class="comments-list">
@@ -121,7 +125,7 @@
                               th:text="${c.utente != null ? c.utente.username : 'Anonimo'}"></span>
                         <span class="comment-date"
                               th:text="${#temporals.format(c.tempoPubblicazione, 'dd/MM/yyyy HH:mm')}"></span>
-                        <!-- Bidone elimina: visibile solo al proprietario -->
+                        <!-- Bidone elimina: visibile solo al proprietario del commento -->
                         <form method="POST"
                               th:if="${currentUserId != null and c.utente != null and c.utente.id == currentUserId}"
                               th:action="@{'/commenti/' + ${c.id} + '/elimina'}"
@@ -140,57 +144,43 @@
                         </form>
                     </div>
 
-                    <p class="comment-text" th:text="${c.testo}"></p>
+                    <p class="comment-text" th:text="${c.testo}"
+                       th:attr="data-comment-text-for=${c.id}"></p>
 
                     <!-- Azioni: like, dislike (visibili a tutti), rispondi (solo se loggato) -->
                     <div class="comment-actions">
 
-                        <!-- LIKE -->
-                        <form th:if="${userDetails != null}" method="POST"
-                              th:action="@{'/commenti/' + ${c.id} + '/reazione'}" class="reaction-form">
-                            <input type="hidden" name="tipo" value="LIKE">
-                            <button type="submit" class="btn-reaction"
-                                    th:classappend="${reazioniUtente != null and reazioniUtente[c.id] == 'LIKE'} ? ' active-like'">
-                                &#128077; <span th:text="${likeMap[c.id] ?: 0}">0</span>
-                            </button>
-                        </form>
+                        <!-- LIKE/DISLIKE – React mount (utente autenticato) -->
+                        <!-- I dati iniziali vengono iniettati come data-attribute da Thymeleaf;
+                             il componente React li legge e gestisce le interazioni via AJAX. -->
+                        <div th:if="${userDetails != null}"
+                             class="react-reaction"
+                             th:attr="data-commento-id=${c.id},
+                                      data-likes=${likeMap[c.id] ?: 0},
+                                      data-dislikes=${dislikeMap[c.id] ?: 0},
+                                      data-mia-reazione=${reazioniUtente != null and reazioniUtente[c.id] != null ? reazioniUtente[c.id] : ''}">
+                        </div>
+                        <!-- LIKE/DISLIKE – sola lettura (utente anonimo) -->
                         <span th:unless="${userDetails != null}" class="reaction-readonly">
                             &#128077; <span th:text="${likeMap[c.id] ?: 0}">0</span>
                         </span>
-
-                        <!-- DISLIKE -->
-                        <form th:if="${userDetails != null}" method="POST"
-                              th:action="@{'/commenti/' + ${c.id} + '/reazione'}" class="reaction-form">
-                            <input type="hidden" name="tipo" value="DISLIKE">
-                            <button type="submit" class="btn-reaction"
-                                    th:classappend="${reazioniUtente != null and reazioniUtente[c.id] == 'DISLIKE'} ? ' active-dislike'">
-                                &#128078; <span th:text="${dislikeMap[c.id] ?: 0}">0</span>
-                            </button>
-                        </form>
                         <span th:unless="${userDetails != null}" class="reaction-readonly">
                             &#128078; <span th:text="${dislikeMap[c.id] ?: 0}">0</span>
                         </span>
 
-                        <!-- Pulsante Rispondi -->
-                        <button th:if="${userDetails != null}" type="button" class="btn-reply-toggle"
-                                onclick="toggleReplyForm(this)">Rispondi</button>
+                        <!-- Pulsante Rispondi + form risposta – React mount (utente autenticato).
+                             Il componente RispostaForm gestisce toggle, form e invio via AJAX. -->
+                        <div th:if="${userDetails != null}"
+                             class="react-reply"
+                             th:attr="data-commento-id=${c.id}">
+                        </div>
 
-                    </div>
+                        <!-- Pulsante Modifica – React mount (solo proprietario del commento) -->
+                        <div th:if="${currentUserId != null and c.utente != null and c.utente.id == currentUserId}"
+                             class="react-edit"
+                             th:attr="data-commento-id=${c.id}, data-testo=${c.testo}">
+                        </div>
 
-                    <!-- Form risposta inline (nascosto di default) -->
-                    <div class="reply-form-wrapper" style="display:none"
-                         th:if="${userDetails != null}">
-                        <form method="POST"
-                              th:action="@{'/manga/' + ${manga.id} + '/commenti/' + ${c.id} + '/risposte'}">
-                            <textarea name="testo" rows="2"
-                                      placeholder="Aggiungi una risposta..."
-                                      class="comment-textarea reply-textarea" required></textarea>
-                            <div class="comment-form-actions">
-                                <button type="button" class="btn-cancel-comment"
-                                        onclick="cancelReply(this)">Annulla</button>
-                                <button type="submit" class="btn-submit-reply">Rispondi</button>
-                            </div>
-                        </form>
                     </div>
 
                     <!-- Toggle + lista risposte (solo se esistono) -->
@@ -228,7 +218,30 @@
                                         </button>
                                     </form>
                                 </div>
-                                <p class="comment-text" th:text="${r.testo}"></p>
+                                <p class="comment-text" th:text="${r.testo}"
+                                   th:attr="data-comment-text-for=${r.id}"></p>
+
+                                <!-- LIKE/DISLIKE sulle risposte – stessa logica dei commenti principali -->
+                                <div class="comment-actions">
+                                    <div th:if="${userDetails != null}"
+                                         class="react-reaction"
+                                         th:attr="data-commento-id=${r.id},
+                                                  data-likes=${likeMap[r.id] ?: 0},
+                                                  data-dislikes=${dislikeMap[r.id] ?: 0},
+                                                  data-mia-reazione=${reazioniUtente != null and reazioniUtente[r.id] != null ? reazioniUtente[r.id] : ''}">
+                                    </div>
+                                    <span th:unless="${userDetails != null}" class="reaction-readonly">
+                                        &#128077; <span th:text="${likeMap[r.id] ?: 0}">0</span>
+                                    </span>
+                                    <span th:unless="${userDetails != null}" class="reaction-readonly">
+                                        &#128078; <span th:text="${dislikeMap[r.id] ?: 0}">0</span>
+                                    </span>
+                                    <!-- Pulsante Modifica risposta – React mount (solo proprietario) -->
+                                    <div th:if="${currentUserId != null and r.utente != null and r.utente.id == currentUserId}"
+                                         class="react-edit"
+                                         th:attr="data-commento-id=${r.id}, data-testo=${r.testo}">
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -263,23 +276,6 @@
         textarea.value = '';
         textarea.rows = 1;
         actions.style.display = 'none';
-    }
-
-    // Mostra/nasconde il form di risposta sotto un commento
-    function toggleReplyForm(btn) {
-        const commentItem = btn.closest('.comment-item');
-        const replyForm = commentItem.querySelector('.reply-form-wrapper');
-        if (!replyForm) return;
-        const isVisible = replyForm.style.display !== 'none';
-        replyForm.style.display = isVisible ? 'none' : 'block';
-        if (!isVisible) replyForm.querySelector('textarea').focus();
-    }
-
-    // Annulla e chiude il form risposta
-    function cancelReply(btn) {
-        const replyForm = btn.closest('.reply-form-wrapper');
-        replyForm.style.display = 'none';
-        replyForm.querySelector('textarea').value = '';
     }
 
     // Apre/chiude la lista delle risposte e ruota la freccia
@@ -355,6 +351,578 @@
         }
     })();
 </script>
+
+    <!-- ============================================================ -->
+    <!--  REACT – Componente per aggiungere commenti senza reload    -->
+    <!-- ============================================================ -->
+
+    <!--
+        Passa i dati server-side (mangaId e username) a JavaScript tramite
+        Thymeleaf inline scripting. Questo è il metodo più affidabile per
+        iniettare valori da Spring nel codice JavaScript della pagina.
+        Il blocco è reso solo se l'utente è autenticato (th:if).
+    -->
+    <script th:if="${userDetails != null}" th:inline="javascript">
+        /*
+         * Sintassi "natural template" di Thymeleaf: il valore dentro [[...]] viene
+         * iniettato server-side da Thymeleaf, sostituendo il valore di fallback dopo il commento.
+         * L'IDE vede JS valido (commento + valore di fallback); il browser riceve il valore reale.
+         *
+         * Esempio: var _reactMangaId = 123;   (dopo la sostituzione di Thymeleaf)
+         */
+        var _reactMangaId = /*[[${manga.id}]]*/ 0;
+        var _reactAutore  = /*[[${userDetails.username}]]*/ '';
+    </script>
+
+    <!-- Librerie React 18 caricate via CDN (no build step necessario) -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel Standalone: compila JSX in-browser (accettabile in sviluppo/università) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        /**
+         * Componente React per l'aggiunta di commenti senza ricaricamento della pagina.
+         *
+         * Props:
+         *   mangaId  - ID del manga (stringa, iniettata tramite variabile JS da Thymeleaf)
+         *   autore   - Username dell'utente corrente (mostrato nell'anteprima immediata)
+         *
+         * Funzionamento:
+         *   1. Mostra un form con textarea (stessa UX del form Thymeleaf originale)
+         *   2. Al submit: invia una richiesta AJAX POST in JSON all'endpoint REST
+         *      /api/manga/{mangaId}/commenti, includendo il CSRF token negli header
+         *   3. In caso di successo: aggiunge il commento allo stato locale (nuoviCommenti)
+         *      e lo mostra immediatamente senza ricaricare la pagina
+         *   4. In caso di errore: mostra un messaggio testuale all'utente
+         *
+         * Nota: usa Promise (.then/.catch) invece di async/await per evitare
+         * la dipendenza da regeneratorRuntime non incluso in Babel Standalone.
+         */
+        function AggiungiCommento(props) {
+            var mangaId = props.mangaId;
+            var autore  = props.autore;
+
+            // --- Stato del componente ---
+            var statoTesto         = React.useState('');
+            var testo              = statoTesto[0];
+            var setTesto           = statoTesto[1];
+
+            var statoEspanso       = React.useState(false);
+            var espanso            = statoEspanso[0];
+            var setEspanso         = statoEspanso[1];
+
+            var statoCommenti      = React.useState([]);
+            var nuoviCommenti      = statoCommenti[0];
+            var setNuoviCommenti   = statoCommenti[1];
+
+            var statoLoading       = React.useState(false);
+            var loading            = statoLoading[0];
+            var setLoading         = statoLoading[1];
+
+            var statoErrore        = React.useState(null);
+            var errore             = statoErrore[0];
+            var setErrore          = statoErrore[1];
+
+            /**
+             * Invia il commento all'endpoint REST tramite fetch (AJAX).
+             * Legge il CSRF token dai meta tag iniettati da Thymeleaf nel <head>.
+             * Usa Promise .then/.catch invece di async/await per compatibilità
+             * con Babel Standalone (che non include regeneratorRuntime).
+             */
+            function inviaCommento(e) {
+                e.preventDefault();
+                if (!testo.trim()) return;
+
+                // Recupera il token CSRF dal meta tag (obbligatorio per Spring Security)
+                var csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+                var csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+                var headers = { 'Content-Type': 'application/json' };
+                headers[csrfHeader] = csrfToken;   // es. headers["X-CSRF-TOKEN"] = "abc123"
+
+                setLoading(true);
+                setErrore(null);
+
+                fetch('/api/manga/' + mangaId + '/commenti', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ testo: testo.trim() })
+                })
+                .then(function(risposta) {
+                    if (risposta.ok) {
+                        // Legge il JSON della risposta e aggiorna lo stato
+                        return risposta.json().then(function(nuovoCommento) {
+                            // Prepend: il nuovo commento appare in cima alla lista locale
+                            setNuoviCommenti(function(prev) { return [nuovoCommento].concat(prev); });
+                            setTesto('');
+                            setEspanso(false);
+                        });
+                    } else {
+                        setErrore("Errore durante l'invio. Riprova.");
+                    }
+                })
+                .catch(function() {
+                    setErrore("Errore di rete. Controlla la connessione.");
+                })
+                .then(function() {
+                    // Eseguito sempre (successo o errore): disabilita lo stato di caricamento
+                    setLoading(false);
+                });
+            }
+
+            // Annulla: svuota il form e lo collassa
+            function annulla() {
+                setTesto('');
+                setEspanso(false);
+                setErrore(null);
+            }
+
+            return (
+                React.createElement(React.Fragment, null,
+
+                    // ---- Form di inserimento ----
+                    React.createElement('div', { className: 'add-comment-box' },
+                        React.createElement('form', { onSubmit: inviaCommento },
+                            React.createElement('textarea', {
+                                className: 'comment-textarea',
+                                rows: espanso ? 3 : 1,
+                                placeholder: 'Aggiungi un commento...',
+                                value: testo,
+                                onFocus: function() { setEspanso(true); },
+                                onChange: function(e) { setTesto(e.target.value); },
+                                required: true
+                            }),
+                            // Pulsanti: visibili solo quando la textarea è espansa
+                            espanso && React.createElement('div', {
+                                className: 'comment-form-actions',
+                                style: { display: 'flex' }
+                            },
+                                React.createElement('button', {
+                                    type: 'button',
+                                    className: 'btn-cancel-comment',
+                                    onClick: annulla
+                                }, 'Annulla'),
+                                React.createElement('button', {
+                                    type: 'submit',
+                                    className: 'btn-submit-comment',
+                                    disabled: loading || !testo.trim()
+                                }, loading ? 'Invio...' : 'Commenta')
+                            )
+                        ),
+                        // Messaggio di errore (visibile solo in caso di errore)
+                        errore && React.createElement('p', {
+                            style: { color: 'red', marginTop: '0.5rem' }
+                        }, errore)
+                    ),
+
+                    // ---- Lista commenti aggiunti in questa sessione ----
+                    // I commenti pre-esistenti rimangono renderizzati da Thymeleaf più in basso.
+                    // Questi nuovi commenti appaiono subito, senza ricaricare la pagina.
+                    // Include like/dislike (ReazioneCommento) e il pulsante Rispondi (RispostaForm)
+                    // per una UX completa anche senza reload.
+                    nuoviCommenti.map(function(c) {
+                        return React.createElement('div', { className: 'comment-item', key: c.id },
+                            React.createElement('div', { className: 'comment-meta' },
+                                React.createElement('span', { className: 'comment-author' }, c.autore),
+                                React.createElement('span', { className: 'comment-date' },   c.data)
+                            ),
+                            React.createElement('p', { className: 'comment-text', 'data-comment-text-for': String(c.id) }, c.testo),
+                            // Azioni: like/dislike, rispondi e modifica subito disponibili
+                            React.createElement('div', { className: 'comment-actions' },
+                                React.createElement(ReazioneCommento, {
+                                    commentoId:      String(c.id),
+                                    initialLikes:    0,
+                                    initialDislikes: 0,
+                                    miaReazione:     null
+                                }),
+                                React.createElement(RispostaForm, {
+                                    commentoId: String(c.id)
+                                }),
+                                React.createElement(ModificaCommento, {
+                                    commentoId: String(c.id),
+                                    testo:      c.testo,
+                                    onSave:     function(nuovoTesto) {
+                                        setNuoviCommenti(function(prev) {
+                                            return prev.map(function(x) {
+                                                return x.id === c.id ? Object.assign({}, x, { testo: nuovoTesto }) : x;
+                                            });
+                                        });
+                                    }
+                                })
+                            )
+                        );
+                    })
+                )
+            );
+        }
+
+        // Monta il componente React sul div iniettato da Thymeleaf.
+        // I dati mangaId e autore vengono letti dalle variabili JS iniettate
+        // dallo script th:inline="javascript" definito sopra.
+        var container = document.getElementById('react-add-comment');
+        if (container && typeof _reactMangaId !== 'undefined') {
+            var root = ReactDOM.createRoot(container);
+            root.render(
+                React.createElement(AggiungiCommento, {
+                    mangaId: String(_reactMangaId),
+                    autore:  _reactAutore
+                })
+            );
+        }
+
+        /**
+         * Componente React per like/dislike su commenti e risposte.
+         *
+         * Props:
+         *   commentoId     - ID del commento (stringa, letta da data-commento-id)
+         *   initialLikes   - Numero di like iniziali (da Thymeleaf, via data-likes)
+         *   initialDislikes- Numero di dislike iniziali (da Thymeleaf, via data-dislikes)
+         *   miaReazione    - "LIKE" | "DISLIKE" | null (reazione dell'utente corrente)
+         *
+         * Funzionamento:
+         *   Al click su 👍 o 👎 invia POST /api/commenti/{id}/reazione con CSRF header.
+         *   La risposta JSON contiene likes, dislikes e miaReazione aggiornati.
+         *   Lo stato locale viene aggiornato: i contatori cambiano senza reload.
+         *   Stessa reazione → toggle off (rimuove); reazione diversa → cambia tipo.
+         *
+         * Nota: usa Promise (.then/.catch) invece di async/await per compatibilità
+         * con Babel Standalone (che non include regeneratorRuntime).
+         */
+        function ReazioneCommento(props) {
+            var commentoId = props.commentoId;
+
+            var statoLikes     = React.useState(props.initialLikes);
+            var likes          = statoLikes[0];
+            var setLikes       = statoLikes[1];
+
+            var statoDislikes  = React.useState(props.initialDislikes);
+            var dislikes       = statoDislikes[0];
+            var setDislikes    = statoDislikes[1];
+
+            var statoReazione  = React.useState(props.miaReazione || null);
+            var miaReazione    = statoReazione[0];
+            var setMiaReazione = statoReazione[1];
+
+            var statoLoading   = React.useState(false);
+            var loading        = statoLoading[0];
+            var setLoading     = statoLoading[1];
+
+            /**
+             * Invia la reazione al server via fetch e aggiorna lo stato locale
+             * con i nuovi contatori restituiti dalla risposta JSON.
+             */
+            function reagisci(tipo) {
+                if (loading) return;
+                var csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+                var csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+                var headers = { 'Content-Type': 'application/json' };
+                headers[csrfHeader] = csrfToken;
+                setLoading(true);
+                fetch('/api/commenti/' + commentoId + '/reazione', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ tipo: tipo })
+                })
+                .then(function(r) {
+                    if (r.ok) {
+                        return r.json().then(function(data) {
+                            setLikes(data.likes);
+                            setDislikes(data.dislikes);
+                            setMiaReazione(data.miaReazione || null);
+                        });
+                    }
+                })
+                .catch(function() {})
+                .then(function() { setLoading(false); });
+            }
+
+            return React.createElement('div', { style: { display: 'inline-flex', gap: '0.5rem' } },
+                React.createElement('button', {
+                    type: 'button',
+                    className: 'btn-reaction' + (miaReazione === 'LIKE' ? ' active-like' : ''),
+                    onClick: function() { reagisci('LIKE'); },
+                    disabled: loading
+                }, '\uD83D\uDC4D ' + likes),
+                React.createElement('button', {
+                    type: 'button',
+                    className: 'btn-reaction' + (miaReazione === 'DISLIKE' ? ' active-dislike' : ''),
+                    onClick: function() { reagisci('DISLIKE'); },
+                    disabled: loading
+                }, '\uD83D\uDC4E ' + dislikes)
+            );
+        }
+
+        // Monta un'istanza di ReazioneCommento su ogni div .react-reaction della pagina.
+        // Questo copre sia i commenti principali sia le risposte, tutti con gli stessi
+        // data-attribute iniettati da Thymeleaf nel ciclo th:each.
+        document.querySelectorAll('.react-reaction').forEach(function(el) {
+            var reactionRoot = ReactDOM.createRoot(el);
+            reactionRoot.render(React.createElement(ReazioneCommento, {
+                commentoId:      el.getAttribute('data-commento-id'),
+                initialLikes:    parseInt(el.getAttribute('data-likes'))    || 0,
+                initialDislikes: parseInt(el.getAttribute('data-dislikes')) || 0,
+                miaReazione:     el.getAttribute('data-mia-reazione')       || null
+            }));
+        });
+
+        /**
+         * Componente React per aggiungere una risposta a un commento via AJAX.
+         *
+         * Props:
+         *   commentoId - ID del commento padre (stringa, letta da data-commento-id)
+         *
+         * Funzionamento:
+         *   Mostra il pulsante "Rispondi"; al click espande un form textarea.
+         *   Al submit invia POST /api/commenti/{id}/risposte con il testo in JSON.
+         *   La risposta JSON viene aggiunta allo stato locale e mostrata subito,
+         *   senza ricaricare la pagina.
+         */
+        function RispostaForm(props) {
+            var commentoId = props.commentoId;
+
+            var statoEspanso  = React.useState(false);
+            var espanso       = statoEspanso[0];  var setEspanso  = statoEspanso[1];
+
+            var statoTesto    = React.useState('');
+            var testo         = statoTesto[0];    var setTesto    = statoTesto[1];
+
+            var statoLoading  = React.useState(false);
+            var loading       = statoLoading[0];  var setLoading  = statoLoading[1];
+
+            var statoRisposte = React.useState([]);
+            var risposte      = statoRisposte[0]; var setRisposte = statoRisposte[1];
+
+            /** Invia la risposta al server via fetch e aggiorna la lista locale. */
+            function invia(e) {
+                e.preventDefault();
+                if (!testo.trim()) return;
+                var csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+                var csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+                var headers = { 'Content-Type': 'application/json' };
+                headers[csrfHeader] = csrfToken;
+                setLoading(true);
+                fetch('/api/commenti/' + commentoId + '/risposte', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ testo: testo.trim() })
+                })
+                .then(function(r) {
+                    if (r.ok) {
+                        return r.json().then(function(nuovaRisposta) {
+                            setRisposte(function(prev) { return prev.concat([nuovaRisposta]); });
+                            setTesto('');
+                            setEspanso(false);
+                        });
+                    }
+                })
+                .catch(function() {})
+                .then(function() { setLoading(false); });
+            }
+
+            return React.createElement(React.Fragment, null,
+
+                // Pulsante "Rispondi" – toggle del form
+                React.createElement('button', {
+                    type: 'button',
+                    className: 'btn-reply-toggle',
+                    onClick: function() { setEspanso(function(v) { return !v; }); }
+                }, 'Rispondi'),
+
+                // Form risposta (visibile solo quando espanso)
+                espanso && React.createElement('div', { className: 'reply-form-wrapper' },
+                    React.createElement('form', { onSubmit: invia },
+                        React.createElement('textarea', {
+                            rows: 2,
+                            placeholder: 'Aggiungi una risposta...',
+                            className: 'comment-textarea reply-textarea',
+                            value: testo,
+                            onChange: function(e) { setTesto(e.target.value); },
+                            required: true
+                        }),
+                        React.createElement('div', { className: 'comment-form-actions' },
+                            React.createElement('button', {
+                                type: 'button',
+                                className: 'btn-cancel-comment',
+                                onClick: function() { setEspanso(false); setTesto(''); }
+                            }, 'Annulla'),
+                            React.createElement('button', {
+                                type: 'submit',
+                                className: 'btn-submit-reply',
+                                disabled: loading || !testo.trim()
+                            }, loading ? 'Invio...' : 'Rispondi')
+                        )
+                    )
+                ),
+
+                // Lista risposte aggiunte in questa sessione (senza reload)
+                risposte.length > 0 && React.createElement('div', { className: 'replies-section' },
+                    React.createElement('div', { className: 'replies-list' },
+                        risposte.map(function(r) {
+                            return React.createElement('div', { className: 'reply-item', key: r.id },
+                                React.createElement('div', { className: 'comment-meta' },
+                                    React.createElement('span', { className: 'comment-author' }, r.autore),
+                                    React.createElement('span', { className: 'comment-date' },   r.data)
+                                ),
+                                React.createElement('p', { className: 'comment-text', 'data-comment-text-for': String(r.id) }, r.testo),
+                                React.createElement(ModificaCommento, {
+                                    commentoId: String(r.id),
+                                    testo:      r.testo,
+                                    onSave:     function(nuovoTesto) {
+                                        setRisposte(function(prev) {
+                                            return prev.map(function(x) {
+                                                return x.id === r.id ? Object.assign({}, x, { testo: nuovoTesto }) : x;
+                                            });
+                                        });
+                                    }
+                                })
+                            );
+                        })
+                    )
+                )
+            );
+        }
+
+        // Monta RispostaForm su ogni div .react-reply della pagina (uno per commento principale).
+        document.querySelectorAll('.react-reply').forEach(function(el) {
+            var replyRoot = ReactDOM.createRoot(el);
+            replyRoot.render(React.createElement(RispostaForm, {
+                commentoId: el.getAttribute('data-commento-id')
+            }));
+        });
+
+        /**
+         * Componente React per modificare il testo di un proprio commento via AJAX.
+         *
+         * Props:
+         *   commentoId - ID del commento da modificare (stringa)
+         *   testo      - Testo corrente del commento (mostrato nella textarea)
+         *   onSave     - (opzionale) callback(nuovoTesto) per commenti gestiti in stato React;
+         *                se assente, aggiorna direttamente il DOM tramite data-comment-text-for.
+         *
+         * Funzionamento:
+         *   Mostra un pulsante ✏; al click apre una textarea inline pre-riempita.
+         *   Al submit: PATCH /api/commenti/{id}/modifica con il nuovo testo in JSON.
+         *   Testo vuoto/blank: rifiutato con messaggio di errore (senza richiesta al server).
+         *   In caso di successo: chiude il form e aggiorna il testo visibile.
+         */
+        function ModificaCommento(props) {
+            var commentoId = props.commentoId;
+            var onSave     = props.onSave || null;
+
+            // testoAttuale: tiene traccia del testo corrente anche tra un salvataggio e l'altro
+            var statoTestoAttuale = React.useState(props.testo);
+            var testoAttuale      = statoTestoAttuale[0];
+            var setTestoAttuale   = statoTestoAttuale[1];
+
+            var statoEspanso = React.useState(false);
+            var espanso      = statoEspanso[0];  var setEspanso  = statoEspanso[1];
+
+            var statoTesto   = React.useState(props.testo);
+            var testo        = statoTesto[0];    var setTesto    = statoTesto[1];
+
+            var statoLoading = React.useState(false);
+            var loading      = statoLoading[0];  var setLoading  = statoLoading[1];
+
+            var statoErrore  = React.useState(null);
+            var errore       = statoErrore[0];   var setErrore   = statoErrore[1];
+
+            // Apre il form di modifica pre-riempito con il testo corrente
+            function apriModifica() {
+                setTesto(testoAttuale);
+                setEspanso(true);
+                setErrore(null);
+            }
+
+            function salva(e) {
+                e.preventDefault();
+                if (!testo.trim()) {
+                    setErrore('Il commento non può essere vuoto.');
+                    return;
+                }
+                var csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+                var csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+                var headers = { 'Content-Type': 'application/json' };
+                headers[csrfHeader] = csrfToken;
+                setLoading(true);
+                setErrore(null);
+                fetch('/api/commenti/' + commentoId + '/modifica', {
+                    method: 'PATCH',
+                    headers: headers,
+                    body: JSON.stringify({ testo: testo.trim() })
+                })
+                .then(function(r) {
+                    if (r.ok) {
+                        return r.json().then(function(data) {
+                            setTestoAttuale(data.testo);
+                            setEspanso(false);
+                            if (onSave) {
+                                // Aggiorna lo stato React del componente padre
+                                onSave(data.testo);
+                            } else {
+                                // Aggiorna direttamente il <p> reso da Thymeleaf
+                                var p = document.querySelector('[data-comment-text-for="' + commentoId + '"]');
+                                if (p) p.textContent = data.testo;
+                            }
+                        });
+                    } else if (r.status === 400) {
+                        setErrore('Il commento non può essere vuoto.');
+                    } else {
+                        setErrore('Errore durante il salvataggio.');
+                    }
+                })
+                .catch(function() { setErrore('Errore di rete.'); })
+                .then(function() { setLoading(false); });
+            }
+
+            return React.createElement(React.Fragment, null,
+                // Pulsante matita: visibile quando il form è chiuso
+                !espanso && React.createElement('button', {
+                    type: 'button',
+                    className: 'btn-edit-toggle',
+                    title: 'Modifica commento',
+                    onClick: apriModifica
+                }, '\u270F'),
+
+                // Form di modifica inline (visibile solo quando espanso)
+                espanso && React.createElement('div', { className: 'edit-form-wrapper' },
+                    React.createElement('form', { onSubmit: salva },
+                        React.createElement('textarea', {
+                            rows: 2,
+                            className: 'comment-textarea',
+                            value: testo,
+                            onChange: function(e) { setTesto(e.target.value); },
+                            autoFocus: true
+                        }),
+                        errore && React.createElement('p', {
+                            style: { color: '#e94560', fontSize: '0.82rem', marginTop: '0.2rem' }
+                        }, errore),
+                        React.createElement('div', { className: 'comment-form-actions' },
+                            React.createElement('button', {
+                                type: 'button',
+                                className: 'btn-cancel-comment',
+                                onClick: function() { setEspanso(false); setErrore(null); }
+                            }, 'Annulla'),
+                            React.createElement('button', {
+                                type: 'submit',
+                                className: 'btn-submit-comment',
+                                disabled: loading || !testo.trim()
+                            }, loading ? 'Salvataggio...' : 'Salva')
+                        )
+                    )
+                )
+            );
+        }
+
+        // Monta ModificaCommento su ogni div .react-edit (commenti Thymeleaf di proprietà dell'utente).
+        document.querySelectorAll('.react-edit').forEach(function(el) {
+            var editRoot = ReactDOM.createRoot(el);
+            editRoot.render(React.createElement(ModificaCommento, {
+                commentoId: el.getAttribute('data-commento-id'),
+                testo:      el.getAttribute('data-testo')
+            }));
+        });
+    </script>
 
 </body>
 </html>

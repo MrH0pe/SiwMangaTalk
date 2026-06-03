@@ -106,4 +106,35 @@ public class ReazioneCommentoService {
                 .collect(Collectors.toMap(r -> r.getCommento().getId(), ReazioneCommento::getTipo));
     }
 
+    /**
+     * Restituisce il numero di like sul commento specificato.
+     * Usato dall'endpoint REST dopo un'operazione di reazione per restituire
+     * il contatore aggiornato senza ricaricare la pagina.
+     */
+    @Transactional(readOnly = true)
+    public long countLikes(Long commentoId) {
+        return this.reazioneRepository.countByCommentoIdAndTipo(commentoId, "LIKE");
+    }
+
+    /**
+     * Restituisce il numero di dislike sul commento specificato.
+     * Usato dall'endpoint REST dopo un'operazione di reazione per restituire
+     * il contatore aggiornato senza ricaricare la pagina.
+     */
+    @Transactional(readOnly = true)
+    public long countDislikes(Long commentoId) {
+        return this.reazioneRepository.countByCommentoIdAndTipo(commentoId, "DISLIKE");
+    }
+
+    /**
+     * Restituisce il tipo di reazione ("LIKE" o "DISLIKE") dell'utente sul commento,
+     * oppure un Optional vuoto se l'utente non ha ancora reagito (o ha rimosso la reazione).
+     * Usato dall'endpoint REST per comunicare al client lo stato aggiornato.
+     */
+    @Transactional(readOnly = true)
+    public Optional<String> getTipoReazioneUtente(Long utenteId, Long commentoId) {
+        return this.reazioneRepository.findByUtenteIdAndCommentoId(utenteId, commentoId)
+                .map(ReazioneCommento::getTipo);
+    }
+
 }

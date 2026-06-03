@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import it.uniroma3.siw.manga.model.Commento;
+import it.uniroma3.siw.manga.model.Credentials;
 import it.uniroma3.siw.manga.model.Manga;
 import it.uniroma3.siw.manga.model.User;
 import it.uniroma3.siw.manga.service.CommentoService;
@@ -117,15 +118,44 @@ public class CommentoController {
         return "redirect:/mangas/" + commento.getManga().getId();
     }
 
-    // Elimina un commento (solo il proprietario può farlo)
+    /**
+     * Elimina un commento.
+     * - Se l'utente ha ruolo ADMIN: può eliminare qualsiasi commento (deleteAsAdmin).
+     * - Altrimenti: solo il proprietario può eliminare il proprio commento (deleteIfOwner).
+     *
+     * Il parametro fromAdmin (opzionale) indica se la richiesta proviene dal
+     * pannello admin: in quel caso il redirect torna alla pagina admin del manga.
+     */
+    /**
+     * Elimina un commento.
+     * - ADMIN: elimina qualsiasi commento (deleteAsAdmin).
+     * - Utente normale: solo il proprio (deleteIfOwner).
+     *
+     * Parametri di redirect opzionali:
+     *   fromAdmin     = true → torna al pannello admin del manga
+     *   fromAdminHome = true → torna alla dashboard /admin
+     *   (nessuno)           → torna alla pagina pubblica del manga
+     */
     @PostMapping("/commenti/{idCommento}/elimina")
-    public String eliminaCommento(@PathVariable Long idCommento) {
+    public String eliminaCommento(@PathVariable Long idCommento,
+                                  @RequestParam(required = false, defaultValue = "false") boolean fromAdmin,
+                                  @RequestParam(required = false, defaultValue = "false") boolean fromAdminHome) {
         Commento commento = commentoService.findById(idCommento);
         if (commento == null) return "redirect:/mangas";
         Long mangaId = commento.getManga().getId();
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = credentialsService.getCredentials(username).getUtente();
-        commentoService.deleteIfOwner(idCommento, currentUser.getId());
+        Credentials creds = credentialsService.getCredentials(username);
+        if (Credentials.ADMIN_ROLE.equals(creds.getRole())) {
+            commentoService.deleteAsAdmin(idCommento);
+        } else {
+            commentoService.deleteIfOwner(idCommento, creds.getUtente().getId());
+        }
+        if (fromAdminHome) {
+            return "redirect:/admin";
+        }
+        if (fromAdmin) {
+            return "redirect:/mangas/admin/" + mangaId;
+        }
         return "redirect:/mangas/" + mangaId;
     }
 }

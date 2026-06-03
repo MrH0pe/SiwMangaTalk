@@ -18,4 +18,7 @@ public interface ReazioneCommentoRepository extends CrudRepository<ReazioneComme
     // Reazioni di un utente su tutti i commenti di un manga (per sapere cosa ha già votato)
     List<ReazioneCommento> findByUtenteIdAndCommentoMangaId(Long utenteId, Long mangaId);
 
+    // Conta le reazioni di un tipo specifico su un singolo commento (usato dall'endpoint REST)
+    long countByCommentoIdAndTipo(Long commentoId, String tipo);
+
 }

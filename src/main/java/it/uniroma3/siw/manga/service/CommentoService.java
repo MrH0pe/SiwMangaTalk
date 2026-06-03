@@ -61,6 +61,24 @@ public class CommentoService {
     }
 
     /**
+     * Elimina un commento senza verificare la proprietà (riservato all'admin).
+     * Usa la stessa logica di orphanRemoval di deleteIfOwner per garantire
+     * la corretta pulizia di risposte e reazioni in cascata.
+     */
+    @Transactional
+    public void deleteAsAdmin(Long commentoId) {
+        Commento commento = this.commentoRepository.findById(commentoId).orElse(null);
+        if (commento == null) return;
+        Commento padre = commento.getCommentoPadre();
+        if (padre != null) {
+            padre.getRisposte().removeIf(r -> r.getId().equals(commentoId));
+            this.commentoRepository.save(padre);
+        } else {
+            this.commentoRepository.delete(commento);
+        }
+    }
+
+    /**
      * Elimina un commento solo se l'utente corrente ne è il proprietario.
      * Se il commento non esiste o appartiene a un altro utente, non viene fatto nulla.
      *
@@ -89,5 +107,23 @@ public class CommentoService {
             // CascadeType.ALL propaga la cancellazione alle risposte e alle reazioni.
             this.commentoRepository.delete(commento);
         }
+    }
+
+    /**
+     * Aggiorna il testo di un commento solo se l'utente corrente ne è il proprietario.
+     * Restituisce false se: il commento non esiste, l'utente non è il proprietario,
+     * o il nuovo testo è vuoto/blank (almeno un carattere non-spazio richiesto).
+     */
+    @Transactional
+    public boolean updateIfOwner(Long commentoId, Long utenteId, String nuovoTesto) {
+        if (nuovoTesto == null || nuovoTesto.isBlank()) return false;
+        Commento commento = this.commentoRepository.findById(commentoId).orElse(null);
+        if (commento == null || commento.getUtente() == null
+                || !commento.getUtente().getId().equals(utenteId)) {
+            return false;
+        }
+        commento.setTesto(nuovoTesto.trim());
+        this.commentoRepository.save(commento);
+        return true;
     }
 }

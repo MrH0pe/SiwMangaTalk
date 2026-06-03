@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard Admin - SiwMangaTalk</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0f0f1a; color: #ddd; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+
+        /* ---- TOP BAR ---- */
+        .admin-topbar {
+            background: #1a1a2e;
+            border-bottom: 2px solid #e94560;
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .site-logo { height: 38px; }
+        .admin-badge {
+            background: #e94560;
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.2rem 0.65rem;
+            border-radius: 3px;
+            letter-spacing: 0.06em;
+        }
+        .topbar-user { color: #aaa; font-size: 0.88rem; }
+        .topbar-spacer { flex: 1; }
+        .btn-logout {
+            background: transparent;
+            border: 1px solid #e94560;
+            color: #e94560;
+            padding: 0.3rem 0.85rem;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.82rem;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-logout:hover { background: #e94560; color: #fff; }
+
+        /* ---- LAYOUT ---- */
+        .dashboard { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem 4rem; }
+
+        /* ---- SECTION ---- */
+        .dash-section { margin-bottom: 3rem; }
+        .dash-section-title {
+            color: #e94560;
+            font-size: 1.25rem;
+            font-weight: 700;
+            border-bottom: 2px solid #e94560;
+            padding-bottom: 0.4rem;
+            margin-bottom: 1.2rem;
+        }
+
+        /* ---- USER ROWS ---- */
+        .user-row {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 6px;
+            margin-bottom: 0.55rem;
+            overflow: hidden;
+        }
+        .user-header {
+            display: flex;
+            align-items: center;
+            padding: 0.7rem 1.2rem;
+            gap: 0.9rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .user-header:hover { background: #1e1e32; }
+        .user-name { font-weight: 600; color: #fff; flex: 1; }
+        .user-count {
+            font-size: 0.8rem;
+            color: #aaa;
+            background: #0f0f1a;
+            padding: 0.18rem 0.65rem;
+            border-radius: 12px;
+        }
+        .toggle-arrow { color: #e94560; font-size: 0.75rem; transition: transform 0.2s; flex-shrink: 0; }
+
+        /* ---- COMMENT LIST ---- */
+        .user-comments { display: none; border-top: 1px solid #2a2a4a; }
+        .comment-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 0.65rem 1.2rem;
+            border-bottom: 1px solid #1e1e30;
+        }
+        .comment-row:last-child { border-bottom: none; }
+        .comment-info { flex: 1; min-width: 0; }
+        .comment-manga { font-size: 0.72rem; color: #e94560; font-weight: 600; margin-bottom: 0.2rem; }
+        .comment-type  { font-size: 0.68rem; color: #777; margin-bottom: 0.18rem; }
+        .comment-text  { font-size: 0.87rem; color: #ccc; word-break: break-word; }
+        .comment-date  { font-size: 0.72rem; color: #666; margin-top: 0.18rem; }
+        .btn-delete-small {
+            background: transparent;
+            border: 1px solid #c0392b;
+            color: #c0392b;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+            transition: background 0.15s, color 0.15s;
+        }
+        .btn-delete-small:hover { background: #c0392b; color: #fff; }
+        .no-comments { padding: 0.65rem 1.2rem; color: #666; font-size: 0.83rem; }
+        .empty-msg { color: #666; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <!-- ===== TOP BAR ===== -->
+    <div class="admin-topbar">
+        <a th:href="@{/admin}">
+            <img th:src="@{/images/logo_siwmangatalk.png}" alt="SiwMangaTalk Logo" class="site-logo">
+        </a>
+        <span class="admin-badge">ADMIN</span>
+        <div class="topbar-spacer"></div>
+        <form method="POST" th:action="@{/logout}" style="margin:0; padding:0; display:inline">
+            <button type="submit" class="btn-logout">Logout</button>
+        </form>
+    </div>
+
+    <main class="dashboard">
+
+        <!-- ===================================================== -->
+        <!-- UTENTI REGISTRATI E I LORO COMMENTI                   -->
+        <!-- ===================================================== -->
+        <section class="dash-section">
+            <h2 class="dash-section-title">&#128101; Utenti Registrati e i loro Commenti</h2>
+
+            <p class="empty-msg" th:if="${#lists.isEmpty(utenti)}">
+                Nessun utente registrato.
+            </p>
+
+            <!-- Riga per ogni utente non-admin -->
+            <div class="user-row" th:each="u : ${utenti}">
+
+                <!-- Header cliccabile: username e contatore commenti -->
+                <div class="user-header" onclick="toggleUser(this)">
+                    <span class="user-name" th:text="${u.username}">username</span>
+                    <span class="user-count"
+                          th:text="${u.totale} + (${u.totale} == 1 ? ' commento' : ' commenti')">0 commenti</span>
+                    <span class="toggle-arrow">&#9660;</span>
+                </div>
+
+                <!-- Lista commenti (nascosta di default) -->
+                <div class="user-comments">
+
+                    <p class="no-comments" th:if="${u.totale == 0}">
+                        Questo utente non ha ancora scritto commenti.
+                    </p>
+
+                    <div class="comment-row" th:each="c : ${u.commenti}">
+                        <div class="comment-info">
+                            <!-- Nome del manga a cui appartiene il commento -->
+                            <div class="comment-manga"
+                                 th:text="${c.manga != null ? c.manga.nome : 'Manga sconosciuto'}"></div>
+                            <!-- Indica se è un commento principale o una risposta -->
+                            <div class="comment-type"
+                                 th:text="${c.commentoPadre != null ? 'Risposta a un commento' : 'Commento principale'}"></div>
+                            <!-- Testo del commento -->
+                            <div class="comment-text" th:text="${c.testo}"></div>
+                            <!-- Data di pubblicazione -->
+                            <div class="comment-date"
+                                 th:text="${#temporals.format(c.tempoPubblicazione, 'dd/MM/yyyy HH:mm')}"></div>
+                        </div>
+                        <!-- Pulsante elimina: dopo la cancellazione torna a /admin -->
+                        <form method="POST"
+                              th:action="@{'/commenti/' + ${c.id} + '/elimina'}">
+                            <input type="hidden" name="fromAdminHome" value="true">
+                            <button type="submit" class="btn-delete-small" title="Elimina commento">
+                                &#128465;
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+<script>
+    /** Espande/collassa la lista commenti di un utente e ruota la freccia. */
+    function toggleUser(header) {
+        const arrow    = header.querySelector('.toggle-arrow');
+        const comments = header.nextElementSibling;
+        const visible  = comments.style.display !== 'none';
+        comments.style.display = visible ? 'none' : 'block';
+        arrow.style.transform  = visible ? '' : 'rotate(180deg)';
+    }
+</script>
+
+</body>
+</html>
