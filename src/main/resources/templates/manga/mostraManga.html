@@ -677,8 +677,14 @@
          * Funzionamento:
          *   Mostra il pulsante "Rispondi"; al click espande un form textarea.
          *   Al submit invia POST /api/commenti/{id}/risposte con il testo in JSON.
-         *   La risposta JSON viene aggiunta allo stato locale e mostrata subito,
-         *   senza ricaricare la pagina.
+         *
+         *   Per i commenti renderizzati da Thymeleaf (già nel DOM al caricamento):
+         *     → la risposta viene iniettata direttamente nella sezione risposte del DOM,
+         *       che appare o si aggiorna subito senza ricaricare la pagina.
+         *
+         *   Per i commenti appena aggiunti via React (senza reload di pagina):
+         *     → fallback sullo stato React locale (risposte[]), perché non esiste
+         *       ancora una sezione .replies-section nel DOM per quel commento.
          */
         function RispostaForm(props) {
             var commentoId = props.commentoId;
@@ -692,10 +698,73 @@
             var statoLoading  = React.useState(false);
             var loading       = statoLoading[0];  var setLoading  = statoLoading[1];
 
+            // Usato solo come fallback per i commenti aggiunti via React (non Thymeleaf)
             var statoRisposte = React.useState([]);
             var risposte      = statoRisposte[0]; var setRisposte = statoRisposte[1];
 
-            /** Invia la risposta al server via fetch e aggiorna la lista locale. */
+            /**
+             * Inietta la nuova risposta nella sezione risposte Thymeleaf del commento padre.
+             * Se la sezione non esiste ancora (prima risposta), la crea con il pulsante toggle.
+             * Se esiste ma è chiusa, l'apre e aggiorna il contatore.
+             * Restituisce true se l'iniezione è riuscita, false se il commento è solo React.
+             */
+            function injectReplyIntoDOM(nuovaRisposta) {
+                // Il div .react-reply esiste solo per i commenti renderizzati da Thymeleaf
+                var replyMount = document.querySelector('.react-reply[data-commento-id="' + commentoId + '"]');
+                if (!replyMount) return false;
+                var commentItem = replyMount.closest('.comment-item');
+                if (!commentItem) return false;
+
+                // Escape HTML per prevenire XSS nell'inserimento dinamico
+                var esc = function(s) {
+                    return String(s || '')
+                        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                };
+
+                var repliesSection = commentItem.querySelector('.replies-section');
+                if (!repliesSection) {
+                    // Prima risposta: crea l'intera sezione toggle + lista subito aperta
+                    repliesSection = document.createElement('div');
+                    repliesSection.className = 'replies-section';
+                    repliesSection.innerHTML =
+                        '<button type="button" class="btn-toggle-replies" onclick="toggleReplies(this)">' +
+                        '<span class="toggle-arrow" style="transform:rotate(180deg)">▼</span>' +
+                        '<span>1 risposta</span>' +
+                        '</button>' +
+                        '<div class="replies-list" style="display:block"></div>';
+                    commentItem.appendChild(repliesSection);
+                } else {
+                    // Sezione già esistente: aggiorna il contatore e apri la lista se chiusa
+                    var countSpan = repliesSection.querySelector('.btn-toggle-replies span:last-child');
+                    if (countSpan) {
+                        var n = (parseInt(countSpan.textContent) || 0) + 1;
+                        countSpan.textContent = n + (n === 1 ? ' risposta' : ' risposte');
+                    }
+                    var list = repliesSection.querySelector('.replies-list');
+                    if (list && list.style.display === 'none') {
+                        list.style.display = 'block';
+                        var arrow = repliesSection.querySelector('.toggle-arrow');
+                        if (arrow) arrow.style.transform = 'rotate(180deg)';
+                    }
+                }
+
+                // Costruisce e inserisce il nuovo elemento risposta nel DOM
+                var repliesList = repliesSection.querySelector('.replies-list');
+                var item = document.createElement('div');
+                item.className = 'reply-item';
+                item.innerHTML =
+                    '<div class="comment-meta">' +
+                    '<span class="comment-author">' + esc(nuovaRisposta.autore) + '</span>' +
+                    '<span class="comment-date">'   + esc(nuovaRisposta.data)   + '</span>' +
+                    '</div>' +
+                    '<p class="comment-text" data-comment-text-for="' + esc(nuovaRisposta.id) + '">' +
+                    esc(nuovaRisposta.testo) + '</p>';
+                repliesList.appendChild(item);
+                return true;
+            }
+
+            /** Invia la risposta via AJAX; usa DOM injection o stato React come fallback. */
             function invia(e) {
                 e.preventDefault();
                 if (!testo.trim()) return;
@@ -712,7 +781,11 @@
                 .then(function(r) {
                     if (r.ok) {
                         return r.json().then(function(nuovaRisposta) {
-                            setRisposte(function(prev) { return prev.concat([nuovaRisposta]); });
+                            // Prova iniezione DOM (commenti Thymeleaf)
+                            // Se fallisce usa stato React (commenti appena aggiunti via React)
+                            if (!injectReplyIntoDOM(nuovaRisposta)) {
+                                setRisposte(function(prev) { return prev.concat([nuovaRisposta]); });
+                            }
                             setTesto('');
                             setEspanso(false);
                         });
@@ -757,7 +830,7 @@
                     )
                 ),
 
-                // Lista risposte aggiunte in questa sessione (senza reload)
+                // Fallback: lista risposte in stato React (solo per commenti aggiunti via React)
                 risposte.length > 0 && React.createElement('div', { className: 'replies-section' },
                     React.createElement('div', { className: 'replies-list' },
                         risposte.map(function(r) {
