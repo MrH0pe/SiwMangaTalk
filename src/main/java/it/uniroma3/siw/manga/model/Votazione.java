@@ -11,7 +11,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-<<<<<<< HEAD
 /**
  * Classe che modella una VOTAZIONE (voto con stelle) di un utente su un manga.
  *
@@ -20,16 +19,12 @@ import jakarta.persistence.UniqueConstraint;
  * il record esistente viene aggiornato (upsert gestito da VotazioneService).
  *
  * Il valore è un Double da 0.5 a 5.0 con incrementi di 0.5 (mezze stelle).
+ *
+ * È collegata a: Manga (manga votato), User (utente che ha votato)
  */
 @Entity
 @Table(uniqueConstraints = {
 	@UniqueConstraint(columnNames = {"utente_id", "manga_id"})
-=======
-//Classe che modella una VOTAZIONE
-@Entity
-@Table(uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"utente_id", "manga_id"})
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 })
 public class Votazione {
 
@@ -38,28 +33,18 @@ public class Votazione {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
-<<<<<<< HEAD
 	/** Valore del voto: da 0.5 (minimo) a 5.0 (massimo), a mezzi punti. */
 	private Double valoreStelline;
 
-	/**
-	 * Manga votato (lato proprietario della FK manga_id).
-	 * EAGER: il manga viene sempre caricato insieme alla votazione.
-	 */
+	// Associazione molti a uno tra Votazione e Manga:
+	// una votazione riguarda un solo manga, ma un manga può ricevere molte votazioni.
+	// EAGER: il manga viene sempre caricato insieme alla votazione.
 	@ManyToOne(fetch = FetchType.EAGER)
-=======
-	// Valore da 0.5 a 5.0 con mezzi punti
-	private Double valoreStelline;
-	
-	//Associazione molti a uno tra Votazione e Manga, una votazione è associata ad un solo manga ma un manga può avere più votazioni
-	@ManyToOne (fetch = FetchType.EAGER)
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 	private Manga manga;
 
-	/**
-	 * Utente che ha espresso il voto (lato proprietario della FK utente_id).
-	 * EAGER: l'utente viene sempre caricato insieme alla votazione.
-	 */
+	// Associazione molti a uno tra Votazione e User:
+	// una votazione appartiene a un solo utente, ma un utente può votare molti manga.
+	// EAGER: l'utente viene sempre caricato insieme alla votazione.
 	@ManyToOne(fetch = FetchType.EAGER)
 	private User utente;
 
@@ -109,14 +94,9 @@ public class Votazione {
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		Votazione other = (Votazione) obj;
-<<<<<<< HEAD
 		return Objects.equals(id, other.id)
 				&& Objects.equals(manga, other.manga)
 				&& Objects.equals(valoreStelline, other.valoreStelline)
 				&& Objects.equals(utente, other.utente);
-=======
-		return Objects.equals(id, other.id) && Objects.equals(manga, other.manga)
-				&& Objects.equals(valoreStelline, other.valoreStelline) && Objects.equals(utente, other.utente);
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 	}
 }

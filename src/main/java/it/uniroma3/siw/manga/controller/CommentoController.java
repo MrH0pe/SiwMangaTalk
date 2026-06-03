@@ -22,7 +22,17 @@ import it.uniroma3.siw.manga.service.MangaService;
 import it.uniroma3.siw.manga.service.ReazioneCommentoService;
 import jakarta.validation.Valid;
 
-// Controller per la gestione dei commenti sui manga
+/**
+ * Controller per la gestione dei commenti e delle reazioni (like/dislike).
+ *
+ * Gestisce:
+ * - la pagina "I miei commenti" dell'utente loggato
+ * - l'invio di nuovi commenti e risposte
+ * - il toggle like/dislike su un commento
+ * - la cancellazione di un commento (sia da utente che da admin)
+ *
+ * È collegato a: CommentoService, MangaService, CredentialsService, ReazioneCommentoService
+ */
 @Controller
 public class CommentoController {
 
@@ -31,6 +41,7 @@ public class CommentoController {
     private final CredentialsService credentialsService;
     private final ReazioneCommentoService reazioneService;
 
+    /** Costruttore con iniezione dei service tramite Spring. */
     public CommentoController(CommentoService commentoService, MangaService mangaService,
             CredentialsService credentialsService, ReazioneCommentoService reazioneService) {
         this.commentoService = commentoService;
@@ -38,8 +49,13 @@ public class CommentoController {
         this.credentialsService = credentialsService;
         this.reazioneService = reazioneService;
     }
-    
-    // Visualizza i commenti dell'utente loggato
+
+    /**
+     * Mostra la pagina "I miei commenti" dell'utente loggato (GET /mieiCommenti).
+     * Recupera tutti i commenti scritti dall'utente e li passa al template.
+     *
+     * Il template usato è: commenti/mieiCommenti.html
+     */
     @GetMapping("/mieiCommenti")
     public String mostraMieiCommenti(Model model) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -48,22 +64,28 @@ public class CommentoController {
         model.addAttribute("listaMieiCommenti", commentoList);
         return "commenti/mieiCommenti";
     }
-    
-    // Salva un nuovo commento per un manga specifico
+
+    /**
+     * Salva un nuovo commento principale su un manga (POST /manga/{idManga}/commenti).
+     * Valida il testo tramite @Valid; in caso di errori ricarica la pagina del manga.
+     * Imposta automaticamente l'utente corrente e la data/ora di pubblicazione.
+     *
+     * Delegato a: CommentoService.save()
+     */
     @PostMapping("/manga/{idManga}/commenti")
-    public String saveCommento(@PathVariable("idManga") Long idManga, 
+    public String saveCommento(@PathVariable Long idManga,
                                @Valid @ModelAttribute("commento") Commento commento,
-                               BindingResult bindingResult, 
+                               BindingResult bindingResult,
                                Model model) {
-        
+
         Manga manga = mangaService.findById(idManga);
-        
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("manga", manga);
             model.addAttribute("commenti", commentoService.findTopLevelByMangaId(idManga));
             return "manga/mostraManga";
         }
-        
+
         commento.setManga(manga);
         commento.setTempoPubblicazione(java.time.LocalDateTime.now());
 
@@ -75,9 +97,15 @@ public class CommentoController {
         return "redirect:/mangas/" + idManga;
     }
 
-    // Salva una risposta a un commento esistente
+    /**
+     * Salva una risposta a un commento esistente (POST /manga/{idManga}/commenti/{idCommentoPadre}/risposte).
+     * Collega la risposta al commento padre tramite setCommentoPadre().
+     * Se il testo è vuoto, ricarica la pagina del manga senza salvare.
+     *
+     * Delegato a: CommentoService.save()
+     */
     @PostMapping("/manga/{idManga}/commenti/{idCommentoPadre}/risposte")
-    public String saveRisposta(@PathVariable("idManga") Long idManga,
+    public String saveRisposta(@PathVariable Long idManga,
                                @PathVariable Long idCommentoPadre,
                                @ModelAttribute Commento risposta,
                                BindingResult bindingResult,
@@ -104,7 +132,13 @@ public class CommentoController {
         return "redirect:/mangas/" + idManga;
     }
 
-    // Aggiunge, cambia o rimuove (toggle) la reazione like/dislike a un commento
+    /**
+     * Aggiunge, cambia o rimuove (toggle) la reazione like/dislike a un commento
+     * (POST /commenti/{idCommento}/reazione).
+     * Valori accettati per il parametro "tipo": "LIKE" o "DISLIKE".
+     *
+     * Delegato a: ReazioneCommentoService.reagisci()
+     */
     @PostMapping("/commenti/{idCommento}/reazione")
     public String reagisci(@PathVariable Long idCommento, @RequestParam String tipo) {
         Commento commento = commentoService.findById(idCommento);
@@ -118,39 +152,28 @@ public class CommentoController {
         return "redirect:/mangas/" + commento.getManga().getId();
     }
 
-<<<<<<< HEAD
     /**
-     * Elimina un commento.
+     * Elimina un commento (POST /commenti/{idCommento}/elimina).
+     *
+     * Logica di cancellazione:
      * - Se l'utente ha ruolo ADMIN: può eliminare qualsiasi commento (deleteAsAdmin).
      * - Altrimenti: solo il proprietario può eliminare il proprio commento (deleteIfOwner).
      *
-     * Il parametro fromAdmin (opzionale) indica se la richiesta proviene dal
-     * pannello admin: in quel caso il redirect torna alla pagina admin del manga.
-     */
-    /**
-     * Elimina un commento.
-     * - ADMIN: elimina qualsiasi commento (deleteAsAdmin).
-     * - Utente normale: solo il proprio (deleteIfOwner).
-     *
      * Parametri di redirect opzionali:
-     *   fromAdmin     = true → torna al pannello admin del manga
-     *   fromAdminHome = true → torna alla dashboard /admin
-     *   (nessuno)           → torna alla pagina pubblica del manga
+     *   fromAdmin     = true → torna al pannello admin del manga (/mangas/admin/{id})
+     *   fromAdminHome = true → torna alla dashboard admin (/admin)
+     *   (nessuno)           → torna alla pagina pubblica del manga (/mangas/{id})
+     *
+     * Delegato a: CommentoService.deleteAsAdmin() oppure CommentoService.deleteIfOwner()
      */
     @PostMapping("/commenti/{idCommento}/elimina")
     public String eliminaCommento(@PathVariable Long idCommento,
                                   @RequestParam(required = false, defaultValue = "false") boolean fromAdmin,
                                   @RequestParam(required = false, defaultValue = "false") boolean fromAdminHome) {
-=======
-    // Elimina un commento (solo il proprietario può farlo)
-    @PostMapping("/commenti/{idCommento}/elimina")
-    public String eliminaCommento(@PathVariable Long idCommento) {
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
         Commento commento = commentoService.findById(idCommento);
         if (commento == null) return "redirect:/mangas";
         Long mangaId = commento.getManga().getId();
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-<<<<<<< HEAD
         Credentials creds = credentialsService.getCredentials(username);
         if (Credentials.ADMIN_ROLE.equals(creds.getRole())) {
             commentoService.deleteAsAdmin(idCommento);
@@ -163,10 +186,6 @@ public class CommentoController {
         if (fromAdmin) {
             return "redirect:/mangas/admin/" + mangaId;
         }
-=======
-        User currentUser = credentialsService.getCredentials(username).getUtente();
-        commentoService.deleteIfOwner(idCommento, currentUser.getId());
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
         return "redirect:/mangas/" + mangaId;
     }
 }

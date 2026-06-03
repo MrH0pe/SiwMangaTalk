@@ -8,24 +8,25 @@ import it.uniroma3.siw.manga.model.Commento;
 
 /**
  * Repository JPA per l'entità Commento.
- * Spring Data genera automaticamente le implementazioni dei metodi
- * sulla base dei nomi dichiarati nell'interfaccia.
+ *
+ * Spring Data JPA genera automaticamente le implementazioni SQL
+ * sulla base dei nomi dichiarati nell'interfaccia (query by method name).
+ *
+ * È collegato a: CommentoService (che usa questo repository per tutte le operazioni DB)
  */
 public interface CommentoRepository extends CrudRepository<Commento, Long> {
 
-	/** Restituisce tutti i commenti scritti dall'utente con l'id specificato. */
+	/**
+	 * Restituisce tutti i commenti scritti dall'utente con l'id specificato.
+	 * Usato nella pagina "I miei commenti" tramite CommentoService.findByUtenteId().
+	 */
 	List<Commento> findByUtenteId(Long utenteId);
 
-<<<<<<< HEAD
 	/**
 	 * Restituisce solo i commenti principali (commentoPadre = null) di un manga.
 	 * Usato per mostrare la lista di commenti nella pagina del manga,
-	 * escludendo le risposte (che sono figlie di altri commenti).
+	 * escludendo le risposte (che sono figlie di altri commenti e già incluse
+	 * nella collection 'risposte' di ogni Commento).
 	 */
-=======
-	List<Commento> findByMangaId(Long mangaId);
-
-	//Restituisce solo i commenti principali (senza padre) di un manga
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 	List<Commento> findByMangaIdAndCommentoPadreIsNull(Long mangaId);
 }

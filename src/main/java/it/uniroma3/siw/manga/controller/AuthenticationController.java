@@ -12,6 +12,18 @@ import it.uniroma3.siw.manga.model.Credentials;
 import it.uniroma3.siw.manga.service.CredentialsService;
 import jakarta.validation.Valid;
 
+/**
+ * Controller per la gestione dell'autenticazione (login e registrazione).
+ *
+ * Gestisce:
+ * - la visualizzazione del form di registrazione (GET /register)
+ * - il salvataggio del nuovo utente (POST /register)
+ * - la visualizzazione del form di login (GET /login)
+ *   (Spring Security gestisce automaticamente il POST /login)
+ *
+ * È collegato a: CredentialsService (per salvare le credenziali),
+ *                Credentials e User (model), template authentication/
+ */
 @Controller
 public class AuthenticationController {
 	

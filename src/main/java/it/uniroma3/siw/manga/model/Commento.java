@@ -16,7 +16,16 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.validation.constraints.NotBlank;
 
-// Classe che modella un COMMENTO
+/**
+ * Classe che modella un COMMENTO scritto da un utente su un manga.
+ *
+ * Struttura ad albero:
+ * - Commenti principali: commentoPadre = null
+ * - Risposte: commentoPadre = riferimento al commento genitore
+ *
+ * È collegata a: User (autore), Manga (su cui è scritto),
+ *                Commento (padre e lista risposte), ReazioneCommento (like/dislike)
+ */
 @Entity
 public class Commento {
 
@@ -24,49 +33,46 @@ public class Commento {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
+	// Il testo del commento; @NotBlank garantisce che non sia vuoto o solo spazi
 	@NotBlank
 	private String testo;
 
+	// Data e ora di pubblicazione, impostata nel controller al momento del salvataggio
 	private LocalDateTime tempoPubblicazione;
 
 	// Associazione molti a uno tra Commento e User:
-	// un commento è scritto da un solo utente, ma un utente può scrivere più commenti
+	// un commento è scritto da un solo utente, ma un utente può scrivere più commenti.
+	// EAGER: l'utente viene caricato subito insieme al commento (serve per mostrare il nome)
 	@ManyToOne(fetch = FetchType.EAGER)
 	private User utente;
 
 	// Associazione molti a uno tra Commento e Manga:
-	// un commento si riferisce a un solo manga, ma un manga può avere più commenti
+	// un commento si riferisce a un solo manga, ma un manga può avere più commenti.
+	// EAGER: il manga viene caricato subito (serve per i redirect nel controller)
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Manga manga;
 
-<<<<<<< HEAD
-	// Riferimento al commento padre: null per i commenti principali, valorizzato per le risposte
+	// Riferimento al commento padre: null per i commenti principali, valorizzato per le risposte.
+	// EAGER: il padre viene caricato subito (serve per la logica di cancellazione a cascata)
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Commento commentoPadre;
 
-	// Lista delle risposte dirette a questo commento;
-	// CascadeType.ALL + orphanRemoval propagano creazione e cancellazione alle risposte
-=======
-	//Riferimento al commento padre: null per commenti principali, valorizzato per le risposte
-	@ManyToOne(fetch = FetchType.EAGER)
-	private Commento commentoPadre;
-
-	//Lista delle risposte dirette a questo commento
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
+	// Lista delle risposte dirette a questo commento.
+	// CascadeType.ALL + orphanRemoval=true: se questo commento viene eliminato,
+	// tutte le sue risposte vengono eliminate automaticamente da Hibernate.
+	// @OrderBy: le risposte sono ordinate dalla più vecchia alla più recente.
 	@OneToMany(mappedBy = "commentoPadre", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("tempoPubblicazione ASC")
 	private List<Commento> risposte = new ArrayList<>();
 
-<<<<<<< HEAD
-	// Lista delle reazioni (like/dislike) a questo commento;
-	// CascadeType.ALL garantisce la cancellazione automatica delle reazioni quando il commento viene eliminato
+	// Lista delle reazioni (like/dislike) a questo commento.
+	// CascadeType.ALL + orphanRemoval=true: garantisce la cancellazione automatica
+	// di tutte le reazioni quando il commento viene eliminato.
 	@OneToMany(mappedBy = "commento", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ReazioneCommento> reazioni = new ArrayList<>();
 
 	// --- Getters e Setters ---
 
-=======
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 	public Long getId() {
 		return id;
 	}
@@ -123,7 +129,6 @@ public class Commento {
 		this.risposte = risposte;
 	}
 
-<<<<<<< HEAD
 	public List<ReazioneCommento> getReazioni() {
 		return reazioni;
 	}
@@ -132,8 +137,7 @@ public class Commento {
 		this.reazioni = reazioni;
 	}
 
-=======
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
+	// hashCode e equals basati sui campi principali (id, manga, testo, utente, data)
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, manga, tempoPubblicazione, testo, utente);

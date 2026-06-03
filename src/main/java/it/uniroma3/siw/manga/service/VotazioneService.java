@@ -10,38 +10,31 @@ import it.uniroma3.siw.manga.model.User;
 import it.uniroma3.siw.manga.model.Votazione;
 import it.uniroma3.siw.manga.repository.VotazioneRepository;
 
-<<<<<<< HEAD
 /**
  * Service per la gestione delle votazioni (voto con stelle) ai manga.
  *
  * Il sistema supporta voti da 0.5 a 5.0 a mezzi punti.
  * Se l'utente vota di nuovo lo stesso manga, il record esistente viene aggiornato
- * (logica upsert: findOrNew + save).
+ * (logica upsert: cerca il voto esistente oppure ne crea uno nuovo, poi salva).
+ *
+ * È collegato a: VotazioneRepository, MangaController (che chiama vota() e getMediaVoti())
  */
-=======
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 @Service
 public class VotazioneService {
 
 	private final VotazioneRepository votazioneRepository;
 
-<<<<<<< HEAD
 	/** Costruttore con iniezione del repository tramite Spring. */
-=======
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 	public VotazioneService(VotazioneRepository votazioneRepository) {
 		this.votazioneRepository = votazioneRepository;
 	}
 
-<<<<<<< HEAD
 	/**
 	 * Salva o aggiorna il voto dell'utente per un manga (upsert).
 	 * Se esiste già un voto per la coppia (utente, manga), viene aggiornato;
-	 * altrimenti viene creato un nuovo record.
+	 * altrimenti viene creato un nuovo record Votazione.
+	 * Chiamato da MangaController.votaManga() dopo la validazione del valore.
 	 */
-=======
-	// Salva o aggiorna il voto dell'utente per un manga
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 	@Transactional
 	public void vota(Manga manga, User utente, double valore) {
 		Votazione votazione = this.votazioneRepository
@@ -53,14 +46,11 @@ public class VotazioneService {
 		this.votazioneRepository.save(votazione);
 	}
 
-<<<<<<< HEAD
 	/**
 	 * Restituisce il voto espresso dall'utente per un manga,
 	 * oppure null se l'utente non ha ancora votato.
+	 * Usato nella pagina del manga per pre-selezionare le stelle già cliccate.
 	 */
-=======
-	// Restituisce il voto dell'utente per un manga, null se non ha ancora votato
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 	@Transactional(readOnly = true)
 	public Double getVotoUtente(Long utenteId, Long mangaId) {
 		return this.votazioneRepository.findByUtenteIdAndMangaId(utenteId, mangaId)
@@ -68,14 +58,11 @@ public class VotazioneService {
 				.orElse(null);
 	}
 
-<<<<<<< HEAD
 	/**
 	 * Calcola e restituisce la media aritmetica di tutti i voti di un manga.
 	 * Restituisce null se il manga non ha ancora ricevuto voti.
+	 * Usato nella pagina del manga e nella lista manga per mostrare il rating.
 	 */
-=======
-	// Restituisce la media dei voti di un manga, null se non ci sono voti
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 	@Transactional(readOnly = true)
 	public Double getMediaVoti(Long mangaId) {
 		List<Votazione> voti = this.votazioneRepository.findByMangaId(mangaId);
@@ -83,11 +70,10 @@ public class VotazioneService {
 		return voti.stream().mapToDouble(Votazione::getValoreStelline).average().orElse(0);
 	}
 
-<<<<<<< HEAD
-	/** Restituisce il numero totale di voti ricevuti da un manga. */
-=======
-	// Restituisce il numero totale di voti per un manga
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
+	/**
+	 * Restituisce il numero totale di voti ricevuti da un manga.
+	 * Usato nella pagina del manga per mostrare quante persone hanno votato.
+	 */
 	@Transactional(readOnly = true)
 	public long countVoti(Long mangaId) {
 		return this.votazioneRepository.findByMangaId(mangaId).size();

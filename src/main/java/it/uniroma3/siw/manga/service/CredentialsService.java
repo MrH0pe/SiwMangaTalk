@@ -10,13 +10,22 @@ import it.uniroma3.siw.manga.model.Credentials;
 import it.uniroma3.siw.manga.repository.CredentialsRepository;
 
 
+/**
+ * Service per la gestione delle credenziali di accesso (username + password).
+ *
+ * Fornisce:
+ * - recupero credenziali per id o username (usato in tutti i controller per identificare l'utente)
+ * - salvataggio credenziali con cifratura BCrypt della password (usato alla registrazione)
+ *
+ * È collegato a: CredentialsRepository, PasswordEncoder (BCrypt da SecurityConfiguration)
+ */
 @Service
 public class CredentialsService {
 
-    //Questo attributo serve per criptare la password
+    // Encoder BCrypt iniettato da SecurityConfiguration: cifra la password prima di salvarla
     private PasswordEncoder passwordEncoder;
 
-    //Questo attributo serve per accedere alla tabella Credentials nella base di dati
+    // Repository per l'accesso alla tabella "credentials" nel database
     private CredentialsRepository credentialsRepository;    
 
     public CredentialsService(PasswordEncoder passwordEncoder, CredentialsRepository credentialsRepository) {

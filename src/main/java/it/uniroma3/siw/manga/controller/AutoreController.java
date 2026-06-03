@@ -7,6 +7,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import it.uniroma3.siw.manga.service.AutoreService;
 
+/**
+ * Controller per la gestione delle pagine relative agli autori.
+ *
+ * Gestisce:
+ * - la lista di tutti gli autori (GET /autori) → template autori/listaAutori.html
+ * - il dettaglio di un autore (GET /autori/{id}) → template autori/mostraAutore.html
+ *
+ * Accessibile a tutti (anche utenti non loggati), come configurato in SecurityConfiguration.
+ * È collegato a: AutoreService (per il recupero dal DB), Autore (model)
+ */
 @Controller
 public class AutoreController {
 	
