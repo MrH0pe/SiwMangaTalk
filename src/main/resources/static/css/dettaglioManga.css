@@ -325,7 +325,6 @@ body, html {
     height: 14px;
 }
 
-<<<<<<< HEAD
 /* --- AZIONI COMMENTO (like, dislike, rispondi) --- */
 .comment-actions {
     display: flex;
@@ -386,16 +385,6 @@ body, html {
 }
 
 /* --- PULSANTE RISPONDI --- */
-
-=======
-/* --- PULSANTE RISPONDI --- */
-.comment-actions {
-    display: flex;
-    align-items: center;
-    margin-bottom: 4px;
-}
-
->>>>>>> 5d5dc9cfc21420119f1c688c386c5ddd2463f799
 .btn-reply-toggle {
     background-color: transparent;
     border: none;

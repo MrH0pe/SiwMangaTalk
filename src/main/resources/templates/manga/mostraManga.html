@@ -147,6 +147,14 @@
                     <p class="comment-text" th:text="${c.testo}"
                        th:attr="data-comment-text-for=${c.id}"></p>
 
+                    <!-- Pulsante Modifica – React mount (solo proprietario del commento).
+                         Posizionato dopo il testo: la penna appare subito sotto il commento,
+                         e il form di modifica si espande in quest'area full-width. -->
+                    <div th:if="${currentUserId != null and c.utente != null and c.utente.id == currentUserId}"
+                         class="react-edit"
+                         th:attr="data-commento-id=${c.id}, data-testo=${c.testo}">
+                    </div>
+
                     <!-- Azioni: like, dislike (visibili a tutti), rispondi (solo se loggato) -->
                     <div class="comment-actions">
 
@@ -173,12 +181,6 @@
                         <div th:if="${userDetails != null}"
                              class="react-reply"
                              th:attr="data-commento-id=${c.id}">
-                        </div>
-
-                        <!-- Pulsante Modifica – React mount (solo proprietario del commento) -->
-                        <div th:if="${currentUserId != null and c.utente != null and c.utente.id == currentUserId}"
-                             class="react-edit"
-                             th:attr="data-commento-id=${c.id}, data-testo=${c.testo}">
                         </div>
 
                     </div>
@@ -220,6 +222,11 @@
                                 </div>
                                 <p class="comment-text" th:text="${r.testo}"
                                    th:attr="data-comment-text-for=${r.id}"></p>
+                                <!-- Pulsante Modifica risposta – React mount (solo proprietario) -->
+                                <div th:if="${currentUserId != null and r.utente != null and r.utente.id == currentUserId}"
+                                     class="react-edit"
+                                     th:attr="data-commento-id=${r.id}, data-testo=${r.testo}">
+                                </div>
 
                                 <!-- LIKE/DISLIKE sulle risposte – stessa logica dei commenti principali -->
                                 <div class="comment-actions">
@@ -236,11 +243,6 @@
                                     <span th:unless="${userDetails != null}" class="reaction-readonly">
                                         &#128078; <span th:text="${dislikeMap[r.id] ?: 0}">0</span>
                                     </span>
-                                    <!-- Pulsante Modifica risposta – React mount (solo proprietario) -->
-                                    <div th:if="${currentUserId != null and r.utente != null and r.utente.id == currentUserId}"
-                                         class="react-edit"
-                                         th:attr="data-commento-id=${r.id}, data-testo=${r.testo}">
-                                    </div>
                                 </div>
                             </div>
                         </div>
