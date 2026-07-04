@@ -10,36 +10,30 @@ import it.uniroma3.siw.manga.model.User;
 import it.uniroma3.siw.manga.model.Votazione;
 import it.uniroma3.siw.manga.repository.VotazioneRepository;
 
-/**
- * Service per la gestione delle votazioni (voto con stelle) ai manga.
- *
- * Il sistema supporta voti da 0.5 a 5.0 a mezzi punti.
- * Se l'utente vota di nuovo lo stesso manga, il record esistente viene aggiornato
- * (logica upsert: cerca il voto esistente oppure ne crea uno nuovo, poi salva).
- *
- * È collegato a: VotazioneRepository, MangaController (che chiama vota() e getMediaVoti())
- */
 @Service
 public class VotazioneService {
 
 	private final VotazioneRepository votazioneRepository;
 
-	/** Costruttore con iniezione del repository tramite Spring. */
 	public VotazioneService(VotazioneRepository votazioneRepository) {
 		this.votazioneRepository = votazioneRepository;
 	}
 
 	/**
 	 * Salva o aggiorna il voto dell'utente per un manga (upsert).
+	 * Se il valore è fuori dal range 0.5–5.0 il metodo non fa nulla (validazione di business).
 	 * Se esiste già un voto per la coppia (utente, manga), viene aggiornato;
 	 * altrimenti viene creato un nuovo record Votazione.
-	 * Chiamato da MangaController.votaManga() dopo la validazione del valore.
 	 */
 	@Transactional
 	public void vota(Manga manga, User utente, double valore) {
-		Votazione votazione = this.votazioneRepository
-				.findByUtenteIdAndMangaId(utente.getId(), manga.getId())
-				.orElse(new Votazione());
+		// Validazione di business: solo valori tra 0.5 e 5.0 sono accettati
+		if (valore < 0.5 || valore > 5.0) return;
+
+		Votazione votazione = this.votazioneRepository.findByUtenteIdAndMangaId(utente.getId(), manga.getId()).orElse(null);
+		if (votazione == null) {
+			votazione = new Votazione();
+		}
 		votazione.setManga(manga);
 		votazione.setUtente(utente);
 		votazione.setValoreStelline(valore);
@@ -53,9 +47,11 @@ public class VotazioneService {
 	 */
 	@Transactional(readOnly = true)
 	public Double getVotoUtente(Long utenteId, Long mangaId) {
-		return this.votazioneRepository.findByUtenteIdAndMangaId(utenteId, mangaId)
-				.map(Votazione::getValoreStelline)
-				.orElse(null);
+		Votazione votazione = this.votazioneRepository.findByUtenteIdAndMangaId(utenteId, mangaId).orElse(null);
+		if (votazione != null) {
+			return votazione.getValoreStelline();
+		}
+		return null;
 	}
 
 	/**
@@ -65,9 +61,14 @@ public class VotazioneService {
 	 */
 	@Transactional(readOnly = true)
 	public Double getMediaVoti(Long mangaId) {
-		List<Votazione> voti = this.votazioneRepository.findByMangaId(mangaId);
-		if (voti.isEmpty()) return null;
-		return voti.stream().mapToDouble(Votazione::getValoreStelline).average().orElse(0);
+	    List<Votazione> voti = this.votazioneRepository.findByMangaId(mangaId);
+	    if (voti.isEmpty()) return null;
+
+	    double somma = 0;
+	    for (Votazione v : voti) {
+	        somma += v.getValoreStelline();
+	    }
+	    return somma / voti.size();
 	}
 
 	/**

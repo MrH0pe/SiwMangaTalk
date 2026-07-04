@@ -10,31 +10,20 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 
-/**
- * Classe che modella le CREDENZIALI di accesso di un utente.
- *
- * Contiene username, password cifrata con BCrypt e ruolo applicativo.
- * È separata da User per tenere distinte le informazioni di profilo
- * da quelle di autenticazione, seguendo il principio di separazione delle responsabilità.
- *
- * Spring Security legge username, password e ruolo da questa tabella
- * tramite le query JDBC configurate in SecurityConfiguration.
- */
+
 @Entity
 public class Credentials {
 
-	/** Ruolo assegnato a tutti gli utenti registrati normalmente. */
-	public static final String DEFAULT_ROLE = "DEFAULT";
+	public static final String DEFAULT_ROLE = "ROLE_DEFAULT";
 
-	/** Ruolo assegnato agli amministratori del sito. */
-	public static final String ADMIN_ROLE = "ADMIN";
+	public static final String ADMIN_ROLE = "ROLE_ADMIN";
 
-	/** Chiave primaria generata automaticamente dal DB. */
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
-	/** Username univoco per il login; non può essere null. */
+
 	@Column(nullable = false, unique = true)
 	private String username;
 
@@ -42,10 +31,7 @@ public class Credentials {
 	@Column(nullable = false)
 	private String password;
 
-	/**
-	 * Ruolo dell'utente: "DEFAULT" per utenti normali, "ADMIN" per amministratori.
-	 * Usato da Spring Security per i controlli di autorizzazione.
-	 */
+	//DEFAULT o ADMIN
 	private String role;
 
 	/**
@@ -98,18 +84,16 @@ public class Credentials {
 		this.utente = utente;
 	}
 
-	/** Metodo statico di comodo per accedere alla costante DEFAULT_ROLE. */
 	public static String getDefaultRole() {
 		return DEFAULT_ROLE;
 	}
 
-	/** Metodo statico di comodo per accedere alla costante ADMIN_ROLE. */
+
 	public static String getAdminRole() {
 		return ADMIN_ROLE;
 	}
 
-	// hashCode e equals basati su id, username, role e utente (tutti EAGER/scalari)
-	// la password è esclusa deliberatamente: non ha senso confrontarla per l'identità dell'entità
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, username, role, utente);

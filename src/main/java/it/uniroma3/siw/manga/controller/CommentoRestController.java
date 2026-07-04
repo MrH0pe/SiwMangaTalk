@@ -20,14 +20,9 @@ import it.uniroma3.siw.manga.model.User;
 import it.uniroma3.siw.manga.service.CommentoService;
 import it.uniroma3.siw.manga.service.CredentialsService;
 import it.uniroma3.siw.manga.service.MangaService;
-import it.uniroma3.siw.manga.service.ReazioneCommentoService;
 
 /**
- * Controller REST per le operazioni sui commenti via AJAX.
- *
- * Esposto sotto il prefisso /api; restituisce JSON invece di redirect.
- * Usato dai componenti React nella pagina di dettaglio del manga per
- * aggiungere commenti e gestire like/dislike senza ricaricare la pagina.
+REACT
  */
 @RestController
 @RequestMapping("/api")
@@ -36,17 +31,14 @@ public class CommentoRestController {
     private final CommentoService commentoService;
     private final MangaService mangaService;
     private final CredentialsService credentialsService;
-    private final ReazioneCommentoService reazioneCommentoService;
 
     /** Costruttore con iniezione dei service tramite Spring. */
     public CommentoRestController(CommentoService commentoService,
                                   MangaService mangaService,
-                                  CredentialsService credentialsService,
-                                  ReazioneCommentoService reazioneCommentoService) {
+                                  CredentialsService credentialsService) {
         this.commentoService = commentoService;
         this.mangaService = mangaService;
         this.credentialsService = credentialsService;
-        this.reazioneCommentoService = reazioneCommentoService;
     }
 
     /**
@@ -56,19 +48,15 @@ public class CommentoRestController {
      * Richiesta:  POST /api/manga/{mangaId}/commenti
      * Body JSON:  { "testo": "testo del commento" }
      * Risposta:   { "id": 1, "testo": "...", "autore": "Mario", "data": "15/01/2024 10:30" }
-     *
-     * L'accesso è protetto da Spring Security: solo gli utenti autenticati
-     * possono raggiungere questo endpoint (anyRequest().authenticated()).
-     * Il CSRF token deve essere incluso nell'header della richiesta.
      */
     @PostMapping("/manga/{mangaId}/commenti")
     public ResponseEntity<Map<String, Object>> aggiungiCommento(
             @PathVariable Long mangaId,
             @RequestBody Map<String, String> body) {
 
-        // Valida il testo del commento
+        // Valida il testo del commento (trim().isEmpty() invece di isBlank() per compatibilità Java 7+)
         String testo = body.get("testo");
-        if (testo == null || testo.isBlank()) {
+        if (testo == null || testo.trim().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -102,50 +90,6 @@ public class CommentoRestController {
     }
 
     /**
-     * Gestisce il like/dislike su un commento (anche risposta) e restituisce
-     * i contatori aggiornati come JSON, senza redirect di pagina.
-     *
-     * Richiesta:  POST /api/commenti/{commentoId}/reazione
-     * Body JSON:  { "tipo": "LIKE" | "DISLIKE" }
-     * Risposta:   { "likes": 5, "dislikes": 2, "miaReazione": "LIKE" | "DISLIKE" | null }
-     *
-     * La logica di toggle è delegata a ReazioneCommentoService.reagisci():
-     * stessa reazione = rimuovi; reazione diversa = aggiorna; nessuna = aggiungi.
-     */
-    @PostMapping("/commenti/{commentoId}/reazione")
-    public ResponseEntity<Map<String, Object>> reagisci(
-            @PathVariable Long commentoId,
-            @RequestBody Map<String, String> body) {
-
-        // Valida il tipo di reazione
-        String tipo = body.get("tipo");
-        if (!"LIKE".equals(tipo) && !"DISLIKE".equals(tipo)) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        // Recupera l'utente corrente dal contesto di sicurezza di Spring
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User utente = credentialsService.getCredentials(username).getUtente();
-
-        // Esegue la logica di toggle (aggiungi / cambia / rimuovi)
-        reazioneCommentoService.reagisci(commentoId, utente, tipo);
-
-        // Legge i contatori aggiornati e lo stato della reazione dell'utente
-        long likes    = reazioneCommentoService.countLikes(commentoId);
-        long dislikes = reazioneCommentoService.countDislikes(commentoId);
-        String miaReazione = reazioneCommentoService
-                .getTipoReazioneUtente(utente.getId(), commentoId)
-                .orElse(null);
-
-        Map<String, Object> risposta = new HashMap<>();
-        risposta.put("likes",       likes);
-        risposta.put("dislikes",    dislikes);
-        risposta.put("miaReazione", miaReazione);
-
-        return ResponseEntity.ok(risposta);
-    }
-
-    /**
      * Modifica il testo di un commento se l'utente corrente ne è il proprietario.
      *
      * Richiesta:  PATCH /api/commenti/{commentoId}/modifica
@@ -160,7 +104,7 @@ public class CommentoRestController {
             @RequestBody Map<String, String> body) {
 
         String nuovoTesto = body.get("testo");
-        if (nuovoTesto == null || nuovoTesto.isBlank()) {
+        if (nuovoTesto == null || nuovoTesto.trim().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -193,7 +137,7 @@ public class CommentoRestController {
 
         // Valida il testo della risposta
         String testo = body.get("testo");
-        if (testo == null || testo.isBlank()) {
+        if (testo == null || testo.trim().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 

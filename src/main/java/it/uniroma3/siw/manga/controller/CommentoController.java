@@ -19,35 +19,20 @@ import it.uniroma3.siw.manga.model.User;
 import it.uniroma3.siw.manga.service.CommentoService;
 import it.uniroma3.siw.manga.service.CredentialsService;
 import it.uniroma3.siw.manga.service.MangaService;
-import it.uniroma3.siw.manga.service.ReazioneCommentoService;
 import jakarta.validation.Valid;
 
-/**
- * Controller per la gestione dei commenti e delle reazioni (like/dislike).
- *
- * Gestisce:
- * - la pagina "I miei commenti" dell'utente loggato
- * - l'invio di nuovi commenti e risposte
- * - il toggle like/dislike su un commento
- * - la cancellazione di un commento (sia da utente che da admin)
- *
- * È collegato a: CommentoService, MangaService, CredentialsService, ReazioneCommentoService
- */
 @Controller
 public class CommentoController {
 
     private final CommentoService commentoService;
     private final MangaService mangaService;
     private final CredentialsService credentialsService;
-    private final ReazioneCommentoService reazioneService;
-
-    /** Costruttore con iniezione dei service tramite Spring. */
+ 
     public CommentoController(CommentoService commentoService, MangaService mangaService,
-            CredentialsService credentialsService, ReazioneCommentoService reazioneService) {
+            CredentialsService credentialsService) {
         this.commentoService = commentoService;
         this.mangaService = mangaService;
         this.credentialsService = credentialsService;
-        this.reazioneService = reazioneService;
     }
 
     /**
@@ -85,7 +70,8 @@ public class CommentoController {
             model.addAttribute("commenti", commentoService.findTopLevelByMangaId(idManga));
             return "manga/mostraManga";
         }
-
+        
+        //Se non ci sono errori, salvi il commento nel DB
         commento.setManga(manga);
         commento.setTempoPubblicazione(java.time.LocalDateTime.now());
 
@@ -114,7 +100,7 @@ public class CommentoController {
         Manga manga = mangaService.findById(idManga);
         Commento commentoPadre = commentoService.findById(idCommentoPadre);
 
-        if (bindingResult.hasErrors() || risposta.getTesto() == null || risposta.getTesto().isBlank()) {
+        if (bindingResult.hasErrors() || risposta.getTesto() == null || risposta.getTesto().trim().isEmpty()) {
             model.addAttribute("manga", manga);
             model.addAttribute("commenti", commentoService.findTopLevelByMangaId(idManga));
             return "manga/mostraManga";
@@ -130,26 +116,6 @@ public class CommentoController {
 
         this.commentoService.save(risposta);
         return "redirect:/mangas/" + idManga;
-    }
-
-    /**
-     * Aggiunge, cambia o rimuove (toggle) la reazione like/dislike a un commento
-     * (POST /commenti/{idCommento}/reazione).
-     * Valori accettati per il parametro "tipo": "LIKE" o "DISLIKE".
-     *
-     * Delegato a: ReazioneCommentoService.reagisci()
-     */
-    @PostMapping("/commenti/{idCommento}/reazione")
-    public String reagisci(@PathVariable Long idCommento, @RequestParam String tipo) {
-        Commento commento = commentoService.findById(idCommento);
-        if (commento == null) return "redirect:/mangas";
-        if (!"LIKE".equals(tipo) && !"DISLIKE".equals(tipo)) {
-            return "redirect:/mangas/" + commento.getManga().getId();
-        }
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User utente = credentialsService.getCredentials(username).getUtente();
-        reazioneService.reagisci(idCommento, utente, tipo);
-        return "redirect:/mangas/" + commento.getManga().getId();
     }
 
     /**
@@ -175,11 +141,8 @@ public class CommentoController {
         Long mangaId = commento.getManga().getId();
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Credentials creds = credentialsService.getCredentials(username);
-        if (Credentials.ADMIN_ROLE.equals(creds.getRole())) {
-            commentoService.deleteAsAdmin(idCommento);
-        } else {
-            commentoService.deleteIfOwner(idCommento, creds.getUtente().getId());
-        }
+        // La scelta tra deleteAsAdmin e deleteIfOwner è logica di business: delegata al service
+        commentoService.delete(idCommento, creds);
         if (fromAdminHome) {
             return "redirect:/admin";
         }

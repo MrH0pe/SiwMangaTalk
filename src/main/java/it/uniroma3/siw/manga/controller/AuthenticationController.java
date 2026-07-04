@@ -12,24 +12,11 @@ import it.uniroma3.siw.manga.model.Credentials;
 import it.uniroma3.siw.manga.service.CredentialsService;
 import jakarta.validation.Valid;
 
-/**
- * Controller per la gestione dell'autenticazione (login e registrazione).
- *
- * Gestisce:
- * - la visualizzazione del form di registrazione (GET /register)
- * - il salvataggio del nuovo utente (POST /register)
- * - la visualizzazione del form di login (GET /login)
- *   (Spring Security gestisce automaticamente il POST /login)
- *
- * È collegato a: CredentialsService (per salvare le credenziali),
- *                Credentials e User (model), template authentication/
- */
 @Controller
 public class AuthenticationController {
 	
 	private final CredentialsService credentialsService;
 
-    /** Costruttore con iniezione del service tramite Spring. */
     public AuthenticationController(CredentialsService credentialsService) {
         this.credentialsService = credentialsService;
     }
@@ -57,15 +44,15 @@ public class AuthenticationController {
 
 	// Processa il form di registrazione: salva l'utente e le credenziali se non ci sono errori di validazione
 	@PostMapping("/register")
-	public String registerUser(@Valid @ModelAttribute("user") User user,
+	public String registerUser(@Valid @ModelAttribute("user") User user,     //BindingResult è una classe di SpringBoot che gestisce tutti gli errori
 			BindingResult userBindingResult, @Valid
 			@ModelAttribute("credentials") Credentials credentials,
 			BindingResult credentialsBindingResult) {
 
-		if (!userBindingResult.hasErrors() && !credentialsBindingResult.hasErrors()) {
+		if (!userBindingResult.hasErrors() && !credentialsBindingResult.hasErrors()) {   //Se non ci sono errori, salvi utente e credenziali nel DB
 			credentials.setUtente(user);
 			credentialsService.saveCredentials(credentials);
-			return "redirect:/";
+			return "redirect:/";     // serve per evitare il problema del doppio invio del form.
 		}
 		return "authentication/registerUser";
 	}

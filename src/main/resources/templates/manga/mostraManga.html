@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
 	<title th:text="${manga.nome} + ' - SiwMangaTalk'">Dettaglio Manga</title>
@@ -155,26 +155,8 @@
                          th:attr="data-commento-id=${c.id}, data-testo=${c.testo}">
                     </div>
 
-                    <!-- Azioni: like, dislike (visibili a tutti), rispondi (solo se loggato) -->
+                    <!-- Azioni: rispondi (solo se loggato) -->
                     <div class="comment-actions">
-
-                        <!-- LIKE/DISLIKE – React mount (utente autenticato) -->
-                        <!-- I dati iniziali vengono iniettati come data-attribute da Thymeleaf;
-                             il componente React li legge e gestisce le interazioni via AJAX. -->
-                        <div th:if="${userDetails != null}"
-                             class="react-reaction"
-                             th:attr="data-commento-id=${c.id},
-                                      data-likes=${likeMap[c.id] ?: 0},
-                                      data-dislikes=${dislikeMap[c.id] ?: 0},
-                                      data-mia-reazione=${reazioniUtente != null and reazioniUtente[c.id] != null ? reazioniUtente[c.id] : ''}">
-                        </div>
-                        <!-- LIKE/DISLIKE – sola lettura (utente anonimo) -->
-                        <span th:unless="${userDetails != null}" class="reaction-readonly">
-                            &#128077; <span th:text="${likeMap[c.id] ?: 0}">0</span>
-                        </span>
-                        <span th:unless="${userDetails != null}" class="reaction-readonly">
-                            &#128078; <span th:text="${dislikeMap[c.id] ?: 0}">0</span>
-                        </span>
 
                         <!-- Pulsante Rispondi + form risposta – React mount (utente autenticato).
                              Il componente RispostaForm gestisce toggle, form e invio via AJAX. -->
@@ -228,22 +210,6 @@
                                      th:attr="data-commento-id=${r.id}, data-testo=${r.testo}">
                                 </div>
 
-                                <!-- LIKE/DISLIKE sulle risposte – stessa logica dei commenti principali -->
-                                <div class="comment-actions">
-                                    <div th:if="${userDetails != null}"
-                                         class="react-reaction"
-                                         th:attr="data-commento-id=${r.id},
-                                                  data-likes=${likeMap[r.id] ?: 0},
-                                                  data-dislikes=${dislikeMap[r.id] ?: 0},
-                                                  data-mia-reazione=${reazioniUtente != null and reazioniUtente[r.id] != null ? reazioniUtente[r.id] : ''}">
-                                    </div>
-                                    <span th:unless="${userDetails != null}" class="reaction-readonly">
-                                        &#128077; <span th:text="${likeMap[r.id] ?: 0}">0</span>
-                                    </span>
-                                    <span th:unless="${userDetails != null}" class="reaction-readonly">
-                                        &#128078; <span th:text="${dislikeMap[r.id] ?: 0}">0</span>
-                                    </span>
-                                </div>
                             </div>
                         </div>
 
@@ -521,8 +487,7 @@
                     // ---- Lista commenti aggiunti in questa sessione ----
                     // I commenti pre-esistenti rimangono renderizzati da Thymeleaf più in basso.
                     // Questi nuovi commenti appaiono subito, senza ricaricare la pagina.
-                    // Include like/dislike (ReazioneCommento) e il pulsante Rispondi (RispostaForm)
-                    // per una UX completa anche senza reload.
+                    // Include il pulsante Rispondi (RispostaForm) per una UX completa anche senza reload.
                     nuoviCommenti.map(function(c) {
                         return React.createElement('div', { className: 'comment-item', key: c.id },
                             React.createElement('div', { className: 'comment-meta' },
@@ -530,14 +495,8 @@
                                 React.createElement('span', { className: 'comment-date' },   c.data)
                             ),
                             React.createElement('p', { className: 'comment-text', 'data-comment-text-for': String(c.id) }, c.testo),
-                            // Azioni: like/dislike, rispondi e modifica subito disponibili
+                            // Azioni: rispondi e modifica subito disponibili
                             React.createElement('div', { className: 'comment-actions' },
-                                React.createElement(ReazioneCommento, {
-                                    commentoId:      String(c.id),
-                                    initialLikes:    0,
-                                    initialDislikes: 0,
-                                    miaReazione:     null
-                                }),
                                 React.createElement(RispostaForm, {
                                     commentoId: String(c.id)
                                 }),
@@ -572,101 +531,6 @@
                 })
             );
         }
-
-        /**
-         * Componente React per like/dislike su commenti e risposte.
-         *
-         * Props:
-         *   commentoId     - ID del commento (stringa, letta da data-commento-id)
-         *   initialLikes   - Numero di like iniziali (da Thymeleaf, via data-likes)
-         *   initialDislikes- Numero di dislike iniziali (da Thymeleaf, via data-dislikes)
-         *   miaReazione    - "LIKE" | "DISLIKE" | null (reazione dell'utente corrente)
-         *
-         * Funzionamento:
-         *   Al click su 👍 o 👎 invia POST /api/commenti/{id}/reazione con CSRF header.
-         *   La risposta JSON contiene likes, dislikes e miaReazione aggiornati.
-         *   Lo stato locale viene aggiornato: i contatori cambiano senza reload.
-         *   Stessa reazione → toggle off (rimuove); reazione diversa → cambia tipo.
-         *
-         * Nota: usa Promise (.then/.catch) invece di async/await per compatibilità
-         * con Babel Standalone (che non include regeneratorRuntime).
-         */
-        function ReazioneCommento(props) {
-            var commentoId = props.commentoId;
-
-            var statoLikes     = React.useState(props.initialLikes);
-            var likes          = statoLikes[0];
-            var setLikes       = statoLikes[1];
-
-            var statoDislikes  = React.useState(props.initialDislikes);
-            var dislikes       = statoDislikes[0];
-            var setDislikes    = statoDislikes[1];
-
-            var statoReazione  = React.useState(props.miaReazione || null);
-            var miaReazione    = statoReazione[0];
-            var setMiaReazione = statoReazione[1];
-
-            var statoLoading   = React.useState(false);
-            var loading        = statoLoading[0];
-            var setLoading     = statoLoading[1];
-
-            /**
-             * Invia la reazione al server via fetch e aggiorna lo stato locale
-             * con i nuovi contatori restituiti dalla risposta JSON.
-             */
-            function reagisci(tipo) {
-                if (loading) return;
-                var csrfToken  = document.querySelector('meta[name="_csrf"]').content;
-                var csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-                var headers = { 'Content-Type': 'application/json' };
-                headers[csrfHeader] = csrfToken;
-                setLoading(true);
-                fetch('/api/commenti/' + commentoId + '/reazione', {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify({ tipo: tipo })
-                })
-                .then(function(r) {
-                    if (r.ok) {
-                        return r.json().then(function(data) {
-                            setLikes(data.likes);
-                            setDislikes(data.dislikes);
-                            setMiaReazione(data.miaReazione || null);
-                        });
-                    }
-                })
-                .catch(function() {})
-                .then(function() { setLoading(false); });
-            }
-
-            return React.createElement('div', { style: { display: 'inline-flex', gap: '0.5rem' } },
-                React.createElement('button', {
-                    type: 'button',
-                    className: 'btn-reaction' + (miaReazione === 'LIKE' ? ' active-like' : ''),
-                    onClick: function() { reagisci('LIKE'); },
-                    disabled: loading
-                }, '\uD83D\uDC4D ' + likes),
-                React.createElement('button', {
-                    type: 'button',
-                    className: 'btn-reaction' + (miaReazione === 'DISLIKE' ? ' active-dislike' : ''),
-                    onClick: function() { reagisci('DISLIKE'); },
-                    disabled: loading
-                }, '\uD83D\uDC4E ' + dislikes)
-            );
-        }
-
-        // Monta un'istanza di ReazioneCommento su ogni div .react-reaction della pagina.
-        // Questo copre sia i commenti principali sia le risposte, tutti con gli stessi
-        // data-attribute iniettati da Thymeleaf nel ciclo th:each.
-        document.querySelectorAll('.react-reaction').forEach(function(el) {
-            var reactionRoot = ReactDOM.createRoot(el);
-            reactionRoot.render(React.createElement(ReazioneCommento, {
-                commentoId:      el.getAttribute('data-commento-id'),
-                initialLikes:    parseInt(el.getAttribute('data-likes'))    || 0,
-                initialDislikes: parseInt(el.getAttribute('data-dislikes')) || 0,
-                miaReazione:     el.getAttribute('data-mia-reazione')       || null
-            }));
-        });
 
         /**
          * Componente React per aggiungere una risposta a un commento via AJAX.

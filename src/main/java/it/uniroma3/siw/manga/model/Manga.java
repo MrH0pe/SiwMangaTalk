@@ -11,26 +11,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 
-/**
- * Classe che modella un MANGA nel catalogo dell'applicazione.
- *
- * Relazioni:
- * - 1:1 con Autore (lato inverso, la FK è nella tabella autore)
- * - 1:N con Votazione (un manga può ricevere molti voti)
- * - 1:N con Commento (un manga può avere molti commenti)
- *
- * Le relazioni con Votazione e Commento sono LAZY: vengono caricate dal DB
- * solo quando esplicitamente accedute (non incluse in hashCode/equals
- * per evitare LazyInitializationException).
- *
- * È collegato a: AutoreController, MangaController, AdminController
- *               e MangaService (che lo recupera dal DB).
- */
+
 @Entity
 public class Manga {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
 	private String nome;
@@ -119,8 +105,7 @@ public class Manga {
 		this.commentoList = commentoList;
 	}
 
-	// hashCode e equals basati solo sui campi non-lazy (id, nome, descrizione, path)
-	// per evitare LazyInitializationException quando le collezioni non sono caricate
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, nome, descrizione, pathImmagine, pathSfondo);

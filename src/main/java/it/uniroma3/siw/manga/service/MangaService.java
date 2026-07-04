@@ -8,17 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 import it.uniroma3.siw.manga.model.Manga;
 import it.uniroma3.siw.manga.repository.MangaRepository;
 
-/**
- * Service per la gestione dei manga.
- * Fornisce metodi di lettura dal database; la scrittura dei manga
- * avviene tramite il data loader o l'area admin (non ancora implementata).
- */
 @Service
 public class MangaService {
 
 	private final MangaRepository mangaRepository;
 
-	/** Costruttore con iniezione del repository tramite Spring. */
 	public MangaService(MangaRepository mangaRepository) {
 		this.mangaRepository = mangaRepository;
 	}
@@ -32,7 +26,8 @@ public class MangaService {
 	/** Restituisce il manga con l'id specificato, oppure null se non esiste. */
 	@Transactional(readOnly = true)
 	public Manga findById(Long id) {
-		return this.mangaRepository.findById(id).orElse(null);
+		Manga manga = this.mangaRepository.findById(id).orElse(null);
+		return manga;
 	}
 
 }

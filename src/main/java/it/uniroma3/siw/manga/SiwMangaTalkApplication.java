@@ -31,6 +31,6 @@ public class SiwMangaTalkApplication {
 	 *          visualizzare i manga ordinati per voto (ascendente o discendente).
 	 *
 	 * 6) (DONE) LETTURA ADMIN: Solo l'admin può vedere, per un manga, quali utenti
-	 *          hanno commentato, con username e numero di commenti effettuati.
+	 *          hanno commentato, con username e numero di commenti effettuati. (/admin)
 	 */
 }

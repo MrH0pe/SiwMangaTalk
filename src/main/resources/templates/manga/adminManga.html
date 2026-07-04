@@ -124,16 +124,6 @@
 
                     <p class="comment-text" th:text="${c.testo}"></p>
 
-                    <!-- Contatori like/dislike (sola lettura nell'admin panel) -->
-                    <div class="comment-actions">
-                        <span class="reaction-readonly">
-                            &#128077; <span th:text="${likeMap[c.id] ?: 0}">0</span>
-                        </span>
-                        <span class="reaction-readonly">
-                            &#128078; <span th:text="${dislikeMap[c.id] ?: 0}">0</span>
-                        </span>
-                    </div>
-
                     <!-- Risposte al commento -->
                     <div class="replies-section"
                          th:if="${c.risposte != null and !#lists.isEmpty(c.risposte)}">
@@ -170,15 +160,6 @@
                                     </form>
                                 </div>
                                 <p class="comment-text" th:text="${r.testo}"></p>
-                                <!-- Contatori like/dislike risposta (sola lettura) -->
-                                <div class="comment-actions">
-                                    <span class="reaction-readonly">
-                                        &#128077; <span th:text="${likeMap[r.id] ?: 0}">0</span>
-                                    </span>
-                                    <span class="reaction-readonly">
-                                        &#128078; <span th:text="${dislikeMap[r.id] ?: 0}">0</span>
-                                    </span>
-                                </div>
                             </div>
                         </div>
 

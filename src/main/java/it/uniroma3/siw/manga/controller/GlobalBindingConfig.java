@@ -14,16 +14,6 @@ import org.springframework.web.bind.annotation.InitBinder;
 @ControllerAdvice
 public class GlobalBindingConfig {
 
-    /**
-     * Registra un editor personalizzato per i campi String dei form.
-     *
-     * StringTrimmerEditor(true) fa due cose:
-     * 1. Rimuove gli spazi iniziali e finali da ogni stringa (trim)
-     * 2. Converte le stringhe vuote (es. "") in null (il parametro "true" abilita questa opzione)
-     *
-     * Questo evita di salvare nel database stringhe con soli spazi o stringhe vuote
-     * al posto di null, riducendo la necessità di validazione manuale nei controller.
-     */
     @InitBinder
     public void initBinder(WebDataBinder binder) {
         binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));

@@ -16,16 +16,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.validation.constraints.NotBlank;
 
-/**
- * Classe che modella un COMMENTO scritto da un utente su un manga.
- *
- * Struttura ad albero:
- * - Commenti principali: commentoPadre = null
- * - Risposte: commentoPadre = riferimento al commento genitore
- *
- * È collegata a: User (autore), Manga (su cui è scritto),
- *                Commento (padre e lista risposte), ReazioneCommento (like/dislike)
- */
 @Entity
 public class Commento {
 
@@ -33,11 +23,11 @@ public class Commento {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
-	// Il testo del commento; @NotBlank garantisce che non sia vuoto o solo spazi
+
 	@NotBlank
 	private String testo;
 
-	// Data e ora di pubblicazione, impostata nel controller al momento del salvataggio
+
 	private LocalDateTime tempoPubblicazione;
 
 	// Associazione molti a uno tra Commento e User:
@@ -61,15 +51,9 @@ public class Commento {
 	// CascadeType.ALL + orphanRemoval=true: se questo commento viene eliminato,
 	// tutte le sue risposte vengono eliminate automaticamente da Hibernate.
 	// @OrderBy: le risposte sono ordinate dalla più vecchia alla più recente.
-	@OneToMany(mappedBy = "commentoPadre", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "commentoPadre", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("tempoPubblicazione ASC")
 	private List<Commento> risposte = new ArrayList<>();
-
-	// Lista delle reazioni (like/dislike) a questo commento.
-	// CascadeType.ALL + orphanRemoval=true: garantisce la cancellazione automatica
-	// di tutte le reazioni quando il commento viene eliminato.
-	@OneToMany(mappedBy = "commento", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<ReazioneCommento> reazioni = new ArrayList<>();
 
 	// --- Getters e Setters ---
 
@@ -129,15 +113,7 @@ public class Commento {
 		this.risposte = risposte;
 	}
 
-	public List<ReazioneCommento> getReazioni() {
-		return reazioni;
-	}
 
-	public void setReazioni(List<ReazioneCommento> reazioni) {
-		this.reazioni = reazioni;
-	}
-
-	// hashCode e equals basati sui campi principali (id, manga, testo, utente, data)
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, manga, tempoPubblicazione, testo, utente);

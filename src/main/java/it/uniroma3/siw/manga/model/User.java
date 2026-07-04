@@ -11,23 +11,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-/**
- * Classe che modella il profilo applicativo di un UTENTE.
- *
- * Contiene le informazioni di profilo (nome, email) distinte
- * dalle credenziali di accesso, che sono gestite dalla classe Credentials.
- *
- * Relazioni:
- * - 1:N con Commento (un utente può scrivere più commenti)
- * - 1:N con Votazione (un utente può esprimere più voti)
- *
- * hashCode e equals sono basati solo su id ed email (campi scalari EAGER)
- * per evitare LazyInitializationException sulle collezioni LAZY.
- */
 @Entity
-@Table(name = "utente")
+@Table(name = "utente")  //"User" è una parola riservata di SQL
 public class User {
 
 	@Id
@@ -37,7 +25,8 @@ public class User {
 	@NotBlank
 	@Column(nullable = false)
 	private String name;
-
+	
+	@Email
 	@NotBlank
 	@Column(nullable = false, unique = true)
 	private String email;
@@ -70,12 +59,12 @@ public class User {
 		this.name = name;
 	}
 
-	// Alias di getName() per compatibilità con i template Thymeleaf (${utente.username})
+	
 	public String getUsername() {
 		return name;
 	}
 
-	// Alias di setName() per compatibilità con i form di registrazione
+	
 	public void setUsername(String username) {
 		this.name = username;
 	}
@@ -104,8 +93,6 @@ public class User {
 		this.votazioneList = votazioneList;
 	}
 
-	// hashCode e equals basati su id ed email (campi univoci e non lazy)
-	// per evitare LazyInitializationException sulle collezioni LAZY
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, email);

@@ -12,33 +12,22 @@ import it.uniroma3.siw.manga.model.Commento;
 import it.uniroma3.siw.manga.model.Manga;
 import it.uniroma3.siw.manga.service.CommentoService;
 import it.uniroma3.siw.manga.service.MangaService;
-import it.uniroma3.siw.manga.service.ReazioneCommentoService;
 import it.uniroma3.siw.manga.service.VotazioneService;
 
-/**
- * Controller per il pannello di amministrazione dei manga.
- *
- * Accessibile solo agli utenti con ruolo ADMIN (protezione in SecurityConfiguration).
- * Fornisce una vista di gestione per un singolo manga: mostra tutti i commenti
- * (principali e risposte) con pulsanti di eliminazione visibili per qualsiasi commento.
- */
 @Controller
 @RequestMapping("/mangas/admin")
 public class AdminController {
 
     private final MangaService mangaService;
     private final CommentoService commentoService;
-    private final ReazioneCommentoService reazioneService;
     private final VotazioneService votazioneService;
 
     /** Costruttore con iniezione dei service tramite Spring. */
     public AdminController(MangaService mangaService,
                            CommentoService commentoService,
-                           ReazioneCommentoService reazioneService,
                            VotazioneService votazioneService) {
         this.mangaService = mangaService;
         this.commentoService = commentoService;
-        this.reazioneService = reazioneService;
         this.votazioneService = votazioneService;
     }
 
@@ -47,7 +36,6 @@ public class AdminController {
      *
      * Carica nel model:
      * - il manga e tutti i suoi commenti principali (con le relative risposte)
-     * - le mappe like/dislike per visualizzare i contatori
      * - media e numero totale voti
      *
      * @param id    ID del manga da gestire
@@ -65,8 +53,6 @@ public class AdminController {
 
         model.addAttribute("manga",      manga);
         model.addAttribute("commenti",   commenti);
-        model.addAttribute("likeMap",    reazioneService.getLikeCountByManga(id));
-        model.addAttribute("dislikeMap", reazioneService.getDislikeCountByManga(id));
         model.addAttribute("mediaVoti",  votazioneService.getMediaVoti(id));
         model.addAttribute("countVoti",  votazioneService.countVoti(id));
 

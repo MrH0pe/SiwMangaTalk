@@ -22,20 +22,8 @@ import it.uniroma3.siw.manga.model.User;
 import it.uniroma3.siw.manga.service.CommentoService;
 import it.uniroma3.siw.manga.service.CredentialsService;
 import it.uniroma3.siw.manga.service.MangaService;
-import it.uniroma3.siw.manga.service.ReazioneCommentoService;
 import it.uniroma3.siw.manga.service.VotazioneService;
 
-/**
- * Controller per la gestione delle pagine relative ai manga.
- *
- * Gestisce:
- * - la pagina di dettaglio di un singolo manga (con commenti, votazione e reazioni)
- * - la pagina con la lista di tutti i manga (con ordinamento opzionale)
- * - la sottomissione del voto dell'utente per un manga
- *
- * È collegato a: MangaService, CommentoService, VotazioneService,
- *                ReazioneCommentoService, CredentialsService
- */
 @Controller
 public class MangaController {
 
@@ -43,17 +31,13 @@ public class MangaController {
 	private final CommentoService commentoService;
 	private final CredentialsService credentialsService;
 	private final VotazioneService votazioneService;
-	private final ReazioneCommentoService reazioneService;
 
-	/** Costruttore con iniezione di tutti i service tramite Spring. */
 	public MangaController(MangaService mangaService, CommentoService commentoService,
-			CredentialsService credentialsService, VotazioneService votazioneService,
-			ReazioneCommentoService reazioneService) {
+			CredentialsService credentialsService, VotazioneService votazioneService) {
 		this.mangaService = mangaService;
 		this.commentoService = commentoService;
 		this.credentialsService = credentialsService;
 		this.votazioneService = votazioneService;
-		this.reazioneService = reazioneService;
 	}
 
 	/**
@@ -73,12 +57,12 @@ public class MangaController {
 	public String mostraManga(@PathVariable Long id, Model model) {
 		Manga manga = this.mangaService.findById(id);
 		if (manga == null) {
-			return "redirect:/mangas";
+			return "redirect:/mangas";  //Se non esiste quell'ID, ci riporta alla lista di tutti i manga
 		}
 		model.addAttribute("manga", manga);
 		model.addAttribute("commenti", this.commentoService.findTopLevelByMangaId(id));
 
-		// Se l'utente è autenticato, recupera i suoi dati personali (voto e reazioni).
+		// Se l'utente è autenticato, recupera i suoi dati personali (voto).
 		// L'admin viene reindirizzato subito al pannello di amministrazione.
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth != null && !(auth instanceof AnonymousAuthenticationToken)) {
@@ -92,16 +76,12 @@ public class MangaController {
 				model.addAttribute("currentUserId", currentUserId);
 				// votoUtente: il voto (0.5–5.0) già espresso dall'utente, null se non ha votato
 				model.addAttribute("votoUtente", votazioneService.getVotoUtente(currentUserId, id));
-				// reazioniUtente: mappa {commentoId → "LIKE"/"DISLIKE"} per i commenti già votati dall'utente
-				model.addAttribute("reazioniUtente", reazioneService.getReazioniUtente(currentUserId, id));
+
 			}
 		}
 		// mediaVoti e countVoti: visibili a tutti (anche anonimi)
 		model.addAttribute("mediaVoti", votazioneService.getMediaVoti(id));
 		model.addAttribute("countVoti", votazioneService.countVoti(id));
-		// likeMap / dislikeMap: mappe {commentoId → conteggio} per tutti i commenti del manga
-		model.addAttribute("likeMap", reazioneService.getLikeCountByManga(id));
-		model.addAttribute("dislikeMap", reazioneService.getDislikeCountByManga(id));
 		return "manga/mostraManga";
 	}
 
@@ -113,14 +93,13 @@ public class MangaController {
 	 * Delegato a: VotazioneService.vota()
 	 */
 	@PostMapping("/mangas/{id}/voto")
-	public String votaManga(@PathVariable Long id, @RequestParam double valoreStelline) {
+	public String votaManga(@PathVariable Long id, @RequestParam double valoreStelline) {  
 		Manga manga = this.mangaService.findById(id);
-		if (manga == null) return "redirect:/mangas";
-		if (valoreStelline >= 0.5 && valoreStelline <= 5.0) {
-			String username = SecurityContextHolder.getContext().getAuthentication().getName();
-			User utente = credentialsService.getCredentials(username).getUtente();
-			votazioneService.vota(manga, utente, valoreStelline);
-		}
+		if (manga == null) return "redirect:/mangas";  //Se l'id non esiste ritorna alla lista dei manga
+		// La validazione del range (0.5–5.0) è responsabilità del service
+		String username = SecurityContextHolder.getContext().getAuthentication().getName();
+		User utente = credentialsService.getCredentials(username).getUtente();
+		votazioneService.vota(manga, utente, valoreStelline);
 		return "redirect:/mangas/" + id;
 	}
 
@@ -137,43 +116,62 @@ public class MangaController {
 	 */
 	@GetMapping("/mangas")
 	public String listaManga(Model model,
-			@RequestParam(required = false, defaultValue = "alpha-asc") String sort) {
+	        @RequestParam(required = false, defaultValue = "alpha-asc") String sort) {
 
-		List<Manga> mangaList = new ArrayList<>(this.mangaService.findAll());
+	    List<Manga> mangaList = new ArrayList<>(this.mangaService.findAll());
 
-		// Precalcola la media voti per ogni manga per usarla nel comparatore e nella view
-		Map<Long, Double> mediaMap = new HashMap<>();
-		for (Manga manga : mangaList) {
-			Double media = votazioneService.getMediaVoti(manga.getId());
-			mediaMap.put(manga.getId(), media != null ? media : 0.0);
-		}
+	    Map<Long, Double> mediaMap = new HashMap<>();
+	    for (Manga manga : mangaList) {
+	        Double media = votazioneService.getMediaVoti(manga.getId());
+	        mediaMap.put(manga.getId(), media != null ? media : 0.0);
+	    }
 
-		// Seleziona il comparatore in base al parametro di ordinamento
-		Comparator<Manga> comparator;
-		switch (sort) {
-			case "alpha-desc":
-				comparator = (a, b) -> b.getNome().compareToIgnoreCase(a.getNome());
-				break;
-			case "rating-desc":
-				comparator = (a, b) -> Double.compare(
-						mediaMap.getOrDefault(b.getId(), 0.0),
-						mediaMap.getOrDefault(a.getId(), 0.0));
-				break;
-			case "rating-asc":
-				comparator = (a, b) -> Double.compare(
-						mediaMap.getOrDefault(a.getId(), 0.0),
-						mediaMap.getOrDefault(b.getId(), 0.0));
-				break;
-			default: // alpha-asc
-				comparator = (a, b) -> a.getNome().compareToIgnoreCase(b.getNome());
-				break;
-		}
-		mangaList.sort(comparator);
+	    Comparator<Manga> comparator;
+	    switch (sort) {
+	        case "alpha-desc":
+	            comparator = new Comparator<Manga>() {
+	                @Override
+	                public int compare(Manga a, Manga b) {
+	                    return b.getNome().compareToIgnoreCase(a.getNome());
+	                }
+	            };
+	            break;
+	        case "rating-desc":
+	            comparator = new Comparator<Manga>() {
+	                @Override
+	                public int compare(Manga a, Manga b) {
+	                    return Double.compare(
+	                            mediaMap.getOrDefault(b.getId(), 0.0),
+	                            mediaMap.getOrDefault(a.getId(), 0.0));
+	                }
+	            };
+	            break;
+	        case "rating-asc":
+	            comparator = new Comparator<Manga>() {
+	                @Override
+	                public int compare(Manga a, Manga b) {
+	                    return Double.compare(
+	                            mediaMap.getOrDefault(a.getId(), 0.0),
+	                            mediaMap.getOrDefault(b.getId(), 0.0));
+	                }
+	            };
+	            break;
+	        default: // alpha-asc
+	            comparator = new Comparator<Manga>() {
+	                @Override
+	                public int compare(Manga a, Manga b) {
+	                    return a.getNome().compareToIgnoreCase(b.getNome());
+	                }
+	            };
+	            break;
+	    }
 
-		model.addAttribute("mangas", mangaList);
-		model.addAttribute("mediaMap", mediaMap);
-		model.addAttribute("sort", sort);
+	    mangaList.sort(comparator);
 
-		return "manga/listaManga";
+	    model.addAttribute("mangas", mangaList);
+	    model.addAttribute("mediaMap", mediaMap);
+	    model.addAttribute("sort", sort);
+
+	    return "manga/listaManga";
 	}
 }

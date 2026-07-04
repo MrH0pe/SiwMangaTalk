@@ -11,40 +11,27 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-/**
- * Classe che modella una VOTAZIONE (voto con stelle) di un utente su un manga.
- *
- * Il vincolo di unicità su (utente_id, manga_id) garantisce che ogni utente
- * possa esprimere al massimo un voto per manga. Se l'utente vota di nuovo,
- * il record esistente viene aggiornato (upsert gestito da VotazioneService).
- *
- * Il valore è un Double da 0.5 a 5.0 con incrementi di 0.5 (mezze stelle).
- *
- * È collegata a: Manga (manga votato), User (utente che ha votato)
- */
 @Entity
 @Table(uniqueConstraints = {
-	@UniqueConstraint(columnNames = {"utente_id", "manga_id"})
+	@UniqueConstraint(columnNames = {"utente_id", "manga_id"})  //Chiavi uniche, sulle FK vero Manga e User
 })
 public class Votazione {
 
-	/** Chiave primaria generata automaticamente dal DB. */
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
-	/** Valore del voto: da 0.5 (minimo) a 5.0 (massimo), a mezzi punti. */
+
 	private Double valoreStelline;
 
-	// Associazione molti a uno tra Votazione e Manga:
-	// una votazione riguarda un solo manga, ma un manga può ricevere molte votazioni.
-	// EAGER: il manga viene sempre caricato insieme alla votazione.
+	//Associazione molti a uno
+	//Un manga può avere tanti voti
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Manga manga;
 
-	// Associazione molti a uno tra Votazione e User:
-	// una votazione appartiene a un solo utente, ma un utente può votare molti manga.
-	// EAGER: l'utente viene sempre caricato insieme alla votazione.
+	//Associazione molti a uno
+	//Tanti utenti posso votare un singolo manga
 	@ManyToOne(fetch = FetchType.EAGER)
 	private User utente;
 
@@ -82,7 +69,7 @@ public class Votazione {
 		this.utente = utente;
 	}
 
-	// Tutti i campi sono EAGER o scalari: nessun rischio di LazyInitializationException
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, manga, valoreStelline, utente);

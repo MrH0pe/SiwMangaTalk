@@ -1,6 +1,7 @@
 package it.uniroma3.siw.manga.service;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -9,16 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import it.uniroma3.siw.manga.model.Credentials;
 import it.uniroma3.siw.manga.repository.CredentialsRepository;
 
-
-/**
- * Service per la gestione delle credenziali di accesso (username + password).
- *
- * Fornisce:
- * - recupero credenziali per id o username (usato in tutti i controller per identificare l'utente)
- * - salvataggio credenziali con cifratura BCrypt della password (usato alla registrazione)
- *
- * È collegato a: CredentialsRepository, PasswordEncoder (BCrypt da SecurityConfiguration)
- */
 @Service
 public class CredentialsService {
 
@@ -28,7 +19,6 @@ public class CredentialsService {
     // Repository per l'accesso alla tabella "credentials" nel database
     private final CredentialsRepository credentialsRepository;
 
-    /** Costruttore con iniezione delle dipendenze tramite Spring. */
     public CredentialsService(PasswordEncoder passwordEncoder, CredentialsRepository credentialsRepository) {
         this.passwordEncoder = passwordEncoder;
         this.credentialsRepository = credentialsRepository;
@@ -37,15 +27,14 @@ public class CredentialsService {
     // Restituisce le credenziali associate all'id specificato, null se non trovate
     @Transactional(readOnly = true)
     public Credentials getCredentials(Long id) {
-        Optional<Credentials> result = this.credentialsRepository.findById(id);
-        return result.orElse(null);
+        Credentials result = this.credentialsRepository.findById(id).orElse(null);
+        return result;
     }
 
     // Restituisce le credenziali associate all'username specificato, null se non trovate
     @Transactional(readOnly = true)
     public Credentials getCredentials(String username) {
-        Optional<Credentials> result = Optional.ofNullable(this.credentialsRepository.findByUsername(username));
-        return result.orElse(null);
+        return this.credentialsRepository.findByUsername(username);
     }
 
     // Salva le credenziali del nuovo utente: assegna il ruolo DEFAULT e cifra la password con BCrypt
@@ -54,5 +43,18 @@ public class CredentialsService {
         credentials.setRole(Credentials.DEFAULT_ROLE);
         credentials.setPassword(this.passwordEncoder.encode(credentials.getPassword()));
         return this.credentialsRepository.save(credentials);
+    }
+
+    // Restituisce tutte le credenziali degli utenti non-admin che hanno un utente associato.
+    // Usato da AdminHomeController per costruire la dashboard.
+    @Transactional(readOnly = true)
+    public List<Credentials> getAllNonAdmin() {
+        List<Credentials> result = new ArrayList<>();
+        for (Credentials creds : this.credentialsRepository.findAll()) {
+            if (!Credentials.ADMIN_ROLE.equals(creds.getRole()) && creds.getUtente() != null) {
+                result.add(creds);
+            }
+        }
+        return result;
     }
 }

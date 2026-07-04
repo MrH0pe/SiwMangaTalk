@@ -45,14 +45,14 @@ public class DataLoader implements CommandLineRunner {
         if (credentialsRepository.findByUsername("Admin") == null) {
 
             // Riusa il profilo utente se l'email esiste già (avvio precedente parzialmente fallito),
-            // altrimenti ne crea uno nuovo.
-            User adminUser = utenteRepository.findByEmail("admin@mangatalk.it")
-                    .orElseGet(() -> {
-                        User u = new User();
-                        u.setName("Admin");
-                        u.setEmail("admin@mangatalk.it");
-                        return utenteRepository.save(u);
-                    });
+            // altrimenti ne crea uno nuovo. orElse(null) usato una sola volta per evitare doppia query.
+            User adminUser = utenteRepository.findByEmail("admin@mangatalk.it").orElse(null);
+            if (adminUser == null) {
+                adminUser = new User();
+                adminUser.setName("Admin");
+                adminUser.setEmail("admin@mangatalk.it");
+                adminUser = utenteRepository.save(adminUser);
+            }
 
             // Crea le credenziali con ruolo ADMIN e password cifrata
             Credentials adminCredentials = new Credentials();
