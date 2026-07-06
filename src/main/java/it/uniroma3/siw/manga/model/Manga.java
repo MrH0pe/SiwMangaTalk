@@ -23,6 +23,7 @@ public class Manga {
 	private String descrizione;
 	private String pathImmagine;
 	private String pathSfondo;
+	private Integer annoPubblicazione;
 
 	// Associazione 1 a 1 tra Manga e Autore (lato inverso):
 	// un manga è scritto da un solo autore e un autore scrive un solo manga
@@ -79,6 +80,14 @@ public class Manga {
 
 	public void setPathSfondo(String pathSfondo) {
 		this.pathSfondo = pathSfondo;
+	}
+
+	public Integer getAnnoPubblicazione() {
+		return annoPubblicazione;
+	}
+
+	public void setAnnoPubblicazione(Integer annoPubblicazione) {
+		this.annoPubblicazione = annoPubblicazione;
 	}
 
 	public Autore getAutore() {

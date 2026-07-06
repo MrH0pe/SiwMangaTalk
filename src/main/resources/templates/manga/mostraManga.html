@@ -45,6 +45,10 @@
         <section class="info-card">
             <h2>Trama</h2>
             <p class="descrizione" th:text="${manga.descrizione}">Questo è un bel manga!</p>
+            <div class="anno-box" th:if="${manga.annoPubblicazione != null}">
+                <strong>Anno di pubblicazione:</strong>
+                <span th:text="${manga.annoPubblicazione}"></span>
+            </div>
             <div class="autore-box">
                 <strong>Autore:</strong>
                 <a th:if="${manga.autore != null}"

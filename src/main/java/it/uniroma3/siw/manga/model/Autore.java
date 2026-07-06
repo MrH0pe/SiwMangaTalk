@@ -1,6 +1,7 @@
 package it.uniroma3.siw.manga.model;
 
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 // Le annotazioni JPA che dicono a Hibernate come mappare questa classe su una tabella del database.
@@ -18,9 +19,10 @@ public class Autore {
 	private Long id;
 
 
-	private String nome;        
-	private String cognome;     
-	private String descrizione; 
+	private String nome;
+	private String cognome;
+	private String descrizione;
+	private LocalDate dataDiNascita;
 
 
 	@OneToOne   //Un autore ha scritto un solo manga
@@ -59,6 +61,14 @@ public class Autore {
 
 	public void setDescrizione(String descrizione) {
 		this.descrizione = descrizione;
+	}
+
+	public LocalDate getDataDiNascita() {
+		return dataDiNascita;
+	}
+
+	public void setDataDiNascita(LocalDate dataDiNascita) {
+		this.dataDiNascita = dataDiNascita;
 	}
 
 	public Manga getManga() {
