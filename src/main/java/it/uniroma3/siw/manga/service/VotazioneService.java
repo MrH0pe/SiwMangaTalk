@@ -1,7 +1,5 @@
 package it.uniroma3.siw.manga.service;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,28 +54,26 @@ public class VotazioneService {
 
 	/**
 	 * Calcola e restituisce la media aritmetica di tutti i voti di un manga.
-	 * Restituisce null se il manga non ha ancora ricevuto voti.
+	 * Restituisce null se il manga non ha ancora ricevuto voti (AVG su zero righe è null).
 	 * Usato nella pagina del manga e nella lista manga per mostrare il rating.
+	 *
+	 * La media è calcolata dal database con una query aggregata (AVG): prima veniva
+	 * calcolata in Java caricando tutte le entità Votazione, che con manga e utente
+	 * EAGER generava una query aggiuntiva per ogni votante (problema N+1).
 	 */
 	@Transactional(readOnly = true)
 	public Double getMediaVoti(Long mangaId) {
-	    List<Votazione> voti = this.votazioneRepository.findByMangaId(mangaId);
-	    if (voti.isEmpty()) return null;
-
-	    double somma = 0;
-	    for (Votazione v : voti) {
-	        somma += v.getValoreStelline();
-	    }
-	    return somma / voti.size();
+	    return this.votazioneRepository.mediaByMangaId(mangaId);
 	}
 
 	/**
 	 * Restituisce il numero totale di voti ricevuti da un manga.
 	 * Usato nella pagina del manga per mostrare quante persone hanno votato.
+	 * Il conteggio è fatto dal database (COUNT), senza caricare le entità.
 	 */
 	@Transactional(readOnly = true)
 	public long countVoti(Long mangaId) {
-		return this.votazioneRepository.findByMangaId(mangaId).size();
+		return this.votazioneRepository.countByMangaId(mangaId);
 	}
 
 }

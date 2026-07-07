@@ -27,7 +27,8 @@ public class GlobalController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+        // Null check PRIMA dell'uso: authentication può essere null (es. dispatch della pagina di errore)
+        if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
             user = (UserDetails) authentication.getPrincipal();
         }
 

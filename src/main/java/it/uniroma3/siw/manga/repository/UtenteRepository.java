@@ -13,4 +13,6 @@ public interface UtenteRepository extends CrudRepository<User, Long> {
 
     Optional<User> findByEmail(String email);   //Utilizzo Optional perchè gestisce il NULL non causando NullPointerException
 
+    boolean existsByEmail(String email);
+
 }

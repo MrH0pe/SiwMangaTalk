@@ -17,10 +17,11 @@ public class MangaService {
 		this.mangaRepository = mangaRepository;
 	}
 
-	/** Restituisce tutti i manga presenti nel database. */
+	/** Restituisce tutti i manga presenti nel database, con l'autore già caricato
+	 *  tramite JOIN FETCH (una sola query invece di 1+N). */
 	@Transactional(readOnly = true)
 	public List<Manga> findAll() {
-		return (List<Manga>) this.mangaRepository.findAll();
+		return this.mangaRepository.findAllWithAutore();
 	}
 
 	/** Restituisce il manga con l'id specificato, oppure null se non esiste. */

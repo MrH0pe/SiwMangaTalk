@@ -126,7 +126,7 @@
 
                     <div class="comment-meta">
                         <span class="comment-author"
-                              th:text="${c.utente != null ? c.utente.username : 'Anonimo'}"></span>
+                              th:text="${c.utente != null ? c.utente.name : 'Anonimo'}"></span>
                         <span class="comment-date"
                               th:text="${#temporals.format(c.tempoPubblicazione, 'dd/MM/yyyy HH:mm')}"></span>
                         <!-- Bidone elimina: visibile solo al proprietario del commento -->
@@ -185,7 +185,7 @@
                             <div class="reply-item" th:each="r : ${c.risposte}">
                                 <div class="comment-meta">
                                     <span class="comment-author"
-                                          th:text="${r.utente != null ? r.utente.username : 'Anonimo'}"></span>
+                                          th:text="${r.utente != null ? r.utente.name : 'Anonimo'}"></span>
                                     <span class="comment-date"
                                           th:text="${#temporals.format(r.tempoPubblicazione, 'dd/MM/yyyy HH:mm')}"></span>
                                     <!-- Bidone elimina risposta: visibile solo al proprietario -->

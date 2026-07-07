@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import it.uniroma3.siw.manga.model.Autore;
 import it.uniroma3.siw.manga.service.AutoreService;
 
 /**
@@ -30,7 +31,11 @@ public class AutoreController {
 	// Mostra il dettaglio di un autore dato il suo id
 	@GetMapping("/autori/{id}")
 	public String mostraAutore(@PathVariable Long id, Model model) {
-		model.addAttribute("autore", this.autoreService.findById(id));
+		Autore autore = this.autoreService.findById(id);
+		if (autore == null) {
+			return "redirect:/autori";  //Se non esiste quell'ID, torna alla lista degli autori
+		}
+		model.addAttribute("autore", autore);
 		return "autori/mostraAutore";
 	}
 

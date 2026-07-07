@@ -64,13 +64,14 @@ public class CommentoController {
                                Model model) {
 
         Manga manga = mangaService.findById(idManga);
+        if (manga == null) return "redirect:/mangas";
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("manga", manga);
             model.addAttribute("commenti", commentoService.findTopLevelByMangaId(idManga));
             return "manga/mostraManga";
         }
-        
+
         //Se non ci sono errori, salvi il commento nel DB
         commento.setManga(manga);
         commento.setTempoPubblicazione(java.time.LocalDateTime.now());
@@ -98,7 +99,11 @@ public class CommentoController {
                                Model model) {
 
         Manga manga = mangaService.findById(idManga);
+        if (manga == null) return "redirect:/mangas";
+
         Commento commentoPadre = commentoService.findById(idCommentoPadre);
+        // Senza padre valido la "risposta" diventerebbe un commento principale: meglio annullare
+        if (commentoPadre == null) return "redirect:/mangas/" + idManga;
 
         if (bindingResult.hasErrors() || risposta.getTesto() == null || risposta.getTesto().trim().isEmpty()) {
             model.addAttribute("manga", manga);

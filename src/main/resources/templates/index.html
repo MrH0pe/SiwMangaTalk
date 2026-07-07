@@ -14,6 +14,11 @@
         <a th:href="@{/}">
             <img th:src="@{/images/logo_siwmangatalk.png}" alt="SiwMangaTalk Logo" class="site-logo">
         </a>
+		<!-- TASTO HOME ADMIN -->
+		<span th:if="${userDetails != null and userDetails.username == 'Admin'}"  >
+			<a th:href="@{/admin}">HOME ADMIN</a>
+		</span>
+		
         <span th:if="${userDetails}" class="user-greeting"
               th:text="'Bentornato ' + ${userDetails.username} + '!'"></span>
     </nav>

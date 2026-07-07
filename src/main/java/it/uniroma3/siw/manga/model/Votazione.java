@@ -27,12 +27,16 @@ public class Votazione {
 
 	//Associazione molti a uno
 	//Un manga può avere tanti voti
-	@ManyToOne(fetch = FetchType.EAGER)
+	// LAZY (deviazione motivata dal default EAGER di @ManyToOne): nessuna vista naviga
+	// da una Votazione verso il manga o l'utente. Media e conteggio usano query aggregate
+	// (AVG/COUNT) che non caricano le entità; con EAGER ogni caricamento di Votazione
+	// avrebbe generato query aggiuntive inutili (problema N+1).
+	@ManyToOne(fetch = FetchType.LAZY)
 	private Manga manga;
 
 	//Associazione molti a uno
 	//Tanti utenti posso votare un singolo manga
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	private User utente;
 
 	// --- Getters e Setters ---
@@ -70,9 +74,11 @@ public class Votazione {
 	}
 
 
+	// equals/hashCode NON usano manga e utente: essendo LAZY, toccarli su un'entità
+	// detached (fuori transazione) causerebbe una LazyInitializationException.
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, manga, valoreStelline, utente);
+		return Objects.hash(id, valoreStelline);
 	}
 
 	@Override
@@ -82,8 +88,6 @@ public class Votazione {
 		if (getClass() != obj.getClass()) return false;
 		Votazione other = (Votazione) obj;
 		return Objects.equals(id, other.id)
-				&& Objects.equals(manga, other.manga)
-				&& Objects.equals(valoreStelline, other.valoreStelline)
-				&& Objects.equals(utente, other.utente);
+				&& Objects.equals(valoreStelline, other.valoreStelline);
 	}
 }

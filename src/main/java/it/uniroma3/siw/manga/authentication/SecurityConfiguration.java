@@ -66,7 +66,7 @@ public class SecurityConfiguration {
             authorize.requestMatchers("/mangas/admin/**").hasAnyAuthority(Credentials.ADMIN_ROLE);
             // Pagine e risorse accessibili a tutti (anche non loggati)
             authorize.requestMatchers(HttpMethod.GET, "/", "/index", "/register", "/mangas", "/mangas/**", "/autori", "/autori/**", "/css/**",
-            		"/images/**", "/CopertinaManga/**", "/sfondoManga/**", "/favicon.ico").permitAll();
+            		"/images/**", "/CopertinaManga/**", "/sfondoManga/**", "/favicon.ico", "/error").permitAll();
             // Registrazione e login accessibili a tutti
             authorize.requestMatchers(HttpMethod.POST, "/register", "/login").permitAll();
             // Pagina "I miei commenti": solo utenti loggati

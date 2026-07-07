@@ -45,6 +45,11 @@ public class CredentialsService {
         return this.credentialsRepository.save(credentials);
     }
 
+    @Transactional(readOnly = true)
+    public boolean existsByUsername(String username) {
+        return this.credentialsRepository.existsByUsername(username);
+    }
+
     // Restituisce tutte le credenziali degli utenti non-admin che hanno un utente associato.
     // Usato da AdminHomeController per costruire la dashboard.
     @Transactional(readOnly = true)

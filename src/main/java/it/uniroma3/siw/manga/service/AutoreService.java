@@ -19,10 +19,11 @@ public class AutoreService {
 		this.autoreRepository = autoreRepository;
 	}
 
-	/** Restituisce tutti gli autori presenti nel database. */
+	/** Restituisce tutti gli autori presenti nel database, con il manga già caricato
+	 *  tramite JOIN FETCH (una sola query invece di 1+N). */
 	@Transactional(readOnly = true)
 	public List<Autore> findAll() {
-		return (List<Autore>) this.autoreRepository.findAll();
+		return this.autoreRepository.findAllWithManga();
 	}
 
 	/** Restituisce l'autore con l'id specificato, oppure null se non esiste. */

@@ -1,6 +1,5 @@
 package it.uniroma3.siw.manga.controller;
 
-import it.uniroma3.siw.manga.model.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -9,16 +8,20 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import it.uniroma3.siw.manga.model.Credentials;
+import it.uniroma3.siw.manga.model.User;
 import it.uniroma3.siw.manga.service.CredentialsService;
+import it.uniroma3.siw.manga.service.UserService;
 import jakarta.validation.Valid;
 
 @Controller
 public class AuthenticationController {
-	
-	private final CredentialsService credentialsService;
 
-    public AuthenticationController(CredentialsService credentialsService) {
+	private final CredentialsService credentialsService;
+	private final UserService userService;
+
+    public AuthenticationController(CredentialsService credentialsService, UserService userService) {
         this.credentialsService = credentialsService;
+        this.userService = userService;
     }
 
 
@@ -43,17 +46,27 @@ public class AuthenticationController {
 	}
 
 	// Processa il form di registrazione: salva l'utente e le credenziali se non ci sono errori di validazione
-	@PostMapping("/register")
-	public String registerUser(@Valid @ModelAttribute("user") User user,     //BindingResult è una classe di SpringBoot che gestisce tutti gli errori
-			BindingResult userBindingResult, @Valid
-			@ModelAttribute("credentials") Credentials credentials,
-			BindingResult credentialsBindingResult) {
+    @PostMapping("/register")
+    public String registerUser(@Valid @ModelAttribute("user") User user,     //BindingResult è una classe di SpringBoot che gestisce tutti gli errori
+            BindingResult userBindingResult, @Valid
+            @ModelAttribute("credentials") Credentials credentials,
+            BindingResult credentialsBindingResult) {
 
-		if (!userBindingResult.hasErrors() && !credentialsBindingResult.hasErrors()) {   //Se non ci sono errori, salvi utente e credenziali nel DB
-			credentials.setUtente(user);
-			credentialsService.saveCredentials(credentials);
-			return "redirect:/";     // serve per evitare il problema del doppio invio del form.
-		}
-		return "authentication/registerUser";
-	}
+        if (credentialsService.existsByUsername(credentials.getUsername())) {
+            credentialsBindingResult.rejectValue("username", "error.credentials", "Username già preso");
+        }
+
+        // L'email è unique nel DB: senza questo controllo un duplicato causerebbe un errore 500
+        if (userService.existsByEmail(user.getEmail())) {
+            userBindingResult.rejectValue("email", "error.user", "Email già registrata");
+        }
+
+        if (!userBindingResult.hasErrors() && !credentialsBindingResult.hasErrors()) {
+            credentials.setUtente(user);
+            credentialsService.saveCredentials(credentials);
+            return "redirect:/";
+        }
+        return "authentication/registerUser";
+    }
+
 }
