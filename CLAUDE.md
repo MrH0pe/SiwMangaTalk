@@ -1,162 +1,213 @@
-# CLAUDE.md — Guardrail per progetto SIW Tornei di Calcio Amatoriale
+# SiwMangaTalk — Blueprint
 
-## Contesto
-Progetto universitario per il corso SIW (Sistemi Informativi sul Web), Roma Tre.
-Studente: Daniele. Ruolo di Claude: **tutor**, non soluzionatore.
-Approccio: guidare Daniele a ragionare e implementare autonomamente. Scrivere codice direttamente solo se Daniele è esplicitamente bloccato e lo chiede.
+Progetto universitario SIW — Roma Tre · Daniele Panzeri
 
 ---
 
-## Stack tecnologico — NON deviare
-- **Java 21**, Spring Boot 3.5.16, Maven
-- **PostgreSQL** porta 5433, database `torneo`
-- **JPA/Hibernate** con Spring Data
-- **Thymeleaf** per le viste MVC
-- **Spring Security** con `JdbcUserDetailsManager` e BCrypt
-- **React** per almeno una sezione (classifica o calendario)
-- IDE: Spring Tool Suite (Eclipse)
-- Package base: `it.uniroma3.siw.torneo`
+## Configurazione & Stack
+
+| Parametro | Valore |
+|-----------|--------|
+| Framework | Spring Boot 4.0.5 |
+| Java | 17 |
+| Database | PostgreSQL @ localhost:5433 |
+| Database name | SiwMangaTalk |
+| Server | localhost:8080 |
+| ddl-auto | update |
+| open-in-view | false |
+| Package base | it.uniroma3.siw.manga |
+
+### Dipendenze Maven
+
+| Dipendenza | Scope |
+|-----------|-------|
+| spring-boot-starter-data-jpa | compile |
+| spring-boot-starter-thymeleaf | compile |
+| spring-boot-starter-webmvc | compile |
+| spring-boot-starter-security | compile |
+| spring-boot-starter-validation | compile |
+| postgresql | runtime |
+| spring-boot-starter-data-jpa-test | test |
+| spring-boot-starter-thymeleaf-test | test |
+| spring-boot-starter-webmvc-test | test |
 
 ---
 
-## Struttura del progetto — rispettare sempre
+## Architettura a strati
 
 ```
-it.uniroma3.siw.torneo
-├── model/          (Entity JPA)
-├── repository/     (interfacce Spring Data)
-├── service/        (logica di business, @Transactional)
-├── controller/     (Spring MVC + REST)
-└── security/       (SecurityConfiguration)
-
-src/main/resources/
-├── templates/      (Thymeleaf)
-│   ├── tornei/
-│   ├── squadre/
-│   ├── partite/
-│   └── admin/
-└── import.sql      (dati di test, caricati con ddl-auto=create)
-```
-
----
-
-## Entità del dominio — NON aggiungere entità non previste
-
-| Entità | Note chiave |
-|--------|-------------|
-| `Torneo` | unique su nome+anno, @ManyToMany squadre (lato proprietario) |
-| `Squadra` | unique su nome+citta |
-| `Giocatore` | unique su nome+cognome+dataDiNascita, @ManyToOne squadra |
-| `Arbitro` | unique su codiceArbitrale |
-| `Partita` | unique su dataOra+luogo, enum StatoPartita {SCHEDULED, PLAYED} |
-| `Commento` | unique su partita+credentials+dataCreazione |
-| `User` | @Table(name="users"), unique su email |
-| `Credentials` | lato proprietario @OneToOne(cascade=ALL) su User |
-
----
-
-## Regole implementative OBBLIGATORIE
-
-### JPA e Hibernate
-- `@ManyToOne` è EAGER di default — non cambiare senza motivazione
-- `@OneToMany` e `@ManyToMany` sono LAZY di default
-- Usare `JOIN FETCH` nel Repository quando si accede a collezioni fuori da una transazione
-- MAI due `JOIN FETCH` su due collezioni diverse nella stessa query (MultipleBagFetchException) — usare due query separate
-- `spring.jpa.open-in-view=false` — obbligatorio
-
-### Service layer
-- Tutti i metodi di lettura: `@Transactional(readOnly=true)`
-- Tutti i metodi di scrittura: `@Transactional`
-- La logica di business sta nel Service, NON nel Controller
-- Dependency injection via costruttore (non @Autowired su campo)
-
-### Spring Security
-- Ruoli nel DB **sempre con prefisso** `ROLE_` → `ROLE_DEFAULT`, `ROLE_ADMIN`
-- Costanti in `Credentials.java`: `DEFAULT_ROLE="ROLE_DEFAULT"`, `ADMIN_ROLE="ROLE_ADMIN"`
-- Tutti i form POST **devono** avere il CSRF token Thymeleaf:
-  ```html
-  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-  ```
-
-### Controller
-- I Controller non contengono logica di business
-- `GlobalController` con `@ControllerAdvice` inietta `userDetails` nel Model globalmente
-- Per leggere l'utente loggato: `SecurityContextHolder.getContext().getAuthentication().getName()`
-
-### application.properties — configurazione consolidata
-```properties
-spring.jpa.hibernate.ddl-auto=create
-spring.jpa.open-in-view=false
-spring.jpa.properties.hibernate.hbm2ddl.import_files_sql_extractor=org.hibernate.tool.schema.internal.script.MultiLineSqlScriptExtractor
+Browser (Thymeleaf SSR + componenti React)
+          ↕
+Controller layer  (@Controller MVC + @RestController JSON /api)
+          ↕
+Service layer     (@Transactional, logica di business)
+          ↕
+Repository layer  (Spring Data JPA — JpaRepository)
+          ↕
+Database          (PostgreSQL 5433 / Hibernate ORM)
 ```
 
 ---
 
-## Funzionalità completate ✅
+## Modello dati (Entità JPA)
 
-- Elenco e dettaglio Torneo (con squadre partecipanti e calendario partite)
-- Elenco e dettaglio Squadra (con lista giocatori)
-- Dettaglio Partita (con risultato condizionale su stato PLAYED)
-- Visualizzazione commenti (pubblica)
-- Inserimento commento (`POST /partite/{id}/commenti`) — solo utenti loggati
-- Registrazione (`POST /register`) — crea User + Credentials, redirect a login
-- Login / Logout funzionanti
-- Navbar con stato login (Ciao {username} / Login+Registrati)
+### Manga
+- Campi: `id`, `nome`, `descrizione`, `annoPubblicazione`, `pathImmagine`, `pathSfondo`
+- `@OneToOne(mappedBy="manga")` ← Autore `[EAGER]`
+- `@OneToMany` → Votazione `[LAZY]`
+- `@OneToMany` → Commento `[LAZY]`
 
----
+### Autore
+- Campi: `id`, `nome`, `cognome`, `descrizione`, `dataDiNascita`
+- `@OneToOne` → Manga (lato proprietario)
 
-## Funzionalità da completare ❌
+### User (`@Table("utente")`)
+- Campi: `id`, `name`, `email` (unique)
+- `@OneToMany` ← Commento `[LAZY]`
+- `@OneToMany` ← Votazione `[LAZY]`
 
-### Sezione 4.2 — USER
-- [ ] Modifica commento: `GET /commenti/{id}/edit` → form precompilato
-- [ ] Modifica commento: `POST /commenti/{id}/edit` → salva, redirect a partita
-- [ ] Controllo ownership: solo il proprietario può modificare il proprio commento
+### Credentials
+- Campi: `id`, `username` (unique), `password` (BCrypt), `role`
+- Costanti: `ROLE_DEFAULT`, `ROLE_ADMIN`
+- `@OneToOne` → User `[CascadeType.ALL]`
 
-### Sezione 4.3 — ADMIN (URL sotto `/admin/**`)
-- [ ] Torneo: creazione, modifica
-- [ ] Squadra: creazione, modifica, eliminazione
-- [ ] Giocatore: creazione, modifica
-- [ ] Partita: creazione, registrazione risultato (cambio stato → PLAYED)
-- [ ] Arbitro: creazione
-- [ ] Associazione squadre a torneo
+### Commento
+- Campi: `id`, `testo`, `tempoPubblicazione`
+- `@ManyToOne` → User `[EAGER]`
+- `@ManyToOne` → Manga `[EAGER]`
+- `@ManyToOne` → Commento padre `[EAGER, nullable]`
+- `@OneToMany` ← risposte `[LAZY, cascade=ALL, orphanRemoval=true]`
 
-### Altro
-- [ ] Classifica torneo (punti per squadra: 3 vittoria, 1 pareggio, 0 sconfitta)
-- [ ] Sezione React (classifica o calendario) con `@RestController` e CORS
-- [ ] Analisi sperimentale LAZY vs EAGER — Sezione 8.2 obbligatoria
-- [ ] Gestione errore username duplicato in registrazione
-
----
-
-## Analisi LAZY/EAGER — da svolgere obbligatoriamente
-
-Confrontare su **calendario partite di un torneo**:
-- **Scenario A**: EAGER default su `@ManyToOne` di Partita → query separate per arbitro, squadraCasa, squadraOspite, torneo per ogni partita
-- **Scenario B**: `JOIN FETCH` esplicito → una sola query con tutti i JOIN
-- Misurare: numero di query generate, tempo di risposta
-- Documentare i risultati con i log Hibernate (`spring.jpa.show-sql=true`)
+### Votazione (`unique(utente_id, manga_id)`)
+- Campi: `id`, `valoreStelline` (Double, 0.5–5.0)
+- `@ManyToOne` → Manga `[EAGER]`
+- `@ManyToOne` → User `[EAGER]`
 
 ---
 
-## Errori classici da evitare
+## Casi d'uso per ruolo
 
-| Errore | Soluzione |
-|--------|-----------|
-| `LazyInitializationException` | Aggiungere `JOIN FETCH` nel Repository |
-| `MultipleBagFetchException` | Usare due query separate invece di un doppio JOIN FETCH |
-| Login fallisce silenziosamente | Verificare prefisso `ROLE_` nei ruoli |
-| Form POST ignorato | Aggiungere CSRF token Thymeleaf |
-| SQL multi-riga in import.sql | `MultiLineSqlScriptExtractor` in application.properties |
-| `model.addAttribute(lista)` senza nome | Usare sempre `model.addAttribute("nomeAttributo", valore)` |
-| Null check dopo uso dell'oggetto | Controllare null PRIMA di usare l'oggetto |
+### Anonimo (visitatore)
+- Visualizza lista manga (con ordinamento alfabetico o per rating)
+- Visualizza dettaglio manga (voti aggregati, commenti)
+- Visualizza lista autori
+- Visualizza dettaglio autore
+- Login
+- Registrazione (crea User + Credentials)
+
+### ROLE_DEFAULT (utente loggato)
+- Tutti i casi d'uso dell'anonimo
+- Vota un manga (0.5–5.0 stelle, una volta per manga)
+- Commenta un manga
+- Rispondi a un commento
+- Modifica il proprio commento (via PATCH /api)
+- Elimina il proprio commento
+- Visualizza "I miei commenti"
+
+### ROLE_ADMIN (amministratore)
+- Dashboard admin (tutti gli utenti + i loro commenti)
+- Pannello di gestione manga
+- Elimina qualsiasi commento
+- Redirect automatico a `/admin` al login
+> L'admin non può votare né commentare. Al `GET /mangas/{id}` viene reindirizzato a `/mangas/admin/{id}`.
 
 ---
 
-## Note per l'orale
+## Mappa URL — Tutti gli endpoint
 
-- Sapere spiegare perché `open-in-view=false` è una buona pratica
-- Sapere spiegare la differenza tra LAZY e EAGER e quando usare JOIN FETCH
-- Sapere spiegare cosa fa `@Transactional(readOnly=true)` e perché usarlo
-- Sapere spiegare il ruolo del `CascadeType.ALL` tra Credentials e User
-- Sapere spiegare perché i ruoli Spring Security richiedono il prefisso `ROLE_`
-- Sapere spiegare la MultipleBagFetchException e come si risolve
+### MVC Controllers
+
+| Metodo | URL | Ruolo | Descrizione |
+|--------|-----|-------|-------------|
+| GET | `/` · `/index` | tutti | Home page |
+| GET | `/mangas` | tutti | Lista manga (`?sort=alpha-asc\|alpha-desc\|rating-asc\|rating-desc`) |
+| GET | `/mangas/{id}` | tutti | Dettaglio manga (admin → redirect `/mangas/admin/{id}`) |
+| POST | `/mangas/{id}/voto` | auth | Vota manga |
+| GET | `/autori` | tutti | Lista autori |
+| GET | `/autori/{id}` | tutti | Dettaglio autore |
+| GET | `/mieiCommenti` | auth | I miei commenti |
+| POST | `/manga/{id}/commenti` | auth | Nuovo commento |
+| POST | `/manga/{id}/commenti/{padreId}/risposte` | auth | Risposta a un commento |
+| POST | `/commenti/{id}/elimina` | auth | Elimina commento (`?fromAdmin=true`) |
+| GET | `/login` | tutti | Pagina login |
+| GET | `/register` | tutti | Form registrazione |
+| POST | `/register` | tutti | Salva nuovo utente |
+| POST | `/logout` | tutti | Termina sessione |
+| GET | `/admin` | admin | Dashboard admin |
+| GET | `/mangas/admin/{id}` | admin | Pannello manga |
+
+### REST API — `@RestController /api` (usata da React)
+
+| Metodo | URL | Ruolo | Risposta |
+|--------|-----|-------|---------|
+| POST | `/api/manga/{id}/commenti` | auth | JSON `{id, testo, autore, data}` |
+| POST | `/api/commenti/{id}/risposte` | auth | JSON `{id, testo, autore, data}` |
+| PATCH | `/api/commenti/{id}/modifica` | auth | JSON `{testo}` oppure 403 |
+
+### Sicurezza (Spring Security)
+
+- **Autenticazione**: `JdbcUserDetailsManager` + BCrypt
+- **Login**: `/login` → successo: admin→`/admin`, utente→`/`
+- **Logout**: `/logout` → invalida sessione + cookie `JSESSIONID`
+- **CSRF**: attivo su tutti i form POST Thymeleaf
+
+---
+
+## Template Thymeleaf
+
+| Template | URL associato |
+|----------|--------------|
+| `index.html` | `/` |
+| `manga/listaManga.html` | `/mangas` |
+| `manga/mostraManga.html` | `/mangas/{id}` |
+| `manga/adminManga.html` | `/mangas/admin/{id}` |
+| `autori/listaAutori.html` | `/autori` |
+| `autori/mostraAutore.html` | `/autori/{id}` |
+| `commenti/mieiCommenti.html` | `/mieiCommenti` |
+| `admin/adminHome.html` | `/admin` |
+| `admin/index.html` | — |
+| `authentication/login.html` | `/login` |
+| `authentication/registerUser.html` | `/register` |
+
+---
+
+## Struttura classi Java
+
+```
+it.uniroma3.siw.manga
+├── SiwMangaTalkApplication.java          @SpringBootApplication
+├── authentication/
+│   └── SecurityConfiguration.java        @Configuration @EnableWebSecurity
+├── configuration/
+│   └── DataLoader.java                   @Component
+├── controller/
+│   ├── HomeController.java               @Controller
+│   ├── AutoreController.java             @Controller
+│   ├── MangaController.java              @Controller
+│   ├── CommentoController.java           @Controller
+│   ├── AdminController.java              @Controller @RequestMapping("/mangas/admin")
+│   ├── AdminHomeController.java          @Controller
+│   ├── AuthenticationController.java     @Controller
+│   ├── CommentoRestController.java       @RestController @RequestMapping("/api")
+│   ├── GlobalController.java             @ControllerAdvice
+│   └── GlobalBindingConfig.java          @ControllerAdvice
+├── model/
+│   ├── Manga.java                        @Entity
+│   ├── Autore.java                       @Entity
+│   ├── User.java                         @Entity @Table("utente")
+│   ├── Credentials.java                  @Entity
+│   ├── Commento.java                     @Entity
+│   └── Votazione.java                    @Entity @Table(uniqueConstraints)
+├── repository/
+│   ├── MangaRepository.java
+│   ├── AutoreRepository.java
+│   ├── UtenteRepository.java
+│   ├── CredentialsRepository.java
+│   ├── CommentoRepository.java
+│   └── VotazioneRepository.java
+└── service/
+    ├── MangaService.java                 @Service @Transactional(readOnly=true)
+    ├── AutoreService.java                @Service @Transactional(readOnly=true)
+    ├── CommentoService.java              @Service @Transactional
+    ├── CredentialsService.java           @Service @Transactional
+    └── VotazioneService.java             @Service @Transactional

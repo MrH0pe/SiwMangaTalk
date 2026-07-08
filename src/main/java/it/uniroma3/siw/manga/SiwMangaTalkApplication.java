@@ -3,9 +3,6 @@ package it.uniroma3.siw.manga;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-// @SpringBootApplication abilita la configurazione automatica di Spring Boot,
-// la scansione dei componenti e la configurazione dei bean.
-// È il punto di ingresso dell'intera applicazione.
 @SpringBootApplication
 public class SiwMangaTalkApplication {
 
