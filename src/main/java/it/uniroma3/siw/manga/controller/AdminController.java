@@ -2,6 +2,7 @@ package it.uniroma3.siw.manga.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,18 +19,12 @@ import it.uniroma3.siw.manga.service.VotazioneService;
 @RequestMapping("/mangas/admin")
 public class AdminController {
 
-    private final MangaService mangaService;
-    private final CommentoService commentoService;
-    private final VotazioneService votazioneService;
-
-    /** Costruttore con iniezione dei service tramite Spring. */
-    public AdminController(MangaService mangaService,
-                           CommentoService commentoService,
-                           VotazioneService votazioneService) {
-        this.mangaService = mangaService;
-        this.commentoService = commentoService;
-        this.votazioneService = votazioneService;
-    }
+    @Autowired
+    private MangaService mangaService;
+    @Autowired
+    private CommentoService commentoService;
+    @Autowired
+    private VotazioneService votazioneService;
 
     /**
      * Mostra il pannello di amministrazione per un manga specifico.

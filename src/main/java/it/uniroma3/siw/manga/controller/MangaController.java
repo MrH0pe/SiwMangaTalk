@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,18 +28,14 @@ import it.uniroma3.siw.manga.service.VotazioneService;
 @Controller
 public class MangaController {
 
-	private final MangaService mangaService;
-	private final CommentoService commentoService;
-	private final CredentialsService credentialsService;
-	private final VotazioneService votazioneService;
-
-	public MangaController(MangaService mangaService, CommentoService commentoService,
-			CredentialsService credentialsService, VotazioneService votazioneService) {
-		this.mangaService = mangaService;
-		this.commentoService = commentoService;
-		this.credentialsService = credentialsService;
-		this.votazioneService = votazioneService;
-	}
+	@Autowired
+	private MangaService mangaService;
+	@Autowired
+	private CommentoService commentoService;
+	@Autowired
+	private CredentialsService credentialsService;
+	@Autowired
+	private VotazioneService votazioneService;
 
 	/**
 	 * Mostra la pagina di dettaglio di un manga (GET /mangas/{id}).
@@ -174,4 +171,5 @@ public class MangaController {
 
 	    return "manga/listaManga";
 	}
+
 }

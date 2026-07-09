@@ -2,6 +2,7 @@ package it.uniroma3.siw.manga.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,12 +13,8 @@ import it.uniroma3.siw.manga.repository.AutoreRepository;
 @Service
 public class AutoreService {
 
-	private final AutoreRepository autoreRepository;
-
-	
-	public AutoreService(AutoreRepository autoreRepository) {
-		this.autoreRepository = autoreRepository;
-	}
+	@Autowired
+	private AutoreRepository autoreRepository;
 
 	/** Restituisce tutti gli autori presenti nel database, con il manga già caricato
 	 *  tramite JOIN FETCH (una sola query invece di 1+N). */

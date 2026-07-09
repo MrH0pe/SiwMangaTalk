@@ -1,5 +1,6 @@
 package it.uniroma3.siw.manga.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,13 +17,10 @@ import jakarta.validation.Valid;
 @Controller
 public class AuthenticationController {
 
-	private final CredentialsService credentialsService;
-	private final UserService userService;
-
-    public AuthenticationController(CredentialsService credentialsService, UserService userService) {
-        this.credentialsService = credentialsService;
-        this.userService = userService;
-    }
+	@Autowired
+	private CredentialsService credentialsService;
+	@Autowired
+	private UserService userService;
 
 
 	// Mostra il form di registrazione di un nuovo utente

@@ -3,6 +3,7 @@ package it.uniroma3.siw.manga.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,15 +15,12 @@ import it.uniroma3.siw.manga.repository.CredentialsRepository;
 public class CredentialsService {
 
     // Encoder BCrypt iniettato da SecurityConfiguration: cifra la password prima di salvarla
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // Repository per l'accesso alla tabella "credentials" nel database
-    private final CredentialsRepository credentialsRepository;
-
-    public CredentialsService(PasswordEncoder passwordEncoder, CredentialsRepository credentialsRepository) {
-        this.passwordEncoder = passwordEncoder;
-        this.credentialsRepository = credentialsRepository;
-    }
+    @Autowired
+    private CredentialsRepository credentialsRepository;
 
     // Restituisce le credenziali associate all'id specificato, null se non trovate
     @Transactional(readOnly = true)

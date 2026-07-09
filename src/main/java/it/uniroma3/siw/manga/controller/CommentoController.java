@@ -2,6 +2,7 @@ package it.uniroma3.siw.manga.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,16 +25,12 @@ import jakarta.validation.Valid;
 @Controller
 public class CommentoController {
 
-    private final CommentoService commentoService;
-    private final MangaService mangaService;
-    private final CredentialsService credentialsService;
- 
-    public CommentoController(CommentoService commentoService, MangaService mangaService,
-            CredentialsService credentialsService) {
-        this.commentoService = commentoService;
-        this.mangaService = mangaService;
-        this.credentialsService = credentialsService;
-    }
+    @Autowired
+    private CommentoService commentoService;
+    @Autowired
+    private MangaService mangaService;
+    @Autowired
+    private CredentialsService credentialsService;
 
     /**
      * Mostra la pagina "I miei commenti" dell'utente loggato (GET /mieiCommenti).
@@ -141,8 +138,13 @@ public class CommentoController {
     public String eliminaCommento(@PathVariable Long idCommento,
                                   @RequestParam(required = false, defaultValue = "false") boolean fromAdmin,
                                   @RequestParam(required = false, defaultValue = "false") boolean fromAdminHome) {
+
         Commento commento = commentoService.findById(idCommento);
+
+
         if (commento == null) return "redirect:/mangas";
+
+
         Long mangaId = commento.getManga().getId();
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Credentials creds = credentialsService.getCredentials(username);
@@ -154,6 +156,9 @@ public class CommentoController {
         if (fromAdmin) {
             return "redirect:/mangas/admin/" + mangaId;
         }
+
+
+
         return "redirect:/mangas/" + mangaId;
     }
 }

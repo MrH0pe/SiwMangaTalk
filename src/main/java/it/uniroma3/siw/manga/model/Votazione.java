@@ -1,7 +1,5 @@
 package it.uniroma3.siw.manga.model;
 
-import java.util.Objects;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -11,13 +9,20 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.EqualsAndHashCode;
+
 @Entity
 @Table(uniqueConstraints = {
 	@UniqueConstraint(columnNames = {"utente_id", "manga_id"})  //Chiavi uniche, sulle FK vero Manga e User
 })
+@Getter
+@Setter
+@EqualsAndHashCode
 public class Votazione {
 
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
@@ -31,63 +36,15 @@ public class Votazione {
 	// da una Votazione verso il manga o l'utente. Media e conteggio usano query aggregate
 	// (AVG/COUNT) che non caricano le entità; con EAGER ogni caricamento di Votazione
 	// avrebbe generato query aggiuntive inutili (problema N+1).
+	// equals/hashCode NON usano manga e utente: essendo LAZY, toccarli su un'entità
+	// detached (fuori transazione) causerebbe una LazyInitializationException.
 	@ManyToOne(fetch = FetchType.LAZY)
+	@EqualsAndHashCode.Exclude
 	private Manga manga;
 
 	//Associazione molti a uno
 	//Tanti utenti posso votare un singolo manga
 	@ManyToOne(fetch = FetchType.LAZY)
+	@EqualsAndHashCode.Exclude
 	private User utente;
-
-	// --- Getters e Setters ---
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Double getValoreStelline() {
-		return valoreStelline;
-	}
-
-	public void setValoreStelline(Double valoreStelline) {
-		this.valoreStelline = valoreStelline;
-	}
-
-	public Manga getManga() {
-		return manga;
-	}
-
-	public void setManga(Manga manga) {
-		this.manga = manga;
-	}
-
-	public User getUtente() {
-		return utente;
-	}
-
-	public void setUtente(User utente) {
-		this.utente = utente;
-	}
-
-
-	// equals/hashCode NON usano manga e utente: essendo LAZY, toccarli su un'entità
-	// detached (fuori transazione) causerebbe una LazyInitializationException.
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, valoreStelline);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		Votazione other = (Votazione) obj;
-		return Objects.equals(id, other.id)
-				&& Objects.equals(valoreStelline, other.valoreStelline);
-	}
 }

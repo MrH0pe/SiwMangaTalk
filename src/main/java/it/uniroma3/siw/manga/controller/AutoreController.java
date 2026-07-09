@@ -1,5 +1,6 @@
 package it.uniroma3.siw.manga.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,13 +21,9 @@ import it.uniroma3.siw.manga.service.AutoreService;
  */
 @Controller
 public class AutoreController {
-	
-	private final AutoreService autoreService;
 
-	/** Costruttore con iniezione del service tramite Spring. */
-	public AutoreController(AutoreService autoreService) {
-		this.autoreService = autoreService;
-	}
+	@Autowired
+	private AutoreService autoreService;
 
 	// Mostra il dettaglio di un autore dato il suo id
 	@GetMapping("/autori/{id}")

@@ -29,4 +29,6 @@ public interface CommentoRepository extends CrudRepository<Commento, Long> {
 	// MultipleBagFetchException.
 	@Query("SELECT DISTINCT c FROM Commento c LEFT JOIN FETCH c.risposte r LEFT JOIN FETCH c.utente LEFT JOIN FETCH r.utente WHERE c.manga.id = :mangaId AND c.commentoPadre IS NULL")
 	List<Commento> findTopLevelByMangaIdWithRisposte(@Param("mangaId") Long mangaId);
+
+	
 }

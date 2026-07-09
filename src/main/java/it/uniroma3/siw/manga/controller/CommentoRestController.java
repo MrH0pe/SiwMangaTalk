@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -28,18 +29,12 @@ REACT
 @RequestMapping("/api")
 public class CommentoRestController {
 
-    private final CommentoService commentoService;
-    private final MangaService mangaService;
-    private final CredentialsService credentialsService;
-
-    /** Costruttore con iniezione dei service tramite Spring. */
-    public CommentoRestController(CommentoService commentoService,
-                                  MangaService mangaService,
-                                  CredentialsService credentialsService) {
-        this.commentoService = commentoService;
-        this.mangaService = mangaService;
-        this.credentialsService = credentialsService;
-    }
+    @Autowired
+    private CommentoService commentoService;
+    @Autowired
+    private MangaService mangaService;
+    @Autowired
+    private CredentialsService credentialsService;
 
     /**
      * Salva un nuovo commento principale per un manga e restituisce i dati

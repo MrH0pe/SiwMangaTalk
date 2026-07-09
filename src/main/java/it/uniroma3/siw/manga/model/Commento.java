@@ -3,7 +3,6 @@ package it.uniroma3.siw.manga.model;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -16,7 +15,14 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.validation.constraints.NotBlank;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.EqualsAndHashCode;
+
 @Entity
+@Getter
+@Setter
+@EqualsAndHashCode
 public class Commento {
 
 	@Id
@@ -45,6 +51,7 @@ public class Commento {
 	// Riferimento al commento padre: null per i commenti principali, valorizzato per le risposte.
 	// EAGER: il padre viene caricato subito (serve per la logica di cancellazione a cascata)
 	@ManyToOne(fetch = FetchType.EAGER)
+	@EqualsAndHashCode.Exclude
 	private Commento commentoPadre;
 
 	// Lista delle risposte dirette a questo commento.
@@ -53,85 +60,6 @@ public class Commento {
 	// @OrderBy: le risposte sono ordinate dalla più vecchia alla più recente.
 	@OneToMany(mappedBy = "commentoPadre", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("tempoPubblicazione ASC")
+	@EqualsAndHashCode.Exclude
 	private List<Commento> risposte = new ArrayList<>();
-
-	// --- Getters e Setters ---
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getTesto() {
-		return testo;
-	}
-
-	public void setTesto(String testo) {
-		this.testo = testo;
-	}
-
-	public LocalDateTime getTempoPubblicazione() {
-		return tempoPubblicazione;
-	}
-
-	public void setTempoPubblicazione(LocalDateTime tempoPubblicazione) {
-		this.tempoPubblicazione = tempoPubblicazione;
-	}
-
-	public User getUtente() {
-		return utente;
-	}
-
-	public void setUtente(User utente) {
-		this.utente = utente;
-	}
-
-	public Manga getManga() {
-		return manga;
-	}
-
-	public void setManga(Manga manga) {
-		this.manga = manga;
-	}
-
-	public Commento getCommentoPadre() {
-		return commentoPadre;
-	}
-
-	public void setCommentoPadre(Commento commentoPadre) {
-		this.commentoPadre = commentoPadre;
-	}
-
-	public List<Commento> getRisposte() {
-		return risposte;
-	}
-
-	public void setRisposte(List<Commento> risposte) {
-		this.risposte = risposte;
-	}
-
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, manga, tempoPubblicazione, testo, utente);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Commento other = (Commento) obj;
-		return Objects.equals(id, other.id)
-				&& Objects.equals(manga, other.manga)
-				&& Objects.equals(tempoPubblicazione, other.tempoPubblicazione)
-				&& Objects.equals(testo, other.testo)
-				&& Objects.equals(utente, other.utente);
-	}
 }

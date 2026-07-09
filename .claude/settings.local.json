@@ -22,7 +22,18 @@
       "PowerShell($log = Get-Content \"$env:TEMP\\\\siwmanga_boot.log\" -Raw; $errs = \\($log -split \"`n\"\\) | Where-Object { $_ -match \"ERROR|Exception|LazyInitialization\" } | Select-Object -First 10; if \\($errs\\) { \"ERRORI TROVATI:\"; $errs } else { \"Nessun ERROR / Exception nei log\" }; \"\"; \"--- Ultime Session Metrics ---\"; \\(\\($log -split \"`n\"\\) | Where-Object { $_ -match \"statements|Session Metrics|JDBC\" } | Select-Object -Last 12\\) -join \"`n\")",
       "PowerShell($before = \\(Select-String -Path \"$env:TEMP\\\\siwmanga_boot.log\" -Pattern \"^Hibernate: \" -AllMatches\\).Count; Invoke-WebRequest -Uri \"http://localhost:8080/mangas\" -UseBasicParsing -TimeoutSec 10 | Out-Null; Start-Sleep -Seconds 2; $after = \\(Select-String -Path \"$env:TEMP\\\\siwmanga_boot.log\" -Pattern \"^Hibernate: \" -AllMatches\\).Count; \"Query SQL per GET /mangas : $\\($after - $before\\)\"; $metrics = Select-String -Path \"$env:TEMP\\\\siwmanga_boot.log\" -Pattern \"Session Metrics\" | Select-Object -Last 1; if \\($metrics\\) { \"Session Metrics presenti nei log: sì\" } else { \"Session Metrics presenti nei log: no\" })",
       "PowerShell($html = \\(Invoke-WebRequest -Uri \"http://localhost:8080/mangas\" -UseBasicParsing -TimeoutSec 10\\).Content; $count = \\([regex]::Matches\\($html, 'class=\"manga-card\"'\\)\\).Count; \"Manga nella lista: $count\"; $before = \\(Select-String -Path \"$env:TEMP\\\\siwmanga_boot.log\" -Pattern \"^Hibernate: \" -AllMatches\\).Count; Invoke-WebRequest -Uri \"http://localhost:8080/mangas/1\" -UseBasicParsing -TimeoutSec 10 -MaximumRedirection 5 | Out-Null; Start-Sleep -Seconds 2; $after = \\(Select-String -Path \"$env:TEMP\\\\siwmanga_boot.log\" -Pattern \"^Hibernate: \" -AllMatches\\).Count; \"Query SQL per GET /mangas/1 \\(dettaglio+commenti\\): $\\($after - $before\\)\")",
-      "PowerShell($conn = Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue; if \\($conn\\) { Stop-Process -Id $conn[0].OwningProcess -Force -Confirm:$false; \"App di test fermata \\(PID $\\($conn[0].OwningProcess\\)\\)\" } else { \"Nessun processo su 8080\" })"
+      "PowerShell($conn = Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue; if \\($conn\\) { Stop-Process -Id $conn[0].OwningProcess -Force -Confirm:$false; \"App di test fermata \\(PID $\\($conn[0].OwningProcess\\)\\)\" } else { \"Nessun processo su 8080\" })",
+      "Bash(./mvnw.cmd -q compile)",
+      "Bash(ls \"/c/Users/Daniele/.m2/repository/org/projectlombok/lombok/1.18.44/\")",
+      "Read(//c/Users/Daniele/.m2/repository/org/projectlombok/lombok/1.18.46//**)",
+      "Read(//c/Users/Daniele/.m2/repository/org/projectlombok/lombok/1.18.38//**)",
+      "Bash(./mvnw.cmd -o -q compile)",
+      "Bash(powershell -Command 'Get-Process | Where-Object {$_.ProcessName -like '\\\\''*eclipse*'\\\\'' -or $_.ProcessName -like '\\\\''*sts*'\\\\''} | Select-Object ProcessName, Path')",
+      "Bash(grep -v \"^Files.*differ$\")",
+      "PowerShell(robocopy \"C:\\\\Users\\\\Daniele\\\\Desktop\\\\SiwMangaTalk-main\" \"C:\\\\Users\\\\Daniele\\\\Documents\\\\workspace-spring-tools-for-eclipse-5.1.1.RELEASE\\\\SiwMangaTalk\" /E /XD .git .idea target .settings .vscode /XF .classpath .project .factorypath HELP.md .DS_Store /NFL /NDL /NJH; \"EXITCODE=$LASTEXITCODE\")",
+      "Bash(git check-ignore *)",
+      "Bash(powershell -Command 'Get-NetTCPConnection -State Listen | Where-Object {$_.LocalPort -eq 5432 -or $_.LocalPort -eq 5433} | Select-Object LocalAddress,LocalPort,OwningProcess')",
+      "Bash(powershell -Command \"Get-Process -Id 6348,6288 | Select-Object Id,ProcessName,Path\")"
     ]
   }
 }

@@ -1,5 +1,6 @@
 package it.uniroma3.siw.manga.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,11 +12,8 @@ import it.uniroma3.siw.manga.repository.VotazioneRepository;
 @Service
 public class VotazioneService {
 
-	private final VotazioneRepository votazioneRepository;
-
-	public VotazioneService(VotazioneRepository votazioneRepository) {
-		this.votazioneRepository = votazioneRepository;
-	}
+	@Autowired
+	private VotazioneRepository votazioneRepository;
 
 	/**
 	 * Salva o aggiorna il voto dell'utente per un manga (upsert).
