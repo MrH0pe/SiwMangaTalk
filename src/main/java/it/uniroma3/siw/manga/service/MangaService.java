@@ -29,10 +29,4 @@ public class MangaService {
 		return manga;
 	}
 
-	//numero totale dei manga:
-	@Transactional(readOnly = true)
-	public Long count(){
-		return this.mangaRepository.count();
-	}
-
 }

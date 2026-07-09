@@ -1,7 +1,6 @@
 package it.uniroma3.siw.manga.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -20,8 +19,5 @@ public interface MangaRepository extends CrudRepository<Manga, Long> {
 	// con il fetch join la lista viene caricata con UNA sola query.
 	@Query("SELECT m FROM Manga m LEFT JOIN FETCH m.autore")
 	List<Manga> findAllWithAutore();
-
-	Optional<Manga> findByNome(String nome);
-
 
 }

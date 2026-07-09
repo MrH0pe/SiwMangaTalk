@@ -55,6 +55,7 @@ public class SecurityConfiguration {
      * - POST /register e /login: pubblici (per permettere la registrazione e il login)
      * - GET /mieiCommenti: solo utenti autenticati
      * - /admin/**: solo utenti con ruolo ADMIN
+     * - Votare, commentare, rispondere, modificare: solo ruolo DEFAULT (l'admin non può)
      * - Qualsiasi altra richiesta: richiede autenticazione
      */
     @Bean
@@ -74,7 +75,13 @@ public class SecurityConfiguration {
             // Area amministrazione: solo ruolo ADMIN
             authorize.requestMatchers(HttpMethod.GET, "/admin/**").hasAnyAuthority(Credentials.ADMIN_ROLE);
             authorize.requestMatchers(HttpMethod.POST, "/admin/**").hasAnyAuthority(Credentials.ADMIN_ROLE);
-            // Tutto il resto (es. post commenti, voti, reazioni): richiede login
+            // Votare, commentare, rispondere e modificare: riservati al ruolo DEFAULT.
+            // La specifica dice che l'admin non può votare né commentare: la UI lo nasconde
+            // (redirect al pannello admin), ma il divieto va applicato anche qui, altrimenti
+            // una richiesta diretta (es. curl) da admin autenticato passerebbe.
+            authorize.requestMatchers(HttpMethod.POST, "/mangas/*/voto", "/manga/**", "/api/**").hasAnyAuthority(Credentials.DEFAULT_ROLE);
+            authorize.requestMatchers(HttpMethod.PATCH, "/api/**").hasAnyAuthority(Credentials.DEFAULT_ROLE);
+            // Tutto il resto (es. eliminazione commenti, consentita anche all'admin): richiede login
             authorize.anyRequest().authenticated();
         });
 

@@ -91,6 +91,7 @@ public class CommentoRestController {
      * Body JSON:  { "testo": "nuovo testo" }
      * Risposta:   { "testo": "nuovo testo" }   — 200 OK
      *             400 Bad Request               — testo vuoto/blank
+     *             404 Not Found                 — commento inesistente
      *             403 Forbidden                 — utente non proprietario del commento
      */
     @PatchMapping("/commenti/{commentoId}/modifica")
@@ -101,6 +102,12 @@ public class CommentoRestController {
         String nuovoTesto = body.get("testo");
         if (nuovoTesto == null || nuovoTesto.trim().isEmpty()) {
             return ResponseEntity.badRequest().build();
+        }
+
+        // Commento inesistente → 404; senza questo check updateIfOwner restituirebbe
+        // false e la risposta sarebbe un 403 fuorviante
+        if (commentoService.findById(commentoId) == null) {
+            return ResponseEntity.notFound().build();
         }
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

@@ -20,6 +20,7 @@ import it.uniroma3.siw.manga.model.User;
 import it.uniroma3.siw.manga.service.CommentoService;
 import it.uniroma3.siw.manga.service.CredentialsService;
 import it.uniroma3.siw.manga.service.MangaService;
+import it.uniroma3.siw.manga.service.VotazioneService;
 import jakarta.validation.Valid;
 
 @Controller
@@ -31,6 +32,30 @@ public class CommentoController {
     private MangaService mangaService;
     @Autowired
     private CredentialsService credentialsService;
+    @Autowired
+    private VotazioneService votazioneService;
+
+    /**
+     * Popola il model con tutti gli attributi che manga/mostraManga.html si aspetta.
+     * Usato quando la validazione di un commento/risposta fallisce e la pagina del manga
+     * va renderizzata di nuovo: senza media, conteggio voti, voto e id dell'utente corrente
+     * la pagina mostrerebbe "nessun voto" e nasconderebbe i pulsanti del proprietario.
+     */
+    private void popolaModelMostraManga(Manga manga, Model model) {
+        Long mangaId = manga.getId();
+        model.addAttribute("manga", manga);
+        model.addAttribute("commenti", commentoService.findTopLevelByMangaId(mangaId));
+        model.addAttribute("mediaVoti", votazioneService.getMediaVoti(mangaId));
+        model.addAttribute("countVoti", votazioneService.countVoti(mangaId));
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Credentials creds = credentialsService.getCredentials(username);
+        if (creds != null && creds.getUtente() != null) {
+            Long currentUserId = creds.getUtente().getId();
+            model.addAttribute("currentUserId", currentUserId);
+            model.addAttribute("votoUtente", votazioneService.getVotoUtente(currentUserId, mangaId));
+        }
+    }
 
     /**
      * Mostra la pagina "I miei commenti" dell'utente loggato (GET /mieiCommenti).
@@ -64,8 +89,7 @@ public class CommentoController {
         if (manga == null) return "redirect:/mangas";
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("manga", manga);
-            model.addAttribute("commenti", commentoService.findTopLevelByMangaId(idManga));
+            popolaModelMostraManga(manga, model);
             return "manga/mostraManga";
         }
 
@@ -91,7 +115,7 @@ public class CommentoController {
     @PostMapping("/manga/{idManga}/commenti/{idCommentoPadre}/risposte")
     public String saveRisposta(@PathVariable Long idManga,
                                @PathVariable Long idCommentoPadre,
-                               @ModelAttribute Commento risposta,
+                               @Valid @ModelAttribute Commento risposta,
                                BindingResult bindingResult,
                                Model model) {
 
@@ -102,9 +126,10 @@ public class CommentoController {
         // Senza padre valido la "risposta" diventerebbe un commento principale: meglio annullare
         if (commentoPadre == null) return "redirect:/mangas/" + idManga;
 
-        if (bindingResult.hasErrors() || risposta.getTesto() == null || risposta.getTesto().trim().isEmpty()) {
-            model.addAttribute("manga", manga);
-            model.addAttribute("commenti", commentoService.findTopLevelByMangaId(idManga));
+        // @Valid + @NotBlank sul testo: il testo vuoto/blank finisce in bindingResult
+        // (lo StringTrimmerEditor globale converte le stringhe di soli spazi in null)
+        if (bindingResult.hasErrors()) {
+            popolaModelMostraManga(manga, model);
             return "manga/mostraManga";
         }
 

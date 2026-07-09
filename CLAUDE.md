@@ -80,8 +80,9 @@ Database          (PostgreSQL 5433 / Hibernate ORM)
 
 ### Votazione (`unique(utente_id, manga_id)`)
 - Campi: `id`, `valoreStelline` (Double, 0.5–5.0)
-- `@ManyToOne` → Manga `[EAGER]`
-- `@ManyToOne` → User `[EAGER]`
+- `@ManyToOne` → Manga `[LAZY]`
+- `@ManyToOne` → User `[LAZY]`
+> LAZY (deviazione dal default EAGER di `@ManyToOne`): nessuna vista naviga da una Votazione verso manga/utente; media e conteggio usano query aggregate (AVG/COUNT).
 
 ---
 
@@ -142,7 +143,7 @@ Database          (PostgreSQL 5433 / Hibernate ORM)
 |--------|-----|-------|---------|
 | POST | `/api/manga/{id}/commenti` | auth | JSON `{id, testo, autore, data}` |
 | POST | `/api/commenti/{id}/risposte` | auth | JSON `{id, testo, autore, data}` |
-| PATCH | `/api/commenti/{id}/modifica` | auth | JSON `{testo}` oppure 403 |
+| PATCH | `/api/commenti/{id}/modifica` | auth | JSON `{testo}` oppure 403/404 |
 
 ### Sicurezza (Spring Security)
 
@@ -210,4 +211,5 @@ it.uniroma3.siw.manga
     ├── AutoreService.java                @Service @Transactional(readOnly=true)
     ├── CommentoService.java              @Service @Transactional
     ├── CredentialsService.java           @Service @Transactional
+    ├── UserService.java                  @Service @Transactional(readOnly=true)
     └── VotazioneService.java             @Service @Transactional

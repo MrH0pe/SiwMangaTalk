@@ -43,10 +43,9 @@ public class MangaController {
 	 * Se l'utente è ADMIN viene subito reindirizzato al pannello admin del manga.
 	 *
 	 * Carica nel model:
-	 * - il manga e i suoi commenti principali (senza risposte)
+	 * - il manga e i suoi commenti principali (con le relative risposte)
 	 * - la media e il numero totale dei voti
-	 * - le mappe like/dislike per ciascun commento
-	 * - se l'utente è autenticato: il suo voto attuale e le sue reazioni ai commenti
+	 * - se l'utente è autenticato: il suo voto attuale
 	 *
 	 * Il template usato è: manga/mostraManga.html
 	 */

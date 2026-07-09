@@ -33,7 +33,8 @@
       "PowerShell(robocopy \"C:\\\\Users\\\\Daniele\\\\Desktop\\\\SiwMangaTalk-main\" \"C:\\\\Users\\\\Daniele\\\\Documents\\\\workspace-spring-tools-for-eclipse-5.1.1.RELEASE\\\\SiwMangaTalk\" /E /XD .git .idea target .settings .vscode /XF .classpath .project .factorypath HELP.md .DS_Store /NFL /NDL /NJH; \"EXITCODE=$LASTEXITCODE\")",
       "Bash(git check-ignore *)",
       "Bash(powershell -Command 'Get-NetTCPConnection -State Listen | Where-Object {$_.LocalPort -eq 5432 -or $_.LocalPort -eq 5433} | Select-Object LocalAddress,LocalPort,OwningProcess')",
-      "Bash(powershell -Command \"Get-Process -Id 6348,6288 | Select-Object Id,ProcessName,Path\")"
+      "Bash(powershell -Command \"Get-Process -Id 6348,6288 | Select-Object Id,ProcessName,Path\")",
+      "PowerShell(mvn -q compile)"
     ]
   }
 }
