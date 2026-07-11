@@ -1,10 +1,12 @@
 package it.uniroma3.siw.manga.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.server.ResponseStatusException;
 
 import it.uniroma3.siw.manga.model.Autore;
 import it.uniroma3.siw.manga.service.AutoreService;
@@ -30,7 +32,8 @@ public class AutoreController {
 	public String mostraAutore(@PathVariable Long id, Model model) {
 		Autore autore = this.autoreService.findById(id);
 		if (autore == null) {
-			return "redirect:/autori";  //Se non esiste quell'ID, torna alla lista degli autori
+			//Se non esiste quell'ID, risponde 404 → Spring Boot mostra error/404.html
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Autore non trovato");
 		}
 		model.addAttribute("autore", autore);
 		return "autori/mostraAutore";

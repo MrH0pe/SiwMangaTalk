@@ -3,11 +3,13 @@ package it.uniroma3.siw.manga.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.server.ResponseStatusException;
 
 import it.uniroma3.siw.manga.model.Commento;
 import it.uniroma3.siw.manga.model.Manga;
@@ -41,7 +43,8 @@ public class AdminController {
     public String adminManga(@PathVariable Long id, Model model) {
         Manga manga = mangaService.findById(id);
         if (manga == null) {
-            return "redirect:/mangas";
+            //Se non esiste quell'ID, risponde 404 → Spring Boot mostra error/404.html
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Manga non trovato");
         }
 
         List<Commento> commenti = commentoService.findTopLevelByMangaId(id);

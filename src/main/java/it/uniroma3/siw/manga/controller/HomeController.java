@@ -18,6 +18,13 @@ public class HomeController {
 		return "index";
 	}
 
+	// TEMPORANEO — solo per testare la pagina error/500.html, da rimuovere dopo il test.
+	// Sotto /mangas/** così è accessibile anche da anonimi (permitAll in SecurityConfiguration).
+	@GetMapping("/mangas/test-errore-500")
+	public String testErrore500() {
+		throw new RuntimeException("Test pagina errore 500");
+	}
+
 
 
 }

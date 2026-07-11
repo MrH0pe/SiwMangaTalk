@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 
 import it.uniroma3.siw.manga.model.Credentials;
 import it.uniroma3.siw.manga.model.Manga;
@@ -53,7 +55,8 @@ public class MangaController {
 	public String mostraManga(@PathVariable Long id, Model model) {
 		Manga manga = this.mangaService.findById(id);
 		if (manga == null) {
-			return "redirect:/mangas";  //Se non esiste quell'ID, ci riporta alla lista di tutti i manga
+			//Se non esiste quell'ID, risponde 404 → Spring Boot mostra error/404.html
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Manga non trovato");
 		}
 		model.addAttribute("manga", manga);
 		model.addAttribute("commenti", this.commentoService.findTopLevelByMangaId(id));

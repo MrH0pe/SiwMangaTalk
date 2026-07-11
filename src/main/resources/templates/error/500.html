@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>500 - Errore del server</title>
+    <link rel="stylesheet" th:href="@{/css/error.css}">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="top-nav">
+        <a th:href="@{/}">
+            <img th:src="@{/images/logo_siwmangatalk.png}" alt="SiwMangaTalk Logo" class="site-logo">
+        </a>
+    </nav>
+
+    <!-- SEZIONE ERRORE -->
+    <section class="error-section">
+
+        <h1 class="error-code">500</h1>
+        <h2 class="error-title">Errore del server</h2>
+        <p class="error-message">Qualcosa è andato storto. Riprova più tardi.</p>
+
+        <a th:href="@{/}" class="btn-home">Torna alla Home</a>
+
+    </section>
+
+    <footer>
+        <p>&copy; 2026 SiwMangaTalk</p>
+    </footer>
+
+</body>
+
+</html>
